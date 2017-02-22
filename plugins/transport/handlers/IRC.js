@@ -109,11 +109,16 @@ module.exports = (variables, config) => {
                 break;
 
             case 'broadcast':
+                let tmp2;
                 if (context.extra.clients >= 3) {
-                    ircHandler.say(to, `< ${context.handler.type}: ${context.text} >`);
+                    tmp2 = `< ${context.handler.type}: ${context.text} >`;
                 } else {
-                    ircHandler.say(to, `< ${context.text} >`);
+                    tmp2 = `< ${context.text} >`;
                 }
+                if (colorize.enabled) {
+                    tmp2 = color[colorize.broadcast](tmp2);
+                }
+                ircHandler.say(to, tmp2);
                 break;
         }
     });

@@ -110,6 +110,7 @@ module.exports = {
                                olive、yellow、lightgreen、teal、cyan、blue、pink、gray、silver
                     */
                     "enabled": true,            // 是否允許在IRC頻道中使用顏色。
+                    "broadcast": "green",       // < 整行通知的顏色 >
                     "client": "navy",           // 用於標記用戶端「<T>」的顏色
                     "nick": "green",            // nick的顏色。除標準顏色外，亦可設為 colorful
                     "replyto": "brown",         // Re replyto的顏色
