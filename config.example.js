@@ -6,7 +6,7 @@
 
 module.exports = {
     "IRC": {
-        "disabled": true,                   // 設為true之後會禁止IRC機器人
+        "disabled": false,                  // 設為true之後會禁止IRC機器人
         "bot": {
             "server": "irc.freenode.net",
             "nick": "",                     // IRC暱稱
@@ -167,7 +167,8 @@ module.exports = {
                 // 是否把Telegram的Sticker（webp格式）轉為PNG格式。
                 // 如果設為true，那麼需要額外配置伺服器，具體步驟見 https://github.com/Intervox/node-webp
                 // 備註：已知type為vim-cn時該功能不正常
-                "webp2png": true
+                "webp2png": true,
+                "webpPath": "",                 // 如果無法取得root權限，可借此指定dwebp位址
             }
         }
     }

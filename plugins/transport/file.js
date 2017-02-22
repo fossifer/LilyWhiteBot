@@ -28,7 +28,7 @@ const preprocessFileName = (name) => {
 };
 const preprocessFile = (url, file) => {
     if (path.extname(url) === '.webp' && servemedia.webp2png) {
-        return new DWebp(file).stream();
+        return new DWebp(file, servemedia.webpPath).stream();
     } else {
         return file;
     }
