@@ -1,0 +1,17 @@
+{
+    "name": "qq-tg-irc",
+    "version": "1.0.0",
+    "description": "QQ-Telegram-IRC互聯機器人",
+    "dependencies": {
+        "telegraf": "^3.6.1",
+        "irc": "~0.5.1",
+        "safe-eval": "~0.3.0",
+        "request": "~2.79.0",
+        "encoding": "~0.1.12",
+        "iconv": "~2.2.1",
+        "cwebp": "~2.0.1"
+    },
+    "engines": {
+        "node": ">=7.0.0"
+    }
+}
