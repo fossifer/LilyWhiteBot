@@ -321,7 +321,7 @@ module.exports = (variables, config) => {
             let chan = ch.toLowerCase();
 
             if ((options.notify.rename === 'all') ||
-                (options.notify.rename === 'onlyactive' && userlist[newnick][chan])
+                (options.notify.rename === 'onlyactive' && userlist[newnick] && userlist[newnick][chan])
                ) {
                 bridge.send(new Broadcast({
                     from: chan,
