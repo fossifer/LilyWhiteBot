@@ -13,7 +13,7 @@ Node.js版本要求：>=7.x
 
 在正式啟用互聯之前，建議提前註冊一個QQ馬甲，將其掛機掛到一定等級，並往錢包裡塞一點錢，以減小被封殺的可能性。
 
-目前僅支援[酷Q](https://cqp.cc/)。酷Q支援Windows與Wine，在Wine中配置酷Q的方法可參照[這裡](https://cqp.cc/t/30970)。搞定之後需要安裝[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi)擴充套件。
+**除本程式外，QQ部分還需要[酷Q](https://cqp.cc/)和[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi)才能正常執行。目前程式僅支援酷Q。**
 
 ### Telegram
 需要與BotFather交互，建立一個機器人帳號。設定完成後，BotFather會給一個Token。
