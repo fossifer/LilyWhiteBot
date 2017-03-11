@@ -203,7 +203,7 @@ module.exports = (variables, config) => {
         ctx.targets = 'IRC';
 
         bridge.send(ctx).catch(() => {
-            context.reply('請在與IRC頻道互聯的群組中使用本命令。');
+            // context.reply('請在與IRC頻道互聯的群組中使用本命令。');
         });
     };
 
