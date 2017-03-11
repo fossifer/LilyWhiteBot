@@ -58,8 +58,8 @@ module.exports = (variables, config) => {
                         tmp = color[colorize.client](tmp);
                     }
                     output.push(tmp);
+                    output.push(' - ');
                 }
-                output.push(' - ');
 
                 tmp = context.nick;
                 if (colorize.enabled && colorize.nick) {
