@@ -23,6 +23,13 @@ module.exports = (variables, config) => {
         options.notify = {};
     }
 
+    ircHandler.splitPrefix = '-> ';
+    ircHandler.splitPostfix = ' ->';
+    if (colorize.enabled && colorize.linesplit) {
+        ircHandler.splitPrefix = color[colorize.linesplit](ircHandler.splitPrefix);
+        ircHandler.splitPostfix = color[colorize.linesplit](ircHandler.splitPostfix);
+    }
+
     /*
      * 傳話
      */
@@ -36,7 +43,7 @@ module.exports = (variables, config) => {
     ircHandler.on('exchange', (context) => {
         let to;
         if (context.extra.mapto) {
-            to = context.extra.mapto.IRC;
+            to = context.extra.mapto[ircHandler.type].toLowerCase();
         }
 
         switch (context.type) {
@@ -44,16 +51,18 @@ module.exports = (variables, config) => {
                 let output = [];
                 let tmp;
 
+                output.push('[');
                 if (context.extra.clients >= 3) {
-                    tmp = `<${context.handler.type.substring(0, 1)}> `;
-                    if (colorize.enabled) {
+                    tmp = `${context.handler.id}`;
+                    if (colorize.enabled && colorize.client) {
                         tmp = color[colorize.client](tmp);
                     }
                     output.push(tmp);
                 }
+                output.push(' - ');
 
                 tmp = context.nick;
-                if (colorize.enabled) {
+                if (colorize.enabled && colorize.nick) {
                     if (colorize.nick === 'colorful') {
                         // hash
                         let m = tmp.split('').map(x=>x.codePointAt(0)).reduce((x,y)=>x+y);
@@ -63,13 +72,12 @@ module.exports = (variables, config) => {
                         tmp = color[colorize.nick](tmp);
                     }
                 }
-                tmp = `[${tmp}] `;
-                output.push(tmp);
+                output.push(tmp, '] ');
 
                 if (context.extra.reply) {
                     const reply = context.extra.reply;
                     tmp = `Re ${reply.nick} `;
-                    if (colorize.enabled) {
+                    if (colorize.enabled && colorize.replyto) {
                         tmp = color[colorize.replyto](tmp);
                     }
                     output.push(tmp);
@@ -79,13 +87,13 @@ module.exports = (variables, config) => {
                     } else {
                         tmp = reply.message;
                     }
-                    if (colorize.enabled) {
+                    if (colorize.enabled && colorize.repliedmessage) {
                         tmp = color[colorize.repliedmessage](tmp);
                     }
                     output.push(tmp, ': ');
                 } else if (context.extra.forward) {
                     tmp = `Fwd ${context.extra.forward.nick}: `;
-                    if (colorize.enabled) {
+                    if (colorize.enabled && colorize.fwdfrom) {
                         tmp = color[colorize.fwdfrom](tmp);
                     }
                     output.push(tmp);
@@ -115,7 +123,7 @@ module.exports = (variables, config) => {
                 } else {
                     tmp2 = `< ${context.text} >`;
                 }
-                if (colorize.enabled) {
+                if (colorize.enabled && colorize.broadcast) {
                     tmp2 = color[colorize.broadcast](tmp2);
                 }
                 ircHandler.say(to, tmp2);
@@ -137,8 +145,8 @@ module.exports = (variables, config) => {
             }
 
             bridge.send(new Broadcast({
-                from: channel,
-                to: channel,
+                from: channel.toLowerCase(),
+                to: channel.toLowerCase(),
                 nick: nick,
                 text: text,
                 handler: ircHandler,
@@ -189,14 +197,14 @@ module.exports = (variables, config) => {
             return;
         }
 
-        let chan = context.extra.mapto.IRC.toLowerCase();
+        let chan = context.extra.mapto[ircHandler.type].toLowerCase();
         let users = ircHandler.chans[chan].users;
         let userlist = [];
 
         for (let user in users) {
             if (users[user] !== '') {
                 userlist.push(`(${users[user]})${user}`);
-            } else {
+            } else if (users[user] !== undefined) {
                 userlist.push(user);
             }
         }
@@ -223,7 +231,7 @@ module.exports = (variables, config) => {
             return;
         }
 
-        let chan = context.extra.mapto.IRC.toLowerCase();
+        let chan = context.extra.mapto[ircHandler.type].toLowerCase();
         let topic = ircHandler.chans[chan].topic;
 
         if (topic) {
@@ -246,7 +254,7 @@ module.exports = (variables, config) => {
                 context.reply(lines[0], {
                     noPrefix: true,
                 });
-                ircHandler.say(context.extra.mapto.IRC, lines[0]);
+                ircHandler.say(context.extra.mapto[ircHandler.type].toLowerCase(), lines[0]);
             }
         } else {
             context.reply('用法：/irccommand 命令');
@@ -275,8 +283,8 @@ module.exports = (variables, config) => {
     ircHandler.on('join', (channel, nick, message) => {
         if (options.notify.join) {
             bridge.send(new Broadcast({
-                from: channel,
-                to: channel,
+                from: channel.toLowerCase(),
+                to: channel.toLowerCase(),
                 nick: nick,
                 text: `${nick} 加入頻道`,
                 handler: ircHandler,
@@ -373,7 +381,7 @@ module.exports = (variables, config) => {
         leaveHandler(nick, { [channel]: {} }, '離開頻道', reason, message);
     });
 
-    ircHandler.on('kill', (channel, nick, by, reason, message) => {
+    ircHandler.on('kick', (channel, nick, by, reason, message) => {
         leaveHandler(nick, { [channel]: {} }, `被 ${by} 踢出頻道`, reason, message);
     });
 

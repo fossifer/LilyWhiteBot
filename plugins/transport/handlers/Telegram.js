@@ -25,7 +25,9 @@ module.exports = (variables, config) => {
         let realText, realNick;
         let symbol = forwardBots[username];
         if (symbol === 'self') {
-            [, , realNick, realText] = text.match(/^(|<.> )\[(.*?)\] ([^]*)$/m) || [];
+            // TODO 更換匹配方式
+            // [, , realNick, realText] = text.match(/^(|<.> )\[(.*?)\] ([^]*)$/m) || [];
+            [, realNick, realText] = text.match(/^\[(.*?)\] ([^]*)$/m) || [];
         } else if (symbol === '[]') {
             [, realNick, realText] = text.match(/^\[(.*?)\]:? ([^]*)$/m) || [];
         } else if (symbol === '<>') {
@@ -76,7 +78,7 @@ module.exports = (variables, config) => {
     tgHandler.on('exchange', (context) => {
         let to;
         if (context.extra.mapto) {
-            to = context.extra.mapto.Telegram;
+            to = context.extra.mapto[tgHandler.type];
         }
 
         switch (context.type) {
@@ -88,11 +90,13 @@ module.exports = (variables, config) => {
                     output = `* <b>${htmlEscape(context.nick)}</b> ${htmlEscape(context.text)}`;
                 } else {
                     if (context.extra.clients >= 3) {
-                        output = `&lt;${context.handler.type.substring(0, 1)}&gt; [<b>${htmlEscape(context.nick)}</b>] ${htmlEscape(context.text)}`;
+                        output = `[<i>${htmlEscape(context.handler.id)}</i> - <b>${htmlEscape(context.nick)}</b>] ${htmlEscape(context.text)}`;
                     } else {
                         output = `[<b>${htmlEscape(context.nick)}</b>] ${htmlEscape(context.text)}`;
                     }
                 }
+
+                tgHandler.sayWithHTML(to, output);
 
                 // 如果含有相片和音訊
                 if (context.extra.uploads) {
@@ -112,8 +116,6 @@ module.exports = (variables, config) => {
                         output += ` ${htmlEscape(files.join(' '))}`;
                     }
                 }
-
-                tgHandler.sayWithHTML(to, output);
 
                 break;
 
@@ -157,7 +159,7 @@ module.exports = (variables, config) => {
         if (from.id === target.id) {
             text = `${target.nick} 加入群組`;
         } else {
-            text = `${target.nick} 被 ${from.nick} 加入群組`;
+            text = `${from.nick} 邀請 ${target.nick} 加入群組`;
         }
 
         if (options.notify.join) {

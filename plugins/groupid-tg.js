@@ -9,7 +9,7 @@ module.exports = (pluginManager, options) => {
     if (tg) {
         tg.addCommand('thisgroupid', (context) => {
             if (context.isPrivate) {
-                context.reply(`BotUserId = ${context.to}`);
+                context.reply(`BotUserId = ${context.to}, YourId = ${context.from}`);
             } else {
                 context.reply(`GroupId = ${context.to}`);
             }

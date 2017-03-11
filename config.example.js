@@ -116,6 +116,7 @@ module.exports = {
                     "replyto": "brown",         // Re replyto的顏色
                     "repliedmessage": "olive",  // 被Re的訊息的顏色
                     "fwdfrom": "cyan",          // Fwd fwdfrom的顏色
+                    "linesplit": "silver",      // 行分隔符的顏色
 
                     "nickcolors": ["green"]     // 如果nick為colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數。
                 },
@@ -142,7 +143,9 @@ module.exports = {
             "QQ": {
                 "notify": {
                     "join": true,               // 有人加入QQ群的話是否提醒其他群組
-                    "leave": true               // 有人離開QQ群的話是否提醒其他群組
+                    "leave": true,              // 有人離開QQ群的話是否提醒其他群組
+                    "setadmin": true,           // 是否提醒設定/取消管理員
+                    "sysmessage": true,         // 是否提醒系統消息，包括禁言和全體禁言
                 }
             },
 
@@ -164,13 +167,14 @@ module.exports = {
                 "cachePath": "",                // type為self時有效：快取存放位置
                 "serveUrl": "",                 // type為self時有效：檔案URL的字首，一般需要以斜線結尾
                 "linxApiUrl": "",               // type為linx時有效：linx API位址，一般以斜線結尾
+                "sizeLimit": 4096,              // 檔案最大大小，單位KB。0表示不限制。限制僅對Telegram有效。
 
                 // 是否把Telegram的Sticker（webp格式）轉為PNG格式。
                 // 如果設為true，那麼需要額外配置伺服器，具體步驟見 https://github.com/Intervox/node-webp
                 // 備註：已知type為vim-cn時該功能不正常
-                "webp2png": true,
-                "webpPath": "",                 // 如果無法取得root權限，可借此指定dwebp位址
+                "webp2png": false,
+                "webpPath": "",                 // 如果無法取得root權限，可借此指定dwebp二進位檔案位址
             }
         }
     }
-}
+};

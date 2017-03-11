@@ -9,8 +9,8 @@
         "safe-eval": "~0.3.0",
         "request": "~2.79.0",
         "encoding": "~0.1.12",
-        "iconv": "~2.2.1",
-        "cwebp": "~2.0.1"
+        "cwebp": "~2.0.1",
+        "tmp": "~0.0.31"
     },
     "engines": {
         "node": ">=7.0.0"

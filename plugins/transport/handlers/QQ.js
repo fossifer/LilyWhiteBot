@@ -26,6 +26,12 @@ module.exports = (variables, config) => {
     qqHandler.on('text', (context) => {
         const send = () => bridge.send(context).catch(() => {});
 
+        // 「應用消息」
+        if (context.from === 1000000 && options.notify.sysmessage) {
+            bridge.send(new Broadcast(context));
+            return;
+        }
+
         // 過濾口令紅包
         if (context.extra.isCash) {
             let key = `${context.to}: ${context.text}`;
@@ -65,7 +71,7 @@ module.exports = (variables, config) => {
     qqHandler.on('exchange', (context) => {
         let to;
         if (context.extra.mapto) {
-            to = context.extra.mapto.QQ;
+            to = context.extra.mapto[qqHandler.type];
         }
 
         switch (context.type) {
@@ -97,7 +103,7 @@ module.exports = (variables, config) => {
                     }
 
                     if (context.extra.clients >= 3) {
-                        qqHandler.say(to, `<${context.handler.type.substring(0, 1)}> [${context.nick}] ${special}${context.text}${files}`);
+                        qqHandler.say(to, `[${context.handler.id} - ${context.nick}] ${special}${context.text}${files}`);
                     } else {
                         qqHandler.say(to, `[${context.nick}] ${special}${context.text}${files}`);
                     }
@@ -159,6 +165,28 @@ module.exports = (variables, config) => {
         }
     });
 
+    /*
+     * 管理員
+     */
+    qqHandler.on('admin', (data) => {
+        let text;
+        if (data.type === 1) {
+            text = `${data.user.name} (${data.target}) 被取消管理員`;
+        } else {
+            text = `${data.user.name} (${data.target}) 成為管理員`;
+        }
+
+        if (options.notify.setadmin) {
+            bridge.send(new Broadcast({
+                from: data.group,
+                to: data.group,
+                nick: data.user.name,
+                text: text,
+                handler: qqHandler,
+                _rawdata: data,
+            })).catch(() => {});
+        }
+    });
 
     /*
      * 查詢IRC群組情況的命令

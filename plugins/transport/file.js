@@ -11,6 +11,7 @@ const url = require('url');
 const path = require('path');
 const request = require('request');
 const DWebp = require('cwebp').DWebp;
+const tmp = require('tmp');
 
 let options = {};
 let servemedia;
@@ -26,6 +27,7 @@ const preprocessFileName = (name) => {
         return name;
     }
 };
+
 const preprocessFile = (url, file) => {
     if (path.extname(url) === '.webp' && servemedia.webp2png) {
         return new DWebp(file, servemedia.webpPath).stream();
@@ -33,6 +35,22 @@ const preprocessFile = (url, file) => {
         return file;
     }
 };
+
+// 不能直接轉檔因此以本機為快取
+const preprocessFile2 = (url, file) => new Promise((resolve, reject) => {
+    if (path.extname(url) === '.webp' && servemedia.webp2png) {
+        let fname = tmp.tmpNameSync();
+        new DWebp(file, servemedia.webpPath).write(fname, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(fs.createReadStream(fname), fname);
+            }
+        });
+    } else {
+        resolve(file);
+    }
+});
 
 /*
  * 儲存至本機快取
@@ -75,30 +93,40 @@ const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
  * 上傳到 http://img.vim-cn.com
  */
 const uploadToVimCN = (file) => new Promise((resolve, reject) => {
-    let t;
-    if (file.url) {
-        // TODO: webp->png轉檔不正常
-        //t = preprocessFile(file.url, request.get(file.url));
-        t = request.get(file.url);
-    } else if (file.path) {
-        t = fs.createReadStream(file.path);
-    } else {
-        reject('Invalid file');
-        return;
-    }
-
-    request.post({
+    const post = (pendingfile, callback) => request.post({
         url: 'http://img.vim-cn.com/',
         formData: {
-            name: t,
+            name: pendingfile,
         },
     }, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
         if (!error && response.statusCode === 200) {
             resolve(body.trim());
         } else {
             reject(error);
         }
     });
+
+    if (file.url) {
+        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
+            post(f, () => {
+                if (filename) {
+                    fs.unlink(filename, (err) => {
+                        if (err) {
+                            console.log(`Unable to unlink ${filename}`);
+                        }
+                    });
+                }
+            });
+        });
+    } else if (file.path) {
+        post(fs.createReadStream(file.path));
+    } else {
+        reject('Invalid file');
+        return;
+    }
 });
 
 /*
@@ -209,11 +237,16 @@ const getQQPhotoUrl = name => new Promise((resolve, reject) => {
     fs.readFile(p, (err, data) => {
         if (err) {
             reject(err);
-        }
-        let info = data.toString('ascii');
-        let [ ,url] = info.match(/url=(.*?)[\r\n]/) || [];
+        } else {
+            try {
+                let info = data.toString('ascii');
+                let [ ,url] = info.match(/url=(.*?)[\r\n]/) || [];
 
-        resolve({ url: url });
+                resolve({ url: url });
+            } catch (ex) {
+                reject(ex);
+            }
+        }
     });
 });
 const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name)});
@@ -252,6 +285,10 @@ module.exports = {
 
         if (context.extra.files && servemedia.type && servemedia.type !== 'none') {
             for (let file of context.extra.files) {
+                if (servemedia.sizeLimit && servemedia.sizeLimit > 0 && file.size && file.size > servemedia.sizeLimit*1024) {
+                    continue;
+                }
+
                 if (file.client === 'Telegram') {
                     promises.push(processTelegramFile(file));
                 } else if (file.client === 'QQ') {

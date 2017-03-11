@@ -26,14 +26,14 @@ module.exports = (options, objects) => {
             handlers.delete(type);
         },
         send: (context) => {
-            return new Promise((resolve, reject) => {
+            let promise = new Promise((resolve, reject) => {
                 // 如果符合paeeye，不傳送
                 if (options.options.paeeye) {
                     if (context.text.startsWith(options.options.paeeye)) {
-                        resolve();
+                        resolve(false);
                         return;
                     } else if (context.extra.reply && context.extra.reply.message.startsWith(options.options.paeeye)) {
-                        resolve();
+                        resolve(false);
                         return;
                     }
                 }
@@ -79,7 +79,7 @@ module.exports = (options, objects) => {
                         context.extra.uploads = uploads;
                     }).catch((e) => {
                         objects.pluginManager.log(`Error on processing files: ${e}`, true);
-                        bridge.send(new objects.Broadcast(context, {
+                        bridge.sendAfter(context, new objects.Broadcast(context, {
                             text: 'File upload error',
                             extra: {},
                         }));
@@ -88,13 +88,24 @@ module.exports = (options, objects) => {
                         for (let t of targets2) {
                             handlers.get(t).emit('exchange', context);
                         }
-                        resolve();
+                        resolve(true);
                     });
                 } else {
                     reject();
                 }
             });
+            context.promise = promise;
+            return promise;
         },
+        sendAfter(context1, context2) {
+            if (context1.promise) {
+                context1.promise.then(() => {
+                    bridge.send(context2);
+                });
+            } else {
+                bridge.send(context2);
+            }
+        }
     };
 
     return bridge;
