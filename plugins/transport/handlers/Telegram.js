@@ -207,8 +207,11 @@ module.exports = (variables, config) => {
         });
     };
 
-    tgHandler.addCommand('ircnames', sendRequest);
-    tgHandler.addCommand('ircwhois', sendRequest);
-    tgHandler.addCommand('irctopic', sendRequest);
-    tgHandler.addCommand('irccommand', sendRequest);
+    // 非主群不提供命令
+    if (tgHandler.type === 'Telegram') {
+        tgHandler.addCommand('ircnames', sendRequest);
+        tgHandler.addCommand('ircwhois', sendRequest);
+        tgHandler.addCommand('irctopic', sendRequest);
+        tgHandler.addCommand('irccommand', sendRequest);
+    }
 };

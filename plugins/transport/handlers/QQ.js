@@ -200,8 +200,11 @@ module.exports = (variables, config) => {
         });
     };
 
-    qqHandler.addCommand('/ircnames', sendRequest);
-    qqHandler.addCommand('/ircwhois', sendRequest);
-    qqHandler.addCommand('/irctopic', sendRequest);
-    qqHandler.addCommand('/irccommand', sendRequest);
+    // 非主群不提供命令
+    if (qqHandler.type === 'QQ') {
+        qqHandler.addCommand('/ircnames', sendRequest);
+        qqHandler.addCommand('/ircwhois', sendRequest);
+        qqHandler.addCommand('/irctopic', sendRequest);
+        qqHandler.addCommand('/irccommand', sendRequest);
+    }
 };

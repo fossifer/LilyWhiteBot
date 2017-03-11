@@ -65,8 +65,26 @@ module.exports = (pluginManager, options) => {
       確定已經支援哪些用戶端
      */
     let availableClients = [];
+    let coreClients = [];
     for (let [type, handler] of pluginManager.handlers) {
         availableClients.push(type);
+        coreClients.push(type);
+    }
+
+    /*
+      處理用戶端別名
+     */
+    let extraClients = [];
+    let aliases = options.aliases || {};
+    for (let original in aliases) {
+        for (let newclient in aliases[original]) {
+            extraClients.push({
+                type: newclient,
+                id: aliases[original][newclient],
+                originalType: original,
+            });
+            availableClients.push(newclient);
+        }
     }
 
     /*
@@ -149,7 +167,7 @@ module.exports = (pluginManager, options) => {
     bridge.map = map;
 
     // 載入各用戶端的處理程式，並連接到bridge中
-    for (let type of availableClients) {
+    for (let type of coreClients) {
         let handler = pluginManager.handlers.get(type);
         if (handler) {
             require(`./transport/handlers/${type}.js`)({
@@ -162,6 +180,30 @@ module.exports = (pluginManager, options) => {
             }, options);
 
             bridge.add(type, handler);
+        }
+    }
+
+    // 為副群組（別名）單獨建立 MessageHandler
+    for (let client of extraClients) {
+        let originalType = client.originalType;
+        let { object: Handler, options: handlerOptions } = pluginManager.handlerClasses.get(originalType);
+        let originalHandler = pluginManager.handlers.get(originalType);
+        if (Handler) {
+            pluginManager.log(`Added a new client: ${originalType} -> ${client.type} <${client.id}>`);
+
+            let handler = new Handler(originalHandler.rawClient, handlerOptions);
+            handler.type = client.type;
+            handler.id = client.id;
+            require(`./transport/handlers/${originalType}.js`)({
+                bridge,
+                handler,
+                Context,
+                Message,
+                Request,
+                Broadcast,
+            }, options);
+
+            bridge.add(client.type, handler);
         }
     }
 

@@ -63,8 +63,9 @@ module.exports = {
         "groups": [
             // 說明：
             // 1. 可以只填兩個群組（例如，把"IRC"留空或省略將變成只有QQ-Telegram互聯）
-            // 2. 各群之間請勿產生交集（目前只支援一對一），否則會出錯
-            // 3. 配置IRC的話請同時修改上方的IRC.bot.channels
+            // 2. 各群之間請勿產生交集（目前只支援一對一），否則會出錯。如果希望把同一軟體的多個群組連接到一起，
+            //    請使用下面提到的「aliases」。
+            // 3. 配置IRC的話請同時修改上方的IRC.bot.channels！
             {
                 "QQ": 12345678,                         // QQ群號碼
                 "Telegram": -12345678,                  // Telegram群組號碼：可以先把bot拉到群組中，然後透過 /thisgroupid 來取得id
@@ -82,6 +83,33 @@ module.exports = {
             }
             */
         ],
+
+        /*
+        "aliases": {
+            // 說明：如果希望把同一軟體的多個群組連接到一起，請為不同的群組設置不同的別名。
+            // 請勿重名，否則會出錯
+            "QQ": {
+                "QQ2": "q2",                     // 將聊天軟體視為「QQ2」，並在轉發時標記為「q」
+                "QQ3": "s",
+            }
+
+            // 設置別名之後可這樣配置 groups:
+            // {
+            //     "QQ": 10001,
+            //     "IRC": "#group1",
+            // },
+            // {
+            //     "QQ2": 10001,
+            //     "IRC": "#group2",
+            // },
+            // {
+            //     "QQ": 12345,
+            //     "QQ2": 54321,
+            //     "IRC": "#group3",
+            // }
+            // 不過請避免這樣設定
+        }
+        */
 
         "options": {
             "IRC": {
@@ -171,7 +199,6 @@ module.exports = {
 
                 // 是否把Telegram的Sticker（webp格式）轉為PNG格式。
                 // 如果設為true，那麼需要額外配置伺服器，具體步驟見 https://github.com/Intervox/node-webp
-                // 備註：已知type為vim-cn時該功能不正常
                 "webp2png": false,
                 "webpPath": "",                 // 如果無法取得root權限，可借此指定dwebp二進位檔案位址
             }

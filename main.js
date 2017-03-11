@@ -21,6 +21,7 @@ const QQMessageHandler = require('./lib/handlers/QQMessageHandler.js');
 // 所有擴充套件包括傳話機器人都只與該物件打交道
 const pluginManager = {
     handlers: new Map(),
+    handlerClasses: new Map(),
     config: {},
     global: {
         Context,
@@ -84,10 +85,15 @@ if (config.IRC && !config.IRC.disabled) {
     ircClient.connect();
 
     let options = config.IRC.options || {};
-    const ircHandler = new IRCMessageHandler(ircClient, {
+    let options2 = {
         maxLines: options.maxLines,
-    });
+    };
+    const ircHandler = new IRCMessageHandler(ircClient, options2);
     pluginManager.handlers.set('IRC', ircHandler);
+    pluginManager.handlerClasses.set('IRC', {
+        object: IRCMessageHandler,
+        options: options2
+    });
 }
 
 if (config.Telegram && !config.Telegram.disabled) {
@@ -117,11 +123,17 @@ if (config.Telegram && !config.Telegram.disabled) {
 
     tgBot.startPolling();
 
-    const telegramHandler = new TelegramMessageHandler(tgBot, {
+    let options2 = {
         botName: tgcfg.bot.name,
         nickStyle: tgcfg.options.nickStyle,
-    });
+    };
+
+    const telegramHandler = new TelegramMessageHandler(tgBot, options2);
     pluginManager.handlers.set('Telegram', telegramHandler);
+    pluginManager.handlerClasses.set('Telegram', {
+        object: TelegramMessageHandler,
+        options: options2
+    });
 
     pluginManager.log('TelegramBot started');
 }
@@ -148,14 +160,20 @@ if (config.QQ && !config.QQ.disabled) {
         }
     }
 
-    const qqHandler = new QQMessageHandler(qqbot, {
+    let options2 = {
         qq: config.QQ.qq,
         selfCensorship: options.selfCensorship,
         ignoreCash: options.ignoreCash,
         badwords: badwords,
         nickStyle: options.nickStyle,
-    });
+    };
+
+    const qqHandler = new QQMessageHandler(qqbot, options2);
     pluginManager.handlers.set('QQ', qqHandler);
+    pluginManager.handlerClasses.set('QQ', {
+        object: QQMessageHandler,
+        options: options2,
+    });
 
     pluginManager.log('QQBot started');
 }
