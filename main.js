@@ -139,7 +139,13 @@ if (config.Telegram && !config.Telegram.disabled) {
 }
 
 if (config.QQ && !config.QQ.disabled) {
-    let qqbot = new QQBot();
+    let options = config.QQ.options || {};
+
+    let qqbot = new QQBot({
+        CoolQPro: options.CoolQPro,
+        host: config.QQ.host || '127.0.0.1',
+        port: config.QQ.port || 11235,
+    });
     pluginManager.log('Starting QQBot...');
 
     qqbot.on('error', (err) => {
@@ -147,8 +153,6 @@ if (config.QQ && !config.QQ.disabled) {
     });
 
     qqbot.start();
-
-    let options = config.QQ.options || {};
 
     // 載入敏感詞清單
     let badwords = [];
@@ -166,6 +170,7 @@ if (config.QQ && !config.QQ.disabled) {
         ignoreCash: options.ignoreCash,
         badwords: badwords,
         nickStyle: options.nickStyle,
+        CoolQPro: options.CoolQPro,
     };
 
     const qqHandler = new QQMessageHandler(qqbot, options2);

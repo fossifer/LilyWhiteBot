@@ -84,18 +84,23 @@ module.exports = (variables, config) => {
         switch (context.type) {
             case 'message':
                 let output = '';
+                let prefix = '';
 
                 // 多群組
-                if (context.extra.isAction) {
-                    output = `* <b>${htmlEscape(context.nick)}</b> ${htmlEscape(context.text)}`;
-                } else {
-                    if (context.extra.clients >= 3) {
-                        output = `[<i>${htmlEscape(context.handler.id)}</i> - <b>${htmlEscape(context.nick)}</b>] ${htmlEscape(context.text)}`;
+                if (!config.options.hidenick) {
+                    if (context.extra.isAction) {
+                        prefix = `* <b>${htmlEscape(context.nick)}</b> `;
                     } else {
-                        output = `[<b>${htmlEscape(context.nick)}</b>] ${htmlEscape(context.text)}`;
+                        if (context.extra.clients >= 3) {
+                            prefix = `[<i>${htmlEscape(context.handler.id)}</i> - <b>${htmlEscape(context.nick)}</b>] `;
+                        } else {
+                            prefix = `[<b>${htmlEscape(context.nick)}</b>] `;
+                        }
                     }
                 }
+                output = `${prefix}${htmlEscape(context.text)}`;
 
+                // TODO 圖片在文字之前發出
                 tgHandler.sayWithHTML(to, output);
 
                 // 如果含有相片和音訊
@@ -208,16 +213,11 @@ module.exports = (variables, config) => {
         let ctx = new Request(context);
         ctx.targets = 'IRC';
 
-        bridge.send(ctx).catch(() => {
-            // context.reply('請在與IRC頻道互聯的群組中使用本命令。');
-        });
+        bridge.send(ctx).catch(() => {});
     };
 
-    // 非主群不提供命令
-    if (tgHandler.type === 'Telegram') {
-        tgHandler.addCommand('ircnames', sendRequest);
-        tgHandler.addCommand('ircwhois', sendRequest);
-        tgHandler.addCommand('irctopic', sendRequest);
-        tgHandler.addCommand('irccommand', sendRequest);
-    }
+    tgHandler.addCommand('ircnames', sendRequest);
+    tgHandler.addCommand('ircwhois', sendRequest);
+    tgHandler.addCommand('irctopic', sendRequest);
+    tgHandler.addCommand('irccommand', sendRequest);
 };

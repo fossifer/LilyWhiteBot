@@ -49,6 +49,7 @@ module.exports = {
             "selfCensorship": true,         // 敏感詞列表，位於badwords.js
             "ignoreCash": true,             // 如果訊息疑似口令紅包則將其屏蔽
             "nickStyle": "groupcard",       // 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用QQ號）
+            "CoolQPro": false,              // 如果使用酷Q Pro，可將其開啟
         }
     },
 
@@ -178,6 +179,7 @@ module.exports = {
             },
 
             "paeeye": "//",                     // 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能。
+            "hidenick": false,                  // 轉發時不顯示暱稱（建議不要開啟）
             "servemedia": {
                 /*
                    本節用於處理圖片等檔案。

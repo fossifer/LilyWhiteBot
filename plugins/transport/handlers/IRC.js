@@ -51,52 +51,54 @@ module.exports = (variables, config) => {
                 let output = [];
                 let tmp;
 
-                output.push('[');
-                if (context.extra.clients >= 3) {
-                    tmp = `${context.handler.id}`;
-                    if (colorize.enabled && colorize.client) {
-                        tmp = color[colorize.client](tmp);
+                if (!config.options.hidenick) {
+                    output.push('[');
+                    if (context.extra.clients >= 3) {
+                        tmp = `${context.handler.id}`;
+                        if (colorize.enabled && colorize.client) {
+                            tmp = color[colorize.client](tmp);
+                        }
+                        output.push(tmp);
+                        output.push(' - ');
                     }
-                    output.push(tmp);
-                    output.push(' - ');
-                }
 
-                tmp = context.nick;
-                if (colorize.enabled && colorize.nick) {
-                    if (colorize.nick === 'colorful') {
-                        // hash
-                        let m = tmp.split('').map(x=>x.codePointAt(0)).reduce((x,y)=>x+y);
-                        let n = colorize.nickcolors.length;
-                        tmp = color[colorize.nickcolors[m % n]](tmp);
-                    } else {
-                        tmp = color[colorize.nick](tmp);
+                    tmp = context.nick;
+                    if (colorize.enabled && colorize.nick) {
+                        if (colorize.nick === 'colorful') {
+                            // hash
+                            let m = tmp.split('').map(x=>x.codePointAt(0)).reduce((x,y)=>x+y);
+                            let n = colorize.nickcolors.length;
+                            tmp = color[colorize.nickcolors[m % n]](tmp);
+                        } else {
+                            tmp = color[colorize.nick](tmp);
+                        }
                     }
-                }
-                output.push(tmp, '] ');
+                    output.push(tmp, '] ');
 
-                if (context.extra.reply) {
-                    const reply = context.extra.reply;
-                    tmp = `Re ${reply.nick} `;
-                    if (colorize.enabled && colorize.replyto) {
-                        tmp = color[colorize.replyto](tmp);
-                    }
-                    output.push(tmp);
+                    if (context.extra.reply) {
+                        const reply = context.extra.reply;
+                        tmp = `Re ${reply.nick} `;
+                        if (colorize.enabled && colorize.replyto) {
+                            tmp = color[colorize.replyto](tmp);
+                        }
+                        output.push(tmp);
 
-                    if (reply.isText) {
-                        tmp = `「${truncate(reply.message)}」`;
-                    } else {
-                        tmp = reply.message;
+                        if (reply.isText) {
+                            tmp = `「${truncate(reply.message)}」`;
+                        } else {
+                            tmp = reply.message;
+                        }
+                        if (colorize.enabled && colorize.repliedmessage) {
+                            tmp = color[colorize.repliedmessage](tmp);
+                        }
+                        output.push(tmp, ': ');
+                    } else if (context.extra.forward) {
+                        tmp = `Fwd ${context.extra.forward.nick}: `;
+                        if (colorize.enabled && colorize.fwdfrom) {
+                            tmp = color[colorize.fwdfrom](tmp);
+                        }
+                        output.push(tmp);
                     }
-                    if (colorize.enabled && colorize.repliedmessage) {
-                        tmp = color[colorize.repliedmessage](tmp);
-                    }
-                    output.push(tmp, ': ');
-                } else if (context.extra.forward) {
-                    tmp = `Fwd ${context.extra.forward.nick}: `;
-                    if (colorize.enabled && colorize.fwdfrom) {
-                        tmp = color[colorize.fwdfrom](tmp);
-                    }
-                    output.push(tmp);
                 }
 
                 output.push(context.text);

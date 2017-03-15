@@ -78,37 +78,61 @@ module.exports = (variables, config) => {
                 if (context.extra.isAction) {
                     // 一定是 IRC
                     qqHandler.say(to, `* ${context.nick} ${context.text}`);
+                    resolve();
                 } else {
                     let special = '';
-                    if (context.extra.reply) {
-                        const reply = context.extra.reply;
-                        special = `Re ${reply.nick} `;
+                    let prefix = '';
+                    if (!config.options.hidenick) {
+                        if (context.extra.reply) {
+                            const reply = context.extra.reply;
+                            special = `Re ${reply.nick} `;
 
-                        if (reply.isText) {
-                            special += `「${truncate(reply.message)}」`;
-                        } else {
-                            special += reply.message;
+                            if (reply.isText) {
+                                special += `「${truncate(reply.message)}」`;
+                            } else {
+                                special += reply.message;
+                            }
+
+                            special += ': ';
+                        } else if (context.extra.forward) {
+                            special = `Fwd ${context.extra.forward.nick}: `;
                         }
 
-                        special += ': ';
-                    } else if (context.extra.forward) {
-                        special = `Fwd ${context.extra.forward.nick}: `;
+                        if (context.extra.clients >= 3) {
+                            prefix = `[${context.handler.id} - ${context.nick}] ${special}`;
+                        } else {
+                            prefix = `[${context.nick}] ${special}`;
+                        }
                     }
 
                     // 檔案
-                    let files = '';
-                    if (context.extra.uploads) {
-                        files = context.extra.uploads.map(u => ` ${u.url}`).join('');
-                    }
+                    const attachFileUrls = () => (context.extra.uploads || []).map(u => ` ${u.url}`).join('');
+                    const send = (output, noEscape = false) => {
+                        qqHandler.say(to, output, {
+                            noEscape: noEscape,
+                        });
+                        resolve();
+                    };
 
-                    if (context.extra.clients >= 3) {
-                        qqHandler.say(to, `[${context.handler.id} - ${context.nick}] ${special}${context.text}${files}`);
+                    // 與file-cqpro.js整合
+                    if (context.extra.uploads && context.extra.isImage && pluginManager.plugins['file-cqpro']) {
+                        pluginManager.plugins['file-cqpro']
+                            .process(context)
+                            .then(codes => {
+                                let output = qqHandler.escape(prefix);
+                                output += '\n' + codes.join('\n');
+
+                                if (context.extra.imageCaption) {
+                                    output += '\n' + qqHandler.escape(context.extra.imageCaption);
+                                }
+                                send(output, true);
+                            }).catch(e => {
+                                send(prefix + context.text + attachFileUrls());
+                            });
                     } else {
-                        qqHandler.say(to, `[${context.nick}] ${special}${context.text}${files}`);
+                        send(prefix + context.text + attachFileUrls());
                     }
                 }
-
-                resolve();
                 break;
 
             case 'request':
@@ -200,16 +224,11 @@ module.exports = (variables, config) => {
         let ctx = new Request(context);
         ctx.targets = 'IRC';
 
-        bridge.send(ctx).catch(() => {
-            // context.reply('請在與IRC頻道互聯的群組中使用本命令。');
-        });
+        bridge.send(ctx).catch(() => {});
     };
 
-    // 非主群不提供命令
-    if (qqHandler.type === 'QQ') {
-        qqHandler.addCommand('/ircnames', sendRequest);
-        qqHandler.addCommand('/ircwhois', sendRequest);
-        qqHandler.addCommand('/irctopic', sendRequest);
-        qqHandler.addCommand('/irccommand', sendRequest);
-    }
+    qqHandler.addCommand('/ircnames', sendRequest);
+    qqHandler.addCommand('/ircwhois', sendRequest);
+    qqHandler.addCommand('/irctopic', sendRequest);
+    qqHandler.addCommand('/irccommand', sendRequest);
 };
