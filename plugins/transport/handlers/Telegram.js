@@ -75,7 +75,7 @@ module.exports = (variables, config) => {
     });
 
     // 收到了來自其他群組的訊息
-    tgHandler.on('exchange', (context) => {
+    tgHandler.on('exchange', (context, resolve, reject) => {
         let to;
         if (context.extra.mapto) {
             to = context.extra.mapto[tgHandler.type];
@@ -117,6 +117,7 @@ module.exports = (variables, config) => {
                     }
                 }
 
+                resolve();
                 break;
 
             case 'request':
@@ -124,6 +125,7 @@ module.exports = (variables, config) => {
                 if (context.command) {
                     tgHandler.emit(`request#${context.command}`, context);
                 }
+                resolve();
                 break;
 
             case 'broadcast':
@@ -132,7 +134,11 @@ module.exports = (variables, config) => {
                 } else {
                     tgHandler.sayWithHTML(to, `<pre>&lt; ${htmlEscape(context.text)} &gt;</pre>`);
                 }
+                resolve();
                 break;
+
+            default:
+                reject();
         }
     });
 

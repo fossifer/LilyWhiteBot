@@ -85,10 +85,15 @@ module.exports = (options, objects) => {
                         }));
                     }).then(() => {
                         // 向對應目標的handler觸發exchange
+                        let promises = [];
                         for (let t of targets2) {
-                            handlers.get(t).emit('exchange', context);
+                            promises.push(new Promise((res, rej) => {
+                                handlers.get(t).emit('exchange', context, res, rej);
+                            }));
                         }
-                        resolve(true);
+                        Promise.all(promises)
+                            .then(() => resolve(true))
+                            .catch(() => reject());
                     });
                 } else {
                     reject();

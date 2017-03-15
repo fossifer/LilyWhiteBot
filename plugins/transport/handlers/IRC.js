@@ -40,7 +40,7 @@ module.exports = (variables, config) => {
     });
 
     // 收到了來自其他群組的訊息
-    ircHandler.on('exchange', (context) => {
+    ircHandler.on('exchange', (context, resolve, reject) => {
         let to;
         if (context.extra.mapto) {
             to = context.extra.mapto[ircHandler.type].toLowerCase();
@@ -107,6 +107,7 @@ module.exports = (variables, config) => {
                 }
 
                 ircHandler.say(to, output.join(''));
+                resolve();
                 break;
 
             case 'request':
@@ -114,6 +115,7 @@ module.exports = (variables, config) => {
                 if (context.command) {
                     ircHandler.emit(`request#${context.command}`, context);
                 }
+                resolve();
                 break;
 
             case 'broadcast':
@@ -127,7 +129,11 @@ module.exports = (variables, config) => {
                     tmp2 = color[colorize.broadcast](tmp2);
                 }
                 ircHandler.say(to, tmp2);
+                resolve();
                 break;
+
+            default:
+                reject();
         }
     });
 

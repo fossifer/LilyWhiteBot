@@ -1,4 +1,3 @@
-
 'use strict';
 
 const truncate = (str, maxLen = 10) => {
@@ -12,7 +11,7 @@ const truncate = (str, maxLen = 10) => {
 let bannedMessage = new Map();
 
 module.exports = (variables, config) => {
-    const {bridge, Request, Broadcast, handler: qqHandler} = variables;
+    const {bridge, Request, Broadcast, pluginManager, handler: qqHandler} = variables;
     const options = config.options.QQ || {};
 
     if (!options.notify) {
@@ -68,7 +67,7 @@ module.exports = (variables, config) => {
     });
 
     // 收到了來自其他群組的訊息
-    qqHandler.on('exchange', (context) => {
+    qqHandler.on('exchange', (context, resolve, reject) => {
         let to;
         if (context.extra.mapto) {
             to = context.extra.mapto[qqHandler.type];
@@ -109,6 +108,7 @@ module.exports = (variables, config) => {
                     }
                 }
 
+                resolve();
                 break;
 
             case 'request':
@@ -116,6 +116,7 @@ module.exports = (variables, config) => {
                 if (context.command) {
                     qqHandler.emit(`request#${context.command}`, context);
                 }
+                resolve();
                 break;
 
             case 'broadcast':
@@ -124,7 +125,11 @@ module.exports = (variables, config) => {
                 } else {
                     qqHandler.say(to, `< ${context.text} >`);
                 }
+                resolve();
                 break;
+
+            default:
+                reject();
         }
     });
 

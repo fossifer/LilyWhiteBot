@@ -177,6 +177,7 @@ module.exports = (pluginManager, options) => {
                 Message,
                 Request,
                 Broadcast,
+                pluginManager,
             }, options);
 
             bridge.add(type, handler);
@@ -201,6 +202,7 @@ module.exports = (pluginManager, options) => {
                 Message,
                 Request,
                 Broadcast,
+                pluginManager,
             }, options);
 
             bridge.add(client.type, handler);
