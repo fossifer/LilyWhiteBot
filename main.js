@@ -87,6 +87,7 @@ if (config.IRC && !config.IRC.disabled) {
     let options = config.IRC.options || {};
     let options2 = {
         maxLines: options.maxLines,
+        keepSilence: options.keepSilence,
     };
     const ircHandler = new IRCMessageHandler(ircClient, options2);
     pluginManager.handlers.set('IRC', ircHandler);
@@ -126,6 +127,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     let options2 = {
         botName: tgcfg.bot.name,
         nickStyle: tgcfg.options.nickStyle,
+        keepSilence: tgcfg.options.keepSilence,
     };
 
     const telegramHandler = new TelegramMessageHandler(tgBot, options2);
@@ -171,6 +173,7 @@ if (config.QQ && !config.QQ.disabled) {
         badwords: badwords,
         nickStyle: options.nickStyle,
         CoolQPro: options.CoolQPro,
+        keepSilence: options.keepSilence,
     };
 
     const qqHandler = new QQMessageHandler(qqbot, options2);

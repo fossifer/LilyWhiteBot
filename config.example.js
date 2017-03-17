@@ -24,7 +24,10 @@ module.exports = {
             "encoding": "UTF-8"
         },
         "options": {
-            "maxLines": 4                   // 一次性容許最多四行訊息（包括因為太長而被迫分割的）
+            "maxLines": 4,                  // 一次性容許最多四行訊息（包括因為太長而被迫分割的）
+            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
+                "#channel1"
+            ],
         }
     },
     "Telegram": {
@@ -38,8 +41,11 @@ module.exports = {
                 "host": "",
                 "port": 0
             },
-            "nickStyle": "username"         // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
+            "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用first name）
+            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
+                -12345678
+            ],
         }
     },
     "QQ": {                                 // 注意：QQ機器人需要與酷Q和 https://github.com/vjudge1/cqsocketapi 配合使用！
@@ -50,6 +56,9 @@ module.exports = {
             "ignoreCash": true,             // 如果訊息疑似口令紅包則將其屏蔽
             "nickStyle": "groupcard",       // 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用QQ號）
             "CoolQPro": false,              // 如果使用酷Q Pro，可將其開啟
+            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
+                12345678
+            ],
         }
     },
 
@@ -74,7 +83,10 @@ module.exports = {
                 "disable": {                            // 禁止某些方向的傳話。不需要的話可以刪除。例如：
                     "QQ": ["Telegram", "IRC"],          // 禁止將QQ訊息傳到到Telegram和IRC
                     "IRC": ["QQ"]                       // 禁止將IRC訊息傳到QQ
-                }
+                },
+                "exchange2": {                          // 允許傳話，但是需要自行設計傳話程式（emit exchange2）。
+                    "QQ": ["IRC"]
+                },
             }
             /*
             // 可以繼續加入其他群組，例如

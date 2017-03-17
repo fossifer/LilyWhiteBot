@@ -42,6 +42,7 @@ module.exports = (options, objects) => {
                 let [fromType, fromGroup] = [context.handler.type, context.to];
                 let alltargets = map[fromType][fromGroup];
                 let targets = {}, targets2 = [], targetCount = 0;
+                let exchange2 = {};
 
                 if (context.type === 'request') {
                     // Request有自己期待的目標
@@ -56,6 +57,10 @@ module.exports = (options, objects) => {
                                 targets[t] = alltargets[t].target;
                                 targets2.push(t);
                                 targetCount++;
+
+                                if (alltargets[t].exchange2) {
+                                    exchange2[t] = true;
+                                }
                             }
                         }
                     }
@@ -65,11 +70,16 @@ module.exports = (options, objects) => {
                             targets[t] = alltargets[t].target;
                             targets2.push(t);
                             targetCount++;
+
+                            if (alltargets[t].exchange2) {
+                                exchange2[t] = true;
+                            }
                         }
                     }
                 }
 
                 // 向context中加入附加訊息
+                //context.promise = promise;
                 context.extra.clients = targetCount + 1;
                 context.extra.mapto = targets;
 
@@ -87,9 +97,13 @@ module.exports = (options, objects) => {
                         // 向對應目標的handler觸發exchange
                         let promises = [];
                         for (let t of targets2) {
-                            promises.push(new Promise((res, rej) => {
-                                handlers.get(t).emit('exchange', context, res, rej);
-                            }));
+                            if (exchange2[t]) {
+                                handlers.get(t).emit('exchange2', context);
+                            } else {
+                                promises.push(new Promise((res, rej) => {
+                                    handlers.get(t).emit('exchange', context, res, rej);
+                                }));
+                            }
                         }
                         Promise.all(promises)
                             .then(() => resolve(true))

@@ -162,6 +162,26 @@ module.exports = (pluginManager, options) => {
                 }
             }
         }
+
+        // 標記「自訂訊息處理」的聯繫
+        let exchange2 = group.exchange2 || {};
+        for (let client1 in exchange2) {
+            if (map[client1]) {
+                let g1 = group[client1];
+                if (typeof exchange2[client1] === 'string') {
+                    let client2 = exchange2[client1];
+                    if (map[client1][g1][client2]) {
+                        map[client1][g1][client2].exchange2 = true;
+                    }
+                } else {
+                    for (let client2 of exchange2[client1]) {
+                        if (map[client1][g1][client2]) {
+                            map[client1][g1][client2].exchange2 = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     bridge.map = map;
