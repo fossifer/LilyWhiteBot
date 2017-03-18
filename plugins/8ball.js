@@ -17,7 +17,7 @@ module.exports = (pluginManager, options) => {
     const Broadcast = pluginManager.global.Broadcast;
 
     const eightball = context => {
-        let result = eightballs[Math.random() * eightballs.length];
+        let result = eightballs[parseInt(Math.random() * eightballs.length)];
 
         context.reply(result);
 
