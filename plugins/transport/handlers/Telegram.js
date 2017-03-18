@@ -1,5 +1,6 @@
-
 'use strict';
+
+const path = require('path');
 
 const htmlEscape = (str) => {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -111,7 +112,11 @@ module.exports = (variables, config) => {
                         if (upload.type === 'audio') {
                             tgHandler.sendAudio(to, upload.url);
                         } else if (upload.type === 'photo') {
-                            tgHandler.sendPhoto(to, upload.url);
+                            if (path.extname(upload.url) === '.gif') {
+                                tgHandler.sendDocument(to, upload.url);
+                            } else {
+                                tgHandler.sendPhoto(to, upload.url);
+                            }
                         } else {
                             files.push(upload.url);
                         }
