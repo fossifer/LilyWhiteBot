@@ -1,6 +1,7 @@
 'use strict';
 
 const fileUploader = require('./file.js');
+const EventEmitter = require('events').EventEmitter;
 
 module.exports = (options, objects) => {
     let handlers = new Map();
@@ -26,6 +27,8 @@ module.exports = (options, objects) => {
             handlers.delete(type);
         },
         send: (context) => {
+            context.sentByBridge = false;
+
             let promise = new Promise((resolve, reject) => {
                 // 如果符合paeeye，不傳送
                 if (options.options.paeeye) {
@@ -79,7 +82,6 @@ module.exports = (options, objects) => {
                 }
 
                 // 向context中加入附加訊息
-                //context.promise = promise;
                 context.extra.clients = targetCount + 1;
                 context.extra.mapto = targets;
 
@@ -89,7 +91,7 @@ module.exports = (options, objects) => {
                         context.extra.uploads = uploads;
                     }).catch((e) => {
                         objects.pluginManager.log(`Error on processing files: ${e}`, true);
-                        bridge.sendAfter(context, new objects.Broadcast(context, {
+                        context.callbacks.push(new objects.Broadcast(context, {
                             text: 'File upload error',
                             extra: {},
                         }));
@@ -105,24 +107,33 @@ module.exports = (options, objects) => {
                                 }));
                             }
                         }
+
                         Promise.all(promises)
-                            .then(() => resolve(true))
-                            .catch(() => reject());
+                            .then(() => {
+                                context.sentByBridge = true;
+                                console.log('bridgesent', context);
+                                for (let ctx of context.callbacks) {
+                                    bridge.send(ctx).catch(_ => {});
+                                }
+                                context.callbacks = [];
+                                resolve(true);
+                            })
+                            .catch(_ => reject());
                     });
                 } else {
                     reject();
                 }
             });
-            context.promise = promise;
             return promise;
         },
         sendAfter(context1, context2) {
-            if (context1.promise) {
-                context1.promise.then(() => {
-                    bridge.send(context2);
-                });
-            } else {
+            if (context1.sentByBridge) {
                 bridge.send(context2);
+            } else {
+                if (!context1.callbacks) {
+                    context1.callbacks = [];
+                }
+                context1.callbacks.push(context2);
             }
         }
     };
