@@ -23,8 +23,8 @@ module.exports = (variables, config) => {
         options.notify = {};
     }
 
-    ircHandler.splitPrefix = '-> ';
-    ircHandler.splitPostfix = ' ->';
+    ircHandler.splitPrefix = '->';
+    ircHandler.splitPostfix = '->';
     if (colorize.enabled && colorize.linesplit) {
         ircHandler.splitPrefix = color[colorize.linesplit](ircHandler.splitPrefix);
         ircHandler.splitPostfix = color[colorize.linesplit](ircHandler.splitPostfix);

@@ -20,7 +20,7 @@ module.exports = (pluginManager, options) => {
         }
     };
 
-    const p = context => pia(' (╯°Д°)╯︵ ~~~~~┻━┻', context);
+    const p = context => pia('(╯°Д°)╯︵ ~~~~~┻━┻', context);
     const m = context => pia('o(*￣3￣)o', context);
     const h = context => pia('(つ°ω°)つ', context);
 

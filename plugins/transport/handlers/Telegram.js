@@ -215,10 +215,9 @@ module.exports = (variables, config) => {
      * 查詢IRC群組情況的命令
      */
     const sendRequest = (context) => {
-        let ctx = new Request(context);
-        ctx.targets = 'IRC';
-
-        bridge.send(ctx).catch(() => {});
+        bridge.sendAfter(context, new Request(context, {
+            targets: ['IRC'],
+        }));
     };
 
     tgHandler.addCommand('ircnames', sendRequest);

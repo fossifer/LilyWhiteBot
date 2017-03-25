@@ -111,7 +111,6 @@ module.exports = (options, objects) => {
                         Promise.all(promises)
                             .then(() => {
                                 context.sentByBridge = true;
-                                console.log('bridgesent', context);
                                 for (let ctx of context.callbacks) {
                                     bridge.send(ctx).catch(_ => {});
                                 }
