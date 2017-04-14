@@ -93,7 +93,7 @@ module.exports = (variables, config) => {
                         prefix = `* <b>${htmlEscape(context.nick)}</b> `;
                     } else {
                         if (context.extra.clients >= 3) {
-                            prefix = `[<i>${htmlEscape(context.handler.id)}</i> - <b>${htmlEscape(context.nick)}</b>] `;
+                            prefix = `[${htmlEscape(context.handler.id)} - <b>${htmlEscape(context.nick)}</b>] `;
                         } else {
                             prefix = `[<b>${htmlEscape(context.nick)}</b>] `;
                         }
