@@ -70,7 +70,7 @@ const linky = (string, prefix) => {
 
     string.replace(/([^{]|^){{\s*([^{#\[\]\|]+?)\s*(|\|.+?)}}/g, (s, _, l, __, offset) => {
         let t = l;
-        if (!t.toLowerCase().startsWith('template:')) {
+        if (!t.startsWith(':') && !t.toLowerCase().startsWith('template:')) {
             t = 'Template:' + t;
         }
         if (!text[t]) {
