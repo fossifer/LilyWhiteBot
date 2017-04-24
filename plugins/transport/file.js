@@ -170,6 +170,52 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
 });
 
 /*
+ * 上傳到自行架設的Uguu圖床上面
+ */
+const uploadToUguu = (file) => new Promise((resolve, reject) => {
+    const post = (pendingfile, path, callback) => request.post({
+        url: servemedia.UguuApiUrl,
+        formData: {
+            file: {
+                value: pendingfile,
+                options: {
+                    filename: path
+                }
+            },
+            randomname: "true"
+        },
+    }, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        if (!error && response.statusCode === 200) {
+            resolve(body.trim());
+        } else {
+            reject(error);
+        }
+    });
+
+    if (file.url) {
+        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
+            post(f, file.url, () => {
+                if (filename) {
+                    fs.unlink(filename, (err) => {
+                        if (err) {
+                            console.log(`Unable to unlink ${filename}`);
+                        }
+                    });
+                }
+            });
+        });
+    } else if (file.path) {
+        post(fs.createReadStream(file.path), file.path);
+    } else {
+        reject('Invalid file');
+        return;
+    }
+});
+
+/*
  * 決定檔案去向
  */
 const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
@@ -186,6 +232,11 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
 
             case 'linx':
                 uploadToLinx(file).then((url) => resolve(url), (e) => reject(e));
+                break;
+
+            case 'uguu':
+            case 'Uguu':
+                uploadToUguu(file).then((url) => resolve(url), (e) => reject(e));
                 break;
 
             default:
