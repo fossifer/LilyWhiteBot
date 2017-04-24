@@ -201,6 +201,7 @@ module.exports = {
                    self：將檔案保存在自己的伺服器中
                    vim-cn：將檔案上傳到img.vim-cn.com
                    linx：將檔案上傳到一個 linx（https://github.com/andreimarcu/linx-server）伺服器中
+                   uguu: 將檔案上傳到一個 uguu（https://github.com/nokonoko/Uguu）伺服器中
 
                    另外，如果使用酷Q的話，您需要定期自行清理酷Q的快取！
                  */
@@ -209,6 +210,7 @@ module.exports = {
                 "cachePath": "",                // type為self時有效：快取存放位置
                 "serveUrl": "",                 // type為self時有效：檔案URL的字首，一般需要以斜線結尾
                 "linxApiUrl": "",               // type為linx時有效：linx API位址，一般以斜線結尾
+                "UguuApiUrl": "",               // type為uguu時有效：請使用 /api.php?d=upload-tool 結尾。
                 "sizeLimit": 4096,              // 檔案最大大小，單位KB。0表示不限制。限制僅對Telegram有效。
 
                 // 是否把Telegram的Sticker（webp格式）轉為PNG格式。
