@@ -144,6 +144,7 @@ if (config.QQ && !config.QQ.disabled) {
         CoolQPro: options.CoolQPro,
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11235,
+        unicode: options.unicode,
     });
     pluginManager.log('Starting QQBot...');
 
