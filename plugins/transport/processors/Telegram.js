@@ -83,14 +83,14 @@ const init = (b, h, c) => {
         bridge.send(context).catch(() => {});
     });
 
-// Pinned message
+    // Pinned message
     tgHandler.on('pin', (info, ctx) => {
         if (options.notify.pin) {
             bridge.send(new BridgeMsg({
                 from: info.from.id,
                 to: info.to,
                 nick: info.from.nick,
-                text: `${info.from.nick} pinned: ${info.text}`,
+                text: `${info.from.nick} pinned: ${info.text.replace(/\n/g, ' ')}`,
                 isNotice: true,
                 handler: tgHandler,
                 _rawdata: ctx,
