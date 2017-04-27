@@ -43,11 +43,11 @@ module.exports = (bridge, options) => {
         let clients = [];
         if (opts.allowedClients) {
             clients = opts.allowedClients;
-        }
-
-        for (let [type, handler] of bridge.handlers) {
-            if (!opts.disallowedClients || (opts.disallowedClients.indexOf(type) !== -1)) {
-                clients.push(type);
+        } else {
+            for (let [type, handler] of bridge.handlers) {
+                if ((!opts.disallowedClients) || (opts.disallowedClients.indexOf(type) === -1)) {
+                    clients.push(type);
+                }
             }
         }
 

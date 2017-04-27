@@ -47,7 +47,7 @@ module.exports = (pluginManager, options) => {
                         qq = '2854196300';
                     }
                     if (qq) {
-                        qqHandler.say(client.id, `[CQ:at,qq=${qq}]${qqHandler.escape(context.param)}`, {
+                        qqHandler.say(client.id, `[CQ:at,qq=${qq}] ${qqHandler.escape(context.param)}`, {
                             noEscape: true,
                         });
                     }
