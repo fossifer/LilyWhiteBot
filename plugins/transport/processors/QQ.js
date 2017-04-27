@@ -1,6 +1,7 @@
 'use strict';
 
 const BridgeMsg = require('../BridgeMsg.js');
+const LRU = require('lru-cache');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -10,7 +11,14 @@ const truncate = (str, maxLen = 10) => {
     return str;
 };
 
-let bannedMessage = new Map();
+let bannedMessage = LRU({
+    max: 500,
+    maxAge: 300000,
+});
+let groupInfo = LRU({
+    max: 500,
+    maxAge: 3600000,
+});
 
 let bridge = null;
 let config = null;
@@ -47,10 +55,8 @@ const init = (b, h, c) => {
         // 過濾口令紅包
         if (context.extra.isCash) {
             let key = `${context.to}: ${context.text}`;
-            if (!bannedMessage.get(key)) {
-                bannedMessage.set(key, setTimeout(() => {
-                    bannedMessage.delete(key);
-                }, 300000));
+            if (!bannedMessage.has(key)) {
+                bannedMessage.set(key, true);
                 bridge.send(new BridgeMsg(context, {
                     text: `已暫時屏蔽「${context.text}」`,
                     isNotice: true,
@@ -59,23 +65,29 @@ const init = (b, h, c) => {
             return;
         }
 
+        if (!context.isPrivate) {
+            groupInfo.set(`${context.from}@${context.to}`, context._rawdata.user);
+        }
+
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
             // 先處理QQ的@
-            // TODO 使用cache！
             let promises = [];
 
             for (let at of context.extra.ats) {
-                promises.push(qqHandler.groupMemberInfo(context.to, at));
+                if (groupInfo.has(`${at}@${context.to}`)) {
+                    promises.push(Promise.resolve(groupInfo.get(`${at}@${context.to}`)));
+                } else {
+                    promises.push(qqHandler.groupMemberInfo(context.to, at).then((info) => {
+                        groupInfo.set(`${at}@${context.to}`, info);
+                    }));
+                }
             }
 
             Promise.all(promises).then((infos) => {
                 for (let info of infos) {
                     context.text = context.text.replace(new RegExp(`@${info.qq}`, 'g'), `＠${qqHandler.getNick(info)}`);
                 }
-                send();
-            }).catch(() => {
-                send();
-            });
+            }).catch(_ => {}).then(() => send());
         } else {
             send();
         }
@@ -104,6 +116,10 @@ const init = (b, h, c) => {
             text = `${data.user_target.name} (${data.target}) 退出QQ群`;
         } else {
             text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.adminQQ}) 踢出QQ群`;
+        }
+
+        if (groupInfo.has(`${data.target}@${data.group}`)) {
+            groupInfo.del(`${data.target}@${data.group}`);
         }
 
         if (options.notify.leave) {
