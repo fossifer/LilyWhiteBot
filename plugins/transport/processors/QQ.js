@@ -77,15 +77,16 @@ const init = (b, h, c) => {
                 if (groupInfo.has(`${at}@${context.to}`)) {
                     promises.push(Promise.resolve(groupInfo.get(`${at}@${context.to}`)));
                 } else {
-                    promises.push(qqHandler.groupMemberInfo(context.to, at).then((info) => {
-                        groupInfo.set(`${at}@${context.to}`, info);
-                    }));
+                    promises.push(qqHandler.groupMemberInfo(context.to, at).catch(_ => {}));
                 }
             }
 
             Promise.all(promises).then((infos) => {
                 for (let info of infos) {
-                    context.text = context.text.replace(new RegExp(`@${info.qq}`, 'g'), `＠${qqHandler.getNick(info)}`);
+                    if (info) {
+                        groupInfo.set(`${info.qq}@${context.to}`, info);
+                        context.text = context.text.replace(new RegExp(`@${info.qq}`, 'g'), `＠${qqHandler.getNick(info)}`);
+                    }
                 }
             }).catch(_ => {}).then(() => send());
         } else {
