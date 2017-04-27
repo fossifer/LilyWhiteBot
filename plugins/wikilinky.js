@@ -18,6 +18,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
+const BridgeMsg = require('./transport/BridgeMsg.js');
 
 const compare = (x, y) => {
     return x.pos - y.pos;
@@ -86,8 +87,9 @@ const linky = (string, prefix) => {
 
 const processlinky = (context) => {
     try {
-        if (map[context.handler.type][context.to]) {
-            let links = linky(context.text, map[context.handler.type][context.to]);
+        let rule = map[BridgeMsg.getUIDFromContext(context, context.to)];
+        if (rule) {
+            let links = linky(context.text, rule);
 
             if (links.length > 0) {
                 context.reply(links.map(l => l.link).join('  '));
@@ -105,14 +107,19 @@ module.exports = (pluginManager, options) => {
 
     let types = {};
 
+    BridgeMsg.setHandlers(pluginManager.handlers);
+
     for (let [type, handler] of pluginManager.handlers) {
         map[type] = {};
     }
 
-    let groups = options.groups || [];
-    for (let group of groups) {
-        map[group.type][group.group] = group.website;
-        types[group.type] = true;
+    let groups = options.groups || {};
+    for (let group in groups) {
+        let client = BridgeMsg.parseUID(group);
+        if (client.uid) {
+            map[client.uid] = groups[group];
+            types[client.client] = true;
+        }
     }
 
     for (let type in types) {

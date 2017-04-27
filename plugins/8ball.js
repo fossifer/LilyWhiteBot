@@ -5,6 +5,8 @@
  */
 'use strict';
 
+const BridgeMsg = require('./transport/BridgeMsg.js');
+
 const eightballs = ['As I see it, yes', 'It is certain', 'It is decidedly so', 'Most likely',
     'Outlook good', 'Signs point to yes', 'One would be wise to think so', 'Naturally', 'Without a doubt',
     'Yes', 'Yes, definitely', 'You may rely on it', 'Reply hazy, try again', 'Ask again later',
@@ -21,15 +23,19 @@ module.exports = (pluginManager, options) => {
 
         context.reply(result);
 
-        // 如果開啟了互聯，而且是在公開群組中使用本命令，那麼讓其他群也看見掀桌
         if (bridge && !context.isPrivate) {
-            bridge.sendAfter(context, new Broadcast(context, {
+            bridge.send(new BridgeMsg(context, {
                 text: `8ball: ${result}`,
+                isNotice: true,
             }));
         }
     };
 
-    for (let [type, handler] of pluginManager.handlers) {
-        handler.addCommand("'8ball", eightball);
+    if (bridge) {
+        bridge.addCommand('!8ball', eightball, options);
+    } else {
+        for (let [type, handler] of pluginManager.handlers) {
+            handler.addCommand('!8ball', eightball);
+        }
     }
 };

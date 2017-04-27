@@ -17,6 +17,17 @@ let options = {};
 let servemedia;
 let handlers;
 
+const log = (message, isError = false) => {
+    let date = new Date().toISOString();
+    let output = `[${date.substring(0,10)} ${date.substring(11,19)}] ${message}`;
+
+    if (isError) {
+        console.error(output);
+    } else {
+        console.log(output);
+    }
+};
+
 /*
  * 轉檔
  */
@@ -324,7 +335,7 @@ const processQQFile = file => new Promise((resolve, reject) => {
 /*
  * 判斷訊息來源，將訊息中的每個檔案交給對應函式處理
  */
-module.exports = {
+const fileUploader = {
     init: (opt) => {
         options = opt;
         servemedia = options.options.servemedia || {};
@@ -354,4 +365,20 @@ module.exports = {
             reject(e);
         });
     }),
+};
+
+module.exports = (bridge, options) => {
+    fileUploader.init(options);
+    fileUploader.handlers = bridge.handlers;
+
+    bridge.addHook('bridge.prepare', (msg) => fileUploader.process(msg).then((uploads) => {
+        msg.extra.uploads = uploads;
+    }).catch((e) => {
+        log(`Error on processing files: ${e}`, true);
+        msg.callbacks.push(new bridge.BridgeMsg(msg, {
+            text: 'File upload error',
+            isNotice: true,
+            extra: {},
+        }));
+    }));
 };

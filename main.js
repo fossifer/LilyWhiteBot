@@ -67,9 +67,6 @@ if (config.IRC && !config.IRC.disabled) {
 
     ircClient.on('registered', (message) => {
         pluginManager.log('IRCBot Registered.');
-        if (botcfg.nick_password) {
-            ircClient.say('NickServ', `IDENTIFY ${botcfg.nick_password}`);
-        }
     });
 
     ircClient.on('join', (channel, nick, message) => {

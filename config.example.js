@@ -12,7 +12,7 @@ module.exports = {
             "nick": "",                     // IRC暱稱
             "userName": "",
             "realName": "",
-            "channels": ["#channel1", "#channel2"],   // 注意：一定要設置這裡！需要加入的頻道
+            "channels": ["#channel1", "#channel2"],   // 需要加入的頻道
             "autoRejoin": true,
             "secure": true,
             "port": 6697,
@@ -20,14 +20,10 @@ module.exports = {
             "floodProtectionDelay": 300,
             "sasl": false,                  // 如果開啟SASL，那麼需要正確設定前面的userName和下面的sasl_password
             "sasl_password": "",
-            "nick_password": "",            // 發送給NickServ的認證訊息：`/msg NickServ IDENTIFY ${nick_password}`
             "encoding": "UTF-8"
         },
         "options": {
             "maxLines": 4,                  // 一次性容許最多四行訊息（包括因為太長而被迫分割的）
-            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
-                "#channel1"
-            ],
         }
     },
     "Telegram": {
@@ -43,12 +39,12 @@ module.exports = {
             },
             "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用first name）
-            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
-                -12345678
-            ],
         }
     },
-    "QQ": {                                 // 注意：QQ機器人需要與酷Q和 https://github.com/vjudge1/cqsocketapi 配合使用！
+    /*
+      注意：QQ機器人需要與酷Q和 https://github.com/vjudge1/cqsocketapi 配合使用！
+     */
+    "QQ": {
         "disabled": false,                  // 設定為true後會禁止QQ機器人。
         "qq": "10000",                      // Bot的QQ號碼
         "options": {
@@ -56,9 +52,6 @@ module.exports = {
             "ignoreCash": true,             // 如果訊息疑似口令紅包則將其屏蔽
             "nickStyle": "groupcard",       // 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用QQ號）
             "CoolQPro": false,              // 如果使用酷Q Pro，可將其開啟
-            "keepSilence": [                // 在這些場合不要說話，不需要可刪除
-                12345678
-            ],
         }
     },
 
@@ -66,63 +59,50 @@ module.exports = {
         "transport",                        // 啟用互聯功能，不想禁止互聯的話請勿移除
         "groupid-tg",                       // 取得目前Telegram群組的ID，
                                             // 可在正式連接之前啟用該套件，然後在Telegram群中使用 /thisgroupid 取得ID
-        "pia"
+        "ircquery",                         // 允許查詢IRC的一些訊息
+        "irccommand",                       // 允許向IRC發送一些命令（注意，不是IRC命令而是給頻道內機器人使用的命令）。
+        "pia",
     ],
 
     "transport": {
         "groups": [
             // 說明：
-            // 1. 可以只填兩個群組（例如，把"IRC"留空或省略將變成只有QQ-Telegram互聯）
-            // 2. 各群之間請勿產生交集（目前只支援一對一），否則會出錯。如果希望把同一軟體的多個群組連接到一起，
-            //    請使用下面提到的「aliases」。
-            // 3. 配置IRC的話請同時修改上方的IRC.bot.channels！
-            {
-                "QQ": 12345678,                         // QQ群號碼
-                "Telegram": -12345678,                  // Telegram群組號碼：可以先把bot拉到群組中，然後透過 /thisgroupid 來取得id
-                "IRC": "#test",                         // IRC頻道
-                "disable": {                            // 禁止某些方向的傳話。不需要的話可以刪除。例如：
-                    "QQ": ["Telegram", "IRC"],          // 禁止將QQ訊息傳到到Telegram和IRC
-                    "IRC": ["QQ"]                       // 禁止將IRC訊息傳到QQ
-                },
-                "exchange2": {                          // 允許傳話，但是需要自行設計傳話程式（emit exchange2）。
-                    "QQ": ["IRC"]
-                },
-            }
+            // 1. 可以填任意個群組
+            // 2. 群組格式：「IRC/#頻道」、「Telegram/-12345678」、「Telegram/@groupname」（公開群）或「QQ/QQ群號」
+            // 3. 聊天軟體名不區分大小寫，可簡寫為i、t、q。
+            // 4. 如果需要，可以加入多個互聯體
+            [
+                'IRC/#test',
+                'Telegram/-12345678',       // Telegram群組號碼：可以先把bot拉到群組中，然後透過 /thisgroupid 來取得id
+                'QQ/12345678'
+                // 'QQ/87654321'            // 如果有這種需求，亦可以連接
+            ]
             /*
-            // 可以繼續加入其他群組，例如
-            {
-                "Telegram": -123456789,
-                "IRC": "#test2"
-            }
-            */
+             如果需要，可以繼續加
+             [
+                'i/#test2',
+                't/@test2',
+                ...
+             ],
+             ...
+             */
         ],
 
         /*
+        // 如果希望把同一軟體的多個群組連接到一起，可為不同的群組設置不同的別名，
+        // 這樣互聯機器人在轉發訊息時會採用自訂群組名，以防混淆。
         "aliases": {
-            // 說明：如果希望把同一軟體的多個群組連接到一起，請為不同的群組設置不同的別名。
-            // 請勿重名，否則會出錯
-            "QQ": {
-                "QQ2": "q2",                     // 將聊天軟體視為「QQ2」，並在轉發時標記為「q」
-                "QQ3": "s",
-            }
+            'QQ/87665432': '分部',
+            'QQ/87665432': ['簡稱', '群組全稱']
+        },
+         */
 
-            // 設置別名之後可這樣配置 groups:
-            // {
-            //     "QQ": 10001,
-            //     "IRC": "#group1",
-            // },
-            // {
-            //     "QQ2": 10001,
-            //     "IRC": "#group2",
-            // },
-            // {
-            //     "QQ": 12345,
-            //     "QQ2": 54321,
-            //     "IRC": "#group3",
-            // }
-            // 不過請避免這樣設定
-        }
-        */
+        /*
+        // 如果不希望特定方向的轉發，例如Telegram群不向QQ轉發，請在下面設定
+        "disables": {
+            'QQ/12345678': ['IRC/#aaa']         // QQ群12345678的訊息不會向IRC的#aaa頻道轉發
+        },
+         */
 
         "options": {
             "IRC": {
@@ -153,13 +133,14 @@ module.exports = {
                     "enabled": true,            // 是否允許在IRC頻道中使用顏色。
                     "broadcast": "green",       // < 整行通知的顏色 >
                     "client": "navy",           // 用於標記用戶端「<T>」的顏色
-                    "nick": "green",            // nick的顏色。除標準顏色外，亦可設為 colorful
+                    "nick": "colorful",            // nick的顏色。除標準顏色外，亦可設為 colorful
                     "replyto": "brown",         // Re replyto的顏色
                     "repliedmessage": "olive",  // 被Re的訊息的顏色
                     "fwdfrom": "cyan",          // Fwd fwdfrom的顏色
                     "linesplit": "silver",      // 行分隔符的顏色
 
-                    "nickcolors": ["green"]     // 如果nick為colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數。
+                    // 如果nick為colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數。
+                    "nickcolors": ["green", "blue", "purple", "olive", "pink", "teal", "red"]
                 },
                 "receiveCommands": true,        // 是否允許Telegram和QQ使用irccommand
                 "allowQuery": true              // 是否允許其他群組查詢IRC頻道資訊
@@ -173,10 +154,9 @@ module.exports = {
                 },
                 "forwardBots": {                // 指出在Telegram運行的傳話機器人，以便取得訊息中的真實暱稱
                     "XiaoT_bot": "[]",          // 目前僅支援[]和<>（包圍暱稱的括弧）
-                    "Peace1_bot": "<>",
                     "zhmrtbot": "[]",
-                    "zhwncommbot": "[]",
-                    "Sakura_fwdbot": "[]"
+                    "Sakura_fwdbot": "[]",
+                    "orzdigbot": "[]",
                 },
                 "forwardCommands": true         // 如果有人使用Telegram命令亦轉發到其他群組（但由於Telegram設定的原因，Bot無法看到命令結果）
             },
@@ -219,5 +199,25 @@ module.exports = {
                 "webpPath": "",                 // 如果無法取得root權限，可借此指定dwebp二進位檔案位址
             }
         }
+    },
+
+    "ircquery": {
+        "disables": [                           // 不要在這些群組使用
+            "qq/12345678"
+        ],
+
+        /*
+        // 如果是只希望在特定群組使用，用這個
+        enables: [
+            'qq/12345678'
+        ]
+         */
+
+        "prefix": "irc",                        // 如果使用，命令會變成 /irctopic、/ircnames 等
+    },
+
+    "irccommand": {
+        "echo": true,                           // 是否在目前的用戶端顯示命令已傳送
+        // 其他設定同 ircquery
     }
 };
