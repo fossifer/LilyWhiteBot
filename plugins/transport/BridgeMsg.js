@@ -21,12 +21,12 @@ class BridgeMsg extends Context {
     constructor(context, overrides = {}) {
         super(context, overrides);
 
-        this.isNotice = overrides.isNotice || context.isNotice || null;
+        this.isNotice = false;
 
-        for (let k of ['from_uid', 'to_uid']) {
-            if (overrides[k]) {
+        for (let k of ['isNotice', 'from_uid', 'to_uid']) {
+            if (overrides[k] !== undefined) {
                 this[k] = overrides[k];
-            } else if (context[k]) {
+            } else if (context[k] !== undefined) {
                 this[k] = context[k];
             }
         }
@@ -63,19 +63,20 @@ BridgeMsg.setHandlers = (handlers) => {
 };
 
 BridgeMsg.parseUID = (s) => {
-    let i = s.indexOf('/');
     let client = null, id = null, uid = null;
+    if (s) {
+        let i = s.indexOf('/');
 
-    if (i !== -1) {
-        client = s.substr(0, i).toLowerCase();
-        if (clientFullNames[client]) {
-            client = clientFullNames[client];
+        if (i !== -1) {
+            client = s.substr(0, i).toLowerCase();
+            if (clientFullNames[client]) {
+                client = clientFullNames[client];
+            }
+
+            id = s.substr(i+1);
+            uid = `${client.toLowerCase()}/${id}`;
         }
-
-        id = s.substr(i+1);
-        uid = `${client.toLowerCase()}/${id}`;
     }
-
     return { client, id, uid };
 };
 

@@ -104,13 +104,17 @@ const bridge = {
                 });
                 let client = BridgeMsg.parseUID(t).client;
 
-                promises.push(bridge.emitHook('bridge.send', msg2).then(_ => processors.get(client).receive(msg2)));
+                promises.push(bridge.emitHook('bridge.send', msg2).then(_ => {
+                    let processor = processors.get(client);
+                    if (processor) {
+                        return processor.receive(msg2);
+                    }
+                }));
             }
 
             return Promise.all(promises)
                 .catch(() => { allresolved = false; })
                 .then(() => {
-                    // msg.finish();
                     bridge.emitHook('bridge.sent', msg);
                     return Promise.resolve(allresolved);
                 });
