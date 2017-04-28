@@ -371,7 +371,7 @@ module.exports = (bridge, options) => {
     fileUploader.init(options);
     fileUploader.handlers = bridge.handlers;
 
-    bridge.addHook('bridge.prepare', (msg) => fileUploader.process(msg).then((uploads) => {
+    bridge.addHook('bridge.send', (msg) => fileUploader.process(msg).then((uploads) => {
         msg.extra.uploads = uploads;
     }).catch((e) => {
         log(`Error on processing files: ${e}`, true);

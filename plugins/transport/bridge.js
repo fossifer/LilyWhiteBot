@@ -42,7 +42,7 @@ const prepareMsg = (msg) => {
         };
     }
 
-    return bridge.emitHook('bridge.prepare', msg);
+    return bridge.emitHook('bridge.send', msg);
 };
 
 const bridge = {
@@ -55,8 +55,8 @@ const bridge = {
     deleteProcessor(type) { processors.delete(type); },
     addHook(event, func, priority = 100) {
         // Event:
-        // bridge.prepare：剛發出，尚未準備傳話
-        // bridge.send：已確認目標
+        // bridge.send：剛發出，尚未準備傳話
+        // bridge.receive：已確認目標
         if (!hooks[event]) {
             hooks[event] = new Map();
         }
@@ -104,7 +104,7 @@ const bridge = {
                 });
                 let client = BridgeMsg.parseUID(t).client;
 
-                promises.push(bridge.emitHook('bridge.send', msg2).then(_ => {
+                promises.push(bridge.emitHook('bridge.receive', msg2).then(_ => {
                     let processor = processors.get(client);
                     if (processor) {
                         return processor.receive(msg2);

@@ -19,9 +19,18 @@ const genUID = (context, id) => {
 
 class BridgeMsg extends Context {
     constructor(context, overrides = {}) {
+        // TODO 雖然這樣很醜陋，不過暫時先這樣了
         super(context, overrides);
 
         this.isNotice = false;
+
+        if (this.handler) {
+            this._from_client = this.handler.type;
+            this._to_client = this.handler.type;
+
+            this.from = this.from;
+            this.to = this.to;
+        }
 
         for (let k of ['isNotice', 'from_uid', 'to_uid']) {
             if (overrides[k] !== undefined) {
@@ -32,24 +41,33 @@ class BridgeMsg extends Context {
         }
     }
 
-    get from_uid() {
-        return this.from ? genUID(this, this.from) : this._from_uid;
+    get from() { return this._from; }
+    get to() { return this._to; }
+    get from_uid() { return this._from_uid; }
+    get to_uid() { return this._to_uid; }
+
+    set from(f) {
+        this._from = f;
+        this._from_uid = `${(this._from_client || '').toLowerCase()}/${f}`;
+    }
+
+    set to(t) {
+        this._to = t;
+        this._to_uid = `${(this._to_client || '').toLowerCase()}/${t}`;
     }
 
     set from_uid(u) {
         let { client, id, uid } = BridgeMsg.parseUID(u);
-        this.from = id;
+        this._from = id;
         this._from_uid = u;
-    }
-
-    get to_uid() {
-        return this.to ? genUID(this, this.to) : this._to_uid;
+        this._from_client = client;
     }
 
     set to_uid(u) {
         let { client, id, uid } = BridgeMsg.parseUID(u);
-        this.to = id;
+        this._to = id;
         this._to_uid = u;
+        this._to_client = client;
     }
 }
 

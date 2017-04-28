@@ -9,8 +9,8 @@
  callbacks: function
  or
  callbacks: {
-    'prepare': func,
     'send': func,
+    'receive': func,
     'sent': func,
  }
  */
@@ -140,7 +140,7 @@ module.exports = (bridge, options) => {
         }
     };
 
-    bridge.addHook('bridge.prepare', hook('prepare'));
     bridge.addHook('bridge.send', hook('send'));
+    bridge.addHook('bridge.receive', hook('receive'));
     bridge.addHook('bridge.sent', hook('sent'));
 };
