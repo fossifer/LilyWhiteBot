@@ -56,8 +56,6 @@ module.exports = (pluginManager, options) => {
     const process = (event) => (msg) => {
         let filters = msgfilters[event];
 
-        console.log('msg', msg.from, msg.to, msg.from_uid, msg.to_uid, msg.nick, msg.text);
-
         for (let f of filters) {
             let rejects = true;
             for (let prop in f) {
