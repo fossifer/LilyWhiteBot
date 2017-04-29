@@ -184,13 +184,13 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
  * 上傳到自行架設的Uguu圖床上面
  */
 const uploadToUguu = (file) => new Promise((resolve, reject) => {
-    const post = (pendingfile, path, callback) => request.post({
+    const post = (pendingfile, name, callback) => request.post({
         url: servemedia.UguuApiUrl,
         formData: {
-            file: {
+            "file": {
                 value: pendingfile,
                 options: {
-                    filename: path
+                    filename: name
                 }
             },
             randomname: "true"
@@ -207,8 +207,9 @@ const uploadToUguu = (file) => new Promise((resolve, reject) => {
     });
 
     if (file.url) {
+        let name = preprocessFileName(path.basename(file.url));
         preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
-            post(f, file.url, () => {
+            post(f, name, () => {
                 if (filename) {
                     fs.unlink(filename, (err) => {
                         if (err) {
@@ -219,7 +220,8 @@ const uploadToUguu = (file) => new Promise((resolve, reject) => {
             });
         });
     } else if (file.path) {
-        post(fs.createReadStream(file.path), file.path);
+        let name = path.basename(file.path);
+        post(fs.createReadStream(file.path), name);
     } else {
         reject('Invalid file');
         return;
