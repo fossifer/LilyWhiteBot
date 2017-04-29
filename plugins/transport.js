@@ -43,24 +43,68 @@ module.exports = (pluginManager, options) => {
     let map = {};
 
     let groups = options.groups || [];
+
     if (groups[0] && !(groups[0] instanceof Array)) {
         groups = [groups];
     }
 
     for (let group of groups) {
         // 建立聯繫
-        for (let c1 of group) {
-            let client1 = BridgeMsg.parseUID(c1).uid;
+        if (group instanceof Array) {
+            for (let c1 of group) {
+                let client1 = BridgeMsg.parseUID(c1).uid;
 
-            if (client1) {
-                for (let c2 of group) {
-                    let client2 = BridgeMsg.parseUID(c2).uid;
-                    if (client1 === client2) { continue; }
-                    if (!map[client1]) { map[client1] = {}; }
+                if (client1) {
+                    for (let c2 of group) {
+                        let client2 = BridgeMsg.parseUID(c2).uid;
+                        if (client1 === client2) { continue; }
+                        if (!map[client1]) { map[client1] = {}; }
 
-                    map[client1][client2] = {
-                        disabled: false,
-                    };
+                        map[client1][client2] = {
+                            disabled: false,
+                        };
+                    }
+                }
+            }
+        } else if (typeof group === 'object') {
+            // 舊版
+            pluginManager.log('* Deprecated: config.example.json changed, please update "groups" in your config.js.');
+
+            for (let client1 of ['QQ', 'Telegram', 'IRC']) {
+                let g1 = group[client1];
+                if (g1) {
+                    for (let client2 of ['QQ', 'Telegram', 'IRC']) {
+                        if (client1 === client2) { continue; }
+
+                        let g2 = group[client2];
+                        if (g2) {
+                            let uid1 = `${client1.toLowerCase()}/${g1}`;
+                            let uid2 = `${client2.toLowerCase()}/${g2}`;
+
+                            if (!map[uid1]) { map[uid1] = {}; }
+                            map[uid1][uid2] = {
+                                disabled: false,
+                            };
+                        }
+                    }
+                }
+            }
+
+            if (group.disable) {
+                for (let client1 in group.disable) {
+                    let g1 = group[client1];
+                    if (!g1) { continue; }
+
+                    let targets = group.disable[client1];
+                    if (typeof targets === 'string') { targets = [targets]; }
+                    for (let client2 of targets) {
+                        let g2 = group[client2];
+                        if (!g2) { continue; }
+
+                        let uid1 = `${client1.toLowerCase()}/${g1}`;
+                        let uid2 = `${client2.toLowerCase()}/${g2}`;
+                        map[uid1][uid2].disabled = true;
+                    }
                 }
             }
         }

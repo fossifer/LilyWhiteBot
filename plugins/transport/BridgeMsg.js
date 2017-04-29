@@ -80,9 +80,10 @@ BridgeMsg.setHandlers = (handlers) => {
     }
 };
 
-BridgeMsg.parseUID = (s) => {
+BridgeMsg.parseUID = (u) => {
     let client = null, id = null, uid = null;
-    if (s) {
+    if (u) {
+        let s = u.toString();
         let i = s.indexOf('/');
 
         if (i !== -1) {
