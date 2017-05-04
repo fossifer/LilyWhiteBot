@@ -40,21 +40,29 @@ module.exports = (bridge, options) => {
             cb = { sent: callbacks };
         }
 
+
         let clients = [];
         if (opts.allowedClients) {
-            clients = opts.allowedClients;
+            for (let client of opts.allowedClients) {
+                clients.push(client.toString().toLowerCase());
+            }
         } else {
+            let disallowedClients = [];
+            for (let client of (opts.disallowedClients || [])) {
+                disallowedClients.push(client.toString().toLowerCase());
+            }
+
             for (let [type, handler] of bridge.handlers) {
-                if ((!opts.disallowedClients) || (opts.disallowedClients.indexOf(type) === -1)) {
-                    clients.push(type);
+                if (disallowedClients.indexOf(type.toLowerCase()) === -1) {
+                    clients.push(type.toLowerCase());
                 }
             }
         }
 
         if (!commands.has(command)) {
             for (let client of clients) {
-                if (bridge.handlers.has(client)) {
-                    bridge.handlers.get(client).addCommand(command);
+                if (clientFullNames[client] && bridge.handlers.has(clientFullNames[client])) {
+                    bridge.handlers.get(clientFullNames[client]).addCommand(command);
                 }
             }
         }
