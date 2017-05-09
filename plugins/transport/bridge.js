@@ -1,141 +1,125 @@
 'use strict';
 
-const fileUploader = require('./file.js');
-const EventEmitter = require('events').EventEmitter;
+const Context = require('../../lib/handlers/Context.js');
+const BridgeMsg = require('./BridgeMsg.js');
 
-module.exports = (options, objects) => {
-    let handlers = new Map();
-    let map = {};
+let processors = new Map();
+let hooks = {};
+let hooks2 = new WeakMap();
+let map = {};
+let aliases = {};
 
-    fileUploader.init(options);
-    fileUploader.handlers = handlers;
+// TODO 独立的命令处理
+// let commands = {};
 
-    let bridge = {
-        get map() {
-            return map;
-        },
-        set map(obj) {
-            map = obj;
-        },
-        get handlers() {
-            return handlers;
-        },
-        add: (type, handler) => {
-            handlers.set(type, handler);
-        },
-        remove: (type) => {
-            handlers.delete(type);
-        },
-        send: (context) => {
-            context.sentByBridge = false;
+const getBridgeMsg = (msg) => {
+    if (msg instanceof BridgeMsg) {
+        return msg;
+    } else {
+        return new BridgeMsg(msg);
+    }
+};
 
-            let promise = new Promise((resolve, reject) => {
-                // 如果符合paeeye，不傳送
-                if (options.options.paeeye) {
-                    if (context.text.startsWith(options.options.paeeye)) {
-                        resolve(false);
-                        return;
-                    } else if (context.extra.reply && context.extra.reply.message.startsWith(options.options.paeeye)) {
-                        resolve(false);
-                        return;
-                    }
-                }
+const prepareMsg = (msg) => {
+    // 檢查是否有傳送目標
+    let alltargets = map[msg.to_uid];
+    let targets = [];
+    for (let t in alltargets) {
+        if (!alltargets[t].disabled) {
+            targets.push(t);
+        }
+    }
 
-                // 檢查是否有傳送目標，如果沒有，reject
-                let [fromType, fromGroup] = [context.handler.type, context.to];
-                let alltargets = map[fromType][fromGroup];
-                let targets = {}, targets2 = [], targetCount = 0;
-                let exchange2 = {};
+    // 向msg中加入附加訊息
+    msg.extra.clients = targets.length + 1;
+    msg.extra.mapto = targets;
+    if (aliases[msg.to_uid]) {
+        msg.extra.clientName = aliases[msg.to_uid];
+    } else {
+        msg.extra.clientName = {
+            shortname: msg.handler.id,
+            fullname: msg.handler.type,
+        };
+    }
 
-                if (context.type === 'request') {
-                    // Request有自己期待的目標
-                    let ts = context.targets;
-                    if (ts) {
-                        if (typeof context.targets === 'string') {
-                            ts = [context.targets];
-                        }
+    return bridge.emitHook('bridge.send', msg);
+};
 
-                        for (let t of ts) {
-                            if (alltargets[t] && !alltargets[t].disabled) {
-                                targets[t] = alltargets[t].target;
-                                targets2.push(t);
-                                targetCount++;
-
-                                if (alltargets[t].exchange2) {
-                                    exchange2[t] = true;
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    for (let t in alltargets) {
-                        if (t !== fromType && alltargets[t] && !alltargets[t].disabled) {
-                            targets[t] = alltargets[t].target;
-                            targets2.push(t);
-                            targetCount++;
-
-                            if (alltargets[t].exchange2) {
-                                exchange2[t] = true;
-                            }
-                        }
-                    }
-                }
-
-                // 向context中加入附加訊息
-                context.extra.clients = targetCount + 1;
-                context.extra.mapto = targets;
-
-                if (targetCount) {
-                    // 檢查是否有檔案，如果有，交給file處理，並等處理結束後將檔案位址附加到訊息中
-                    fileUploader.process(context).then((uploads) => {
-                        context.extra.uploads = uploads;
-                    }).catch((e) => {
-                        objects.pluginManager.log(`Error on processing files: ${e}`, true);
-                        context.callbacks.push(new objects.Broadcast(context, {
-                            text: 'File upload error',
-                            extra: {},
-                        }));
-                    }).then(() => {
-                        // 向對應目標的handler觸發exchange
-                        let promises = [];
-                        for (let t of targets2) {
-                            if (exchange2[t]) {
-                                handlers.get(t).emit('exchange2', context);
-                            } else {
-                                promises.push(new Promise((res, rej) => {
-                                    handlers.get(t).emit('exchange', context, res, rej);
-                                }));
-                            }
-                        }
-
-                        Promise.all(promises)
-                            .then(() => {
-                                context.sentByBridge = true;
-                                for (let ctx of context.callbacks) {
-                                    bridge.send(ctx).catch(_ => {});
-                                }
-                                context.callbacks = [];
-                                resolve(true);
-                            })
-                            .catch(_ => reject());
-                    });
-                } else {
-                    reject();
-                }
-            });
-            return promise;
-        },
-        sendAfter(context1, context2) {
-            if (context1.sentByBridge) {
-                bridge.send(context2);
-            } else {
-                if (!context1.callbacks) {
-                    context1.callbacks = [];
-                }
-                context1.callbacks.push(context2);
+const bridge = {
+    get map() { return map; },
+    set map(obj) { map = obj; },
+    get aliases() { return aliases; },
+    set aliases(obj) { aliases = obj; },
+    get processors() { return processors; },
+    addProcessor(type, processor) { processors.set(type, processor); },
+    deleteProcessor(type) { processors.delete(type); },
+    addHook(event, func, priority = 100) {
+        // Event:
+        // bridge.send：剛發出，尚未準備傳話
+        // bridge.receive：已確認目標
+        if (!hooks[event]) {
+            hooks[event] = new Map();
+        }
+        let m = hooks[event];
+        if (m && typeof func === 'function') {
+            let p = priority;
+            while (m.has(p)) {
+                p++;
+            }
+            m.set(p, func);
+            hooks2.set(func, { event: event, priority: p });
+        }
+    },
+    deleteHook(func) {
+        if (hooks2.has(func)) {
+            let h = hooks2.get(func);
+            hooks[h.event].delete(h.priority);
+            hooks2.delete(func);
+        }
+    },
+    emitHook(event, msg) {
+        let r = Promise.resolve();
+        if (hooks[event]) {
+            for (let [priority, hook] of hooks[event]) {
+                r = r.then(_ => hook(msg));
             }
         }
-    };
+        return r;
+    },
 
-    return bridge;
+    send(m) {
+        let msg = getBridgeMsg(m);
+        return prepareMsg(msg).then(() => {
+            // 全部訊息已傳送resolve(true)，部分訊息已傳送resolve(false)；
+            // 所有訊息被拒絕傳送reject()
+            // Hook需自行處理異常
+
+            // 向對應目標的handler觸發exchange
+            let promises = [];
+            let allresolved = true;
+
+            for (let t of msg.extra.mapto) {
+                let msg2 = new BridgeMsg(msg, {
+                    to_uid: t
+                });
+                let client = BridgeMsg.parseUID(t).client;
+
+                promises.push(bridge.emitHook('bridge.receive', msg2).then(_ => {
+                    let processor = processors.get(client);
+                    if (processor) {
+                        return processor.receive(msg2);
+                    }
+                }));
+            }
+
+            return Promise.all(promises)
+                .catch(() => { allresolved = false; })
+                .then(() => {
+                    bridge.emitHook('bridge.sent', msg);
+                    return Promise.resolve(allresolved);
+                });
+        });
+    }
 };
+
+module.exports = bridge;

@@ -17,6 +17,17 @@ let options = {};
 let servemedia;
 let handlers;
 
+const log = (message, isError = false) => {
+    let date = new Date().toISOString();
+    let output = `[${date.substring(0,10)} ${date.substring(11,19)}] ${message}`;
+
+    if (isError) {
+        console.error(output);
+    } else {
+        console.log(output);
+    }
+};
+
 /*
  * 轉檔
  */
@@ -170,6 +181,54 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
 });
 
 /*
+ * 上傳到自行架設的Uguu圖床上面
+ */
+const uploadToUguu = (file) => new Promise((resolve, reject) => {
+    const post = (pendingfile, name, callback) => request.post({
+        url: servemedia.UguuApiUrl,
+        formData: {
+            "file": {
+                value: pendingfile,
+                options: {
+                    filename: name
+                }
+            },
+            randomname: "true"
+        },
+    }, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        if (!error && response.statusCode === 200) {
+            resolve(body.trim());
+        } else {
+            reject(error);
+        }
+    });
+
+    if (file.url) {
+        let name = preprocessFileName(path.basename(file.url));
+        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
+            post(f, name, () => {
+                if (filename) {
+                    fs.unlink(filename, (err) => {
+                        if (err) {
+                            console.log(`Unable to unlink ${filename}`);
+                        }
+                    });
+                }
+            });
+        });
+    } else if (file.path) {
+        let name = path.basename(file.path);
+        post(fs.createReadStream(file.path), name);
+    } else {
+        reject('Invalid file');
+        return;
+    }
+});
+
+/*
  * 決定檔案去向
  */
 const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
@@ -186,6 +245,11 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
 
             case 'linx':
                 uploadToLinx(file).then((url) => resolve(url), (e) => reject(e));
+                break;
+
+            case 'uguu':
+            case 'Uguu':
+                uploadToUguu(file).then((url) => resolve(url), (e) => reject(e));
                 break;
 
             default:
@@ -273,7 +337,7 @@ const processQQFile = file => new Promise((resolve, reject) => {
 /*
  * 判斷訊息來源，將訊息中的每個檔案交給對應函式處理
  */
-module.exports = {
+const fileUploader = {
     init: (opt) => {
         options = opt;
         servemedia = options.options.servemedia || {};
@@ -303,4 +367,20 @@ module.exports = {
             reject(e);
         });
     }),
+};
+
+module.exports = (bridge, options) => {
+    fileUploader.init(options);
+    fileUploader.handlers = bridge.handlers;
+
+    bridge.addHook('bridge.send', (msg) => fileUploader.process(msg).then((uploads) => {
+        msg.extra.uploads = uploads;
+    }).catch((e) => {
+        log(`Error on processing files: ${e}`, true);
+        msg.callbacks.push(new bridge.BridgeMsg(msg, {
+            text: 'File upload error',
+            isNotice: true,
+            extra: {},
+        }));
+    }));
 };

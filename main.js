@@ -67,9 +67,6 @@ if (config.IRC && !config.IRC.disabled) {
 
     ircClient.on('registered', (message) => {
         pluginManager.log('IRCBot Registered.');
-        if (botcfg.nick_password) {
-            ircClient.say('NickServ', `IDENTIFY ${botcfg.nick_password}`);
-        }
     });
 
     ircClient.on('join', (channel, nick, message) => {
@@ -147,6 +144,7 @@ if (config.QQ && !config.QQ.disabled) {
         CoolQPro: options.CoolQPro,
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11235,
+        unicode: options.unicode,
     });
     pluginManager.log('Starting QQBot...');
 
