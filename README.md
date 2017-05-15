@@ -27,25 +27,28 @@ goto a
 ### 設定QQ機器人
 1. 在正式啟用互聯之前，建議提前註冊一個QQ馬甲，將其掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。
 2. **下載[酷Q](https://cqp.cc/)**，啟動一下以便完成安裝。
-3. 進入[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi/releases)，下載org.dazzyd.cqsocketapi.cpk，並放到酷Q的app目錄中。本程式需要酷Q Air/Pro和這個專門的cqsocketapi才能收發QQ群訊息。
+3. 進入[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi/releases)，下載org.dazzyd.cqsocketapi.cpk，並放到酷Q的app目錄中。
 4. 再次啟動酷Q，登入機器人帳號，然後在插件設定中啟用「cqsocket」。
 5. 根據實際需要修改 badwords.example.js，並改名為 badwords.js。「敏感詞」功能僅對QQ機器人有效。
 6. 請記得定期清除快取。
 7. 因為目前沒做監控功能，所以還請自己盯一下酷Q的狀態。
 
 注意：
-1. 酷Q是私有軟體，和我沒關係。
-2. 酷Q可以透過wine在Linux/Mac系統中執行，可以參考[這篇教程](https://cqp.cc/t/30970)進行設定。
+1. 本程式需要酷Q Air/Pro和這個專門的cqsocketapi才能收發QQ群訊息。
+2. 在伺服器執行程式時，酷Q會有很大機率要求你開啟QQ的設備鎖，因此註冊馬甲時請不要亂填電話號。
+3. 酷Q模擬的是安卓QQ，而且QQ不允許多個手機同時登入。如果已經開啟酷Q，而且需要直接操作機器人帳號，請用電腦登入。
+4. 酷Q是私有軟體，和我沒關係。
+5. 酷Q可以透過wine在Linux/Mac系統中執行，可以參考[這篇教程](https://cqp.cc/t/30970)進行設定。
 
 ### 設定Telegram機器人
 @BotFather，與其交互，按照熒幕提示進行操作，建立一個機器人帳號。設定完成後，BotFather會給一個Token，你需要把這個Token填到config.js中。
 
 之後請記得執行`/setprivacy`命令，將機器人的私隱模式設為DISABLED以便於讓它看到群組內的訊息。
 
-在剛開始的時候，可以保留config.js之內「plugins」中的「groupid-tg」，然後執行程式，並且在群組中輸入「/thisgroupid」，這樣機器人會自動給出群組ID以便設定互聯。
+在剛開始的時候，可以保留config.js之內「plugins」中的「groupid-tg」，然後執行程式，並且在群組中輸入`/thisgroupid`，這樣機器人會自動給出群組ID以便設定互聯。如果沒看懂前面那句話，你也可以把@combot拉進群中，然後輸入`/stat`，看機器人給出的數字是多少。注意，數字是負數。
 
 ### 設定IRC機器人
-IRC沒有什麼特別之處。如果你有機器人Cloak，請在config.js中輸入正確的userName、sasl_password，並將sasl設為true。
+IRC沒有什麼特別之處。如果你有Cloak，請在config.js中輸入正確的userName、sasl_password，並將sasl設為true。
 
 ## 提示
 
