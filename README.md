@@ -50,9 +50,9 @@ IRC沒有什麼特別之處。如果你有機器人Cloak，請在config.js中輸
 ## 提示
 
 1. 如果把config.json中的`paeeye`設為`//`，那麼在訊息之前加入`//`（例如「//隱藏」）可防止被其他群組看見。
-2. 如果允許IRC接受命令，那麼可在Telegram和QQ中使用`/command 命令`。該命令並非IRC命令，而是為配合IRC頻道中的機器人而設。
-3. 如果允許查詢IRC的情況，那麼可在Telegram和QQ中使用`/names`（取得在線使用者名稱列表）、`/whois 暱稱`（whois）和`/topic`（取得Topic）。
-4. 「敏感詞」功能會將敏感詞列表中的詞語轉為「*」，可使用正規表示式。具體的政治敏感詞彙可參照中文維基百科「中華人民共和國審查辭彙列表」條目製作，本專案不再提供。詳情見badwords.example.js。
+2. 如果允許IRC接受命令（plugins中有「irccommand」），那麼可在Telegram和QQ中使用`/command 命令`。該命令並非IRC命令，而是為配合IRC頻道中的機器人而設。
+3. 如果允許查詢IRC的情況（plugins中有「ircquery」），那麼可在Telegram和QQ中使用`/names`（取得在線使用者名稱列表）、`/whois 暱稱`（whois）和`/topic`（取得Topic）。
+4. 「敏感詞」功能僅在QQ有效，而且僅對機器人自己「張嘴」有效。啟用之後，程式會自動把敏感詞列表中的詞語轉為「*」，可使用正規表示式。具體的政治敏感詞彙可參照中文維基百科「中華人民共和國審查辭彙列表」條目製作，本專案不再提供。詳情見badwords.example.js。
 
 ### 其他功能
 以下各功能的設定方法均為改config.js。
