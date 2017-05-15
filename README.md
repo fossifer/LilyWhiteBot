@@ -1,7 +1,7 @@
 QQ-Telegram-IRC
 ===
 
-[简体中文版](https://github.com/vjudge1/qq-tg-irc/edit/master/README-hans.md)
+[简体中文版](https://github.com/vjudge1/qq-tg-irc/blob/master/README-hans.md)
 
 在三個（或以上）群組間傳話的機器人。
 
