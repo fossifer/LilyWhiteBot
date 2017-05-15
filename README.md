@@ -1,7 +1,7 @@
 QQ-Telegram-IRC
 ===
 
-在三個群組間傳話的機器人。
+在三個（或以上）群組間傳話的機器人。
 
 ## 如何安裝
 目前支援QQ、Telegram和IRC三種群組互聯，不過亦可以選擇兩群互聯。
@@ -15,16 +15,19 @@ QQ-Telegram-IRC
 npm install
 node main.js
 ```
-* 如果擔心crash的話請直接寫個無窮迴圈，例如`while true; do node main.js; done`。
+* 如果擔心crash的話請直接寫個無窮迴圈，例如`while true; do node main.js; done`或者
+```batch
+:a
+node main.js
+goto a
+```
 * 根據實際需要修改 config.example.js，並改名為 config.js。
-    * QQ群格式：qq/QQ群號
-    * Telegram群格式：telegram/一串數字  該數字可透過 /thisgroupid 取得（後面有說明），而且該數字是**負數**。
-    * IRC頻道格式：irc/#頻道名  別忘了#
+* QQ群格式`qq/QQ群號`；Telegram群格式`telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**`；IRC頻道格式`irc/#頻道名`，別忘了`#`。
 
 ### 設定QQ機器人
 1. 在正式啟用互聯之前，建議提前註冊一個QQ馬甲，將其掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。
-2. '''下載[酷Q](https://cqp.cc/)'''，啟動一下以便完成安裝。
-3. 進入[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi/releases)，下載org.dazzyd.cqsocketapi.cpk，並放到酷Q的app目錄中。
+2. **下載[酷Q](https://cqp.cc/)**，啟動一下以便完成安裝。
+3. 進入[vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi/releases)，下載org.dazzyd.cqsocketapi.cpk，並放到酷Q的app目錄中。本程式需要酷Q Air/Pro和這個專門的cqsocketapi才能收發QQ群訊息。
 4. 再次啟動酷Q，登入機器人帳號，然後在插件設定中啟用「cqsocket」。
 5. 根據實際需要修改 badwords.example.js，並改名為 badwords.js。「敏感詞」功能僅對QQ機器人有效。
 6. 請記得定期清除快取。
