@@ -22,7 +22,7 @@ node main.js
 goto a
 ```
 * 根據實際需要修改 config.example.js，並改名為 config.js。
-* QQ群格式`qq/QQ群號`；Telegram群格式`telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**`；IRC頻道格式`irc/#頻道名`，別忘了`#`。
+* QQ群格式`qq/QQ群號`；Telegram群格式`telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**；IRC頻道格式`irc/#頻道名`，別忘了`#`。
 
 ### 設定QQ機器人
 1. 在正式啟用互聯之前，建議提前註冊一個QQ馬甲，將其掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。
