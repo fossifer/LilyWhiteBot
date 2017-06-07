@@ -148,7 +148,7 @@ if (config.QQ && !config.QQ.disabled) {
     });
     pluginManager.log('Starting QQBot...');
 
-    qqbot.on('error', (err) => {
+    qqbot.on('Error', (err) => {
         pluginManager.log(`QQBot Error: ${err.error.toString()} (${err.event})`, true);
     });
 

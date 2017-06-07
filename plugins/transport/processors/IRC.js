@@ -233,7 +233,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
             }
 
             tmp = msg.nick;
-            if (colorize.enabled && colorize.nick) {
+            if (colorize.enabled && colorize.nick && tmp.length > 0) {
                 if (colorize.nick === 'colorful') {
                     // hash
                     let m = tmp.split('').map(x=>x.codePointAt(0)).reduce((x,y)=>x+y);
