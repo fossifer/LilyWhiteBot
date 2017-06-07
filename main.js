@@ -11,12 +11,14 @@ const https = require('https');
 const irc = require('irc');
 const Telegraf = require('telegraf');
 const QQBot = require('./lib/QQBot.js');
+const WeChatBot = require('./lib/WeChatBotClient.js');
 const proxy = require('./lib/proxy.js');
 
 const {Context, Message} = require('./lib/handlers/Context.js');
 const IRCMessageHandler = require('./lib/handlers/IRCMessageHandler.js');
 const TelegramMessageHandler = require('./lib/handlers/TelegramMessageHandler.js');
 const QQMessageHandler = require('./lib/handlers/QQMessageHandler.js');
+const WeChatMessageHandler = require('./lib/handlers/WeChatMessageHandler.js');
 
 // 所有擴充套件包括傳話機器人都只與該物件打交道
 const pluginManager = {
@@ -182,6 +184,45 @@ if (config.QQ && !config.QQ.disabled) {
     });
 
     pluginManager.log('QQBot started');
+}
+
+if (config.WeChat && !config.WeChat.disabled) {
+    let options = config.WeChat.options || {};
+
+    let wechatbot = new WeChatBot({
+        CoolQPro: options.CoolQPro,
+        host: config.QQ.host || '127.0.0.1',
+        port: config.QQ.port || 11337,
+    });
+    pluginManager.log('Starting QQBot...');
+
+    wechatbot.on('Error', (err) => {
+        pluginManager.log(`WeChatBot Error: ${err.error.toString()} (${err.event})`, true);
+    });
+
+    wechatbot.start();
+
+    // 載入敏感詞清單
+    let ungoodwords = [];
+    try {
+        ungoodwords = require('./ungoodwords.js');
+    } catch (ex) {
+        pluginManager.log('Failed to load ungoodwords.js', true);
+    }
+
+    let options2 = {
+        ungoodwords: ungoodwords,
+        keepSilence: options.keepSilence,
+    };
+
+    const wechatHandler = new WeChatMessageHandler(wechatbot, options2);
+    pluginManager.handlers.set('WeChat', wechatHandler);
+    pluginManager.handlerClasses.set('WeChat', {
+        object: QQMessageHandler,
+        options: options2,
+    });
+
+    pluginManager.log('WeChatBot started');
 }
 
 /**
