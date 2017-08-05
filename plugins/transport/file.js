@@ -3,6 +3,9 @@
  *
  * 已知的問題：
  * Telegram音訊使用ogg格式，QQ則使用amr和silk，這個可以考慮互相轉換一下。
+ *
+ * TODO
+ * 將下面幾個uploadToXXX合併
  */
 'use strict';
 
@@ -101,11 +104,11 @@ const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
 });
 
 /*
- * 上傳到 http://img.vim-cn.com
+ * 上傳到 https://img.vim-cn.com
  */
 const uploadToVimCN = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, callback) => request.post({
-        url: 'http://img.vim-cn.com/',
+        url: 'https://img.vim-cn.com/',
         formData: {
             name: pendingfile,
         },
@@ -117,6 +120,99 @@ const uploadToVimCN = (file) => new Promise((resolve, reject) => {
             resolve(body.trim());
         } else {
             reject(error);
+        }
+    });
+
+    if (file.url) {
+        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
+            post(f, () => {
+                if (filename) {
+                    fs.unlink(filename, (err) => {
+                        if (err) {
+                            console.log(`Unable to unlink ${filename}`);
+                        }
+                    });
+                }
+            });
+        });
+    } else if (file.path) {
+        post(fs.createReadStream(file.path));
+    } else {
+        reject('Invalid file');
+        return;
+    }
+});
+
+/*
+ * 上傳到 https://sm.ms
+ */
+const uploadToSmms = (file) => new Promise((resolve, reject) => {
+    const post = (pendingfile, callback) => request.post({
+        url: 'https://sm.ms/api/upload',
+        headers: {
+            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/vjudge1/LilyWhiteBot)'
+        },
+        json: true,
+        formData: {
+            smfile: pendingfile,
+        },
+    }, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        if (error) {
+            reject(error);
+        } else if (body && body.code !== 'success') {
+            reject(body.msg);
+        } else {
+            resolve(body.data.url);
+        }
+    });
+
+    if (file.url) {
+        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
+            post(f, () => {
+                if (filename) {
+                    fs.unlink(filename, (err) => {
+                        if (err) {
+                            console.log(`Unable to unlink ${filename}`);
+                        }
+                    });
+                }
+            });
+        });
+    } else if (file.path) {
+        post(fs.createReadStream(file.path));
+    } else {
+        reject('Invalid file');
+        return;
+    }
+});
+
+/*
+ * 上傳到 https://imgur.com
+ */
+const uploadToImgur = (file, config) => new Promise((resolve, reject) => {
+    const post = (pendingfile, callback) => request.post({
+        url: config.apiUrl + 'upload',
+        headers: {
+            'Authorization': `Client-ID ${config.clientId}`,
+        },
+        json: true,
+        formData: {
+            type: 'file',
+            image: pendingfile,
+        },
+    }, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        if (error) {
+            reject(error);
+        } else if (body && !body.success) {
+            reject(body.data.error);
+        } else {
+            resolve(body.data.link);
         }
     });
 
@@ -237,6 +333,14 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
             case 'vimcn':
             case 'vim-cn':
                 uploadToVimCN(file).then((url) => resolve(url), (e) => reject(e));
+                break;
+
+            case 'sm.ms':
+                uploadToSmms(file).then((url) => resolve(url), (e) => reject(e));
+                break;
+
+            case 'imgur':
+                uploadToImgur(file, servemedia.imgur || {}).then((url) => resolve(url), (e) => reject(e));
                 break;
 
             case 'self':

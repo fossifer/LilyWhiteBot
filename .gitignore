@@ -37,6 +37,7 @@ jspm_packages
 .node_repl_history
 
 # 編輯器設定檔
+.idea
 .jshintrc
 .tern-project
 
