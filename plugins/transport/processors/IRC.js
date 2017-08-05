@@ -90,7 +90,7 @@ const init = (b, h, c) => {
     let userlist = {};
 
     ircHandler.on('join', (channel, nick, message) => {
-        if (options.notify.join) {
+        if (options.notify.join && nick !== ircHandler.nick) {
             bridge.send(new BridgeMsg({
                 from: channel.toLowerCase(),
                 to: channel.toLowerCase(),
