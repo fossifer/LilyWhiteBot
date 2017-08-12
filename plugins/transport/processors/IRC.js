@@ -165,7 +165,7 @@ const init = (b, h, c) => {
 
         for (let ch in chans) {
             let chan = ch.toLowerCase();
-            if ((options.notify.leave === 'all') ||
+            if ((options.notify.leave === 'all' && nick !== ircHandler.nick) ||
                 (options.notify.leave === 'onlyactive' && isActive(nick, chan))
                ) {
                 bridge.send(new BridgeMsg({
