@@ -1,6 +1,6 @@
 /**
  * QQ-Telegram-IRC
- * https://github.com/vjudge1/qq-tg-irc
+ * https://github.com/vjudge1/LilyWhiteBot
  *
  * @author      vjudge1
  * @description

@@ -1,7 +1,7 @@
 {
-    "name": "qq-tg-irc",
+    "name": "lilywhitebot",
     "version": "1.3.0",
-    "description": "QQ-Telegram-IRC互聯機器人",
+    "description": "互聯機器人（目前支援 QQ、Telegram、IRC）",
     "dependencies": {
         "cwebp": "~2.0.1",
         "irc": "~0.5.2",
