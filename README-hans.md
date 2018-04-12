@@ -31,7 +31,7 @@ goto a
 ### 设置 QQ 机器人
 1. 在正式启用互联之前，建议提前注册一个 QQ 马甲，挂机挂到一定等级，并往钱包里塞一点钱，以减小被腾讯封杀的可能性。不过从实践情况来看，只有一颗星或不塞钱也无妨。
 2. **下载[酷 Q](https://cqp.cc/)**，启动一下以便完成安装。
-3. 进入 [vjudge1/cqsocketapi](https://github.com/vjudge1/cqsocketapi/releases)，下载 org.dazzyd.cqsocketapi.cpk，并放到酷 Q 的 app 目录中。
+3. 进入 [mrhso/cqsocketapi](https://bintray.com/mrhso/cqsocketapi-nodejs/nodejs/_latestVersion)，下载 org.dazzyd.cqsocketapi.cpk，并放到酷 Q 的 app 目录中。
 4. 再次启动酷 Q，登录机器人账号，然后在插件设置中启用“cqsocket”。
 5. 根据实际需要修改 badwords.example.js，并改名为 badwords.js。“敏感词”功能仅对 QQ 机器人有效。
 6. 请记得定期清除缓存。
