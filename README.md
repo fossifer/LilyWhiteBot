@@ -31,7 +31,7 @@ goto a
 ### 設定 QQ 機器人
 1. 在正式啟用互聯之前，建議提前註冊一個 QQ 馬甲，掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。不過從實踐情況來看，只有一顆星或不塞錢也無妨。
 2. **下載[酷 Q](https://cqp.cc/)**，啟動一下以便完成安裝。
-3. 進入 [mrhso/cqsocketapi](https://bintray.com/mrhso/cqsocketapi-nodejs/nodejs/_latestVersion)，下載 org.dazzyd.cqsocketapi.cpk，並放到酷 Q 的 app 目錄中。
+3. 進入 [mrhso/cqsocketapi](https://bintray.com/mrhso/cqsocketapi/nodejs/_latestVersion)，下載 org.dazzyd.cqsocketapi.cpk，並放到酷 Q 的 app 目錄中。
 4. 再次啟動酷 Q，登入機器人帳號，然後在插件設定中啟用「cqsocket」。
 5. 根據實際需要修改 badwords.example.js，並改名為 badwords.js。「敏感詞」功能僅對 QQ 機器人有效。
 6. 請記得定期清除快取。
