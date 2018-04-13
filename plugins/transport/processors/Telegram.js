@@ -26,6 +26,8 @@ const parseForwardBot = (username, text) => {
         [, realNick, realText] = text.match(/^\[(.*?)\]:? ([^]*)$/m) || [];
     } else if (symbol === '<>') {
         [, realNick, realText] = text.match(/^<(.*?)>:? ([^]*)$/m) || [];
+    } else if (symbol === 'skt') {
+        [, realNick, realText] = text.match(/^\[(.*?)\]:?\n([^]*)$/m) || [];
     }
 
     return {realNick, realText};
