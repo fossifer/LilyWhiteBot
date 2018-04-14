@@ -17,7 +17,7 @@ module.exports = (pluginManager, options) => {
     pluginManager.global.BridgeMsg = BridgeMsg;
 
     /*
-      理清各群之間的關係：根據已知資料，建立一對一的關係（然後將disable的關係去除），便於查詢。例如：
+      理清各群之間的關係：根據已知資料，建立一對一的關係（然後將 disable 的關係去除），便於查詢。例如：
 
         map: {
             'irc/#channel1': {
@@ -157,7 +157,7 @@ module.exports = (pluginManager, options) => {
     }
     bridge.aliases = aliases2;
 
-    // 載入各用戶端的處理程式，並連接到bridge中
+    // 載入各用戶端的處理程式，並連接到 bridge 中
     for (let [type, handler] of pluginManager.handlers) {
         let processor = require(`./transport/processors/${type}.js`);
         processor.init(bridge, handler, options);

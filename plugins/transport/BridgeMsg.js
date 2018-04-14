@@ -9,7 +9,7 @@ const genUID = (context, id) => {
         return null;
     }
 
-    // QQ要特殊處理
+    // QQ 要特殊處理
     if (context.handler.type === 'QQ' && context.isPrivate) {
         return `qq/@${id}`;
     } else {

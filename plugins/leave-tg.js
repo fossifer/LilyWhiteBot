@@ -1,11 +1,11 @@
 /*
  * 離開群組
  *
- * 請設置Bot Owner，否則無法使用。
+ * 請設置 Bot Owner，否則無法使用。
  *
  * 設置：
  * "leave-tg": {
- *     "owner": 你的userid，可通過groupid-tg並與bot私聊取得
+ *     "owner": 你的 userid，可通過 groupid-tg 並與 bot 私聊取得
  * }
  */
 

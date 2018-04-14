@@ -1,5 +1,5 @@
 /*
- * @name IRC訊息收發
+ * @name IRC 訊息收發
  */
 
 'use strict';
@@ -60,7 +60,7 @@ const init = (b, h, c) => {
     });
 
     /*
-     * 頻道Topic變更
+     * 頻道 Topic 變更
      */
     ircHandler.on('topic', (channel, topic, nick, message) => {
         if (message.command === 'TOPIC' && options.notify.topic) {

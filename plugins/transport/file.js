@@ -1,11 +1,11 @@
 /*
- * 集中處理檔案：將檔案上傳到圖床，取得URL並儲存至context中。
+ * 集中處理檔案：將檔案上傳到圖床，取得 URL 並儲存至 context 中。
  *
  * 已知的問題：
- * Telegram音訊使用ogg格式，QQ則使用amr和silk，這個可以考慮互相轉換一下。
+ * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下。
  *
  * TODO
- * 將下面幾個uploadToXXX合併
+ * 將下面幾個 uploadToXXX 合併
  */
 'use strict';
 
@@ -91,7 +91,7 @@ const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
                 resolve(servemedia.serveUrl + targetName);
             }).pipe(w);
         } else if (file.path) {
-            // 複製到cachePath
+            // 複製到 cachePath
             fs.createReadStream(file.path).on('end', () => {
                 resolve(servemedia.serveUrl + targetName);
             }).pipe(w);
@@ -237,7 +237,7 @@ const uploadToImgur = (file, config) => new Promise((resolve, reject) => {
 });
 
 /*
- * 上傳到自行架設的linx圖床上面
+ * 上傳到自行架設的 linx 圖床上面
  */
 const uploadToLinx = (file) => new Promise((resolve, reject) => {
     let name;
@@ -277,7 +277,7 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
 });
 
 /*
- * 上傳到自行架設的Uguu圖床上面
+ * 上傳到自行架設的 Uguu 圖床上面
  */
 const uploadToUguu = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, name, callback) => request.post({
@@ -364,7 +364,7 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
 
 
 /*
- * 處理來自Telegram的多媒體訊息
+ * 處理來自 Telegram 的多媒體訊息
  */
 const getTelegramFileUrl = fileid => new Promise((resolve, reject) => {
     handlers.get('Telegram').getFileLink(fileid).then((url) => {
@@ -398,7 +398,7 @@ const processTelegramFile = file => new Promise((resolve, reject) => {
 
 
 /*
- * 處理來自QQ的多媒體訊息
+ * 處理來自 QQ 的多媒體訊息
  */
 const getQQPhotoUrl = name => new Promise((resolve, reject) => {
     let p = path.join(servemedia.coolqCache, 'image', name) + '.cqimg';

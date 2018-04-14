@@ -1,9 +1,9 @@
 /*
- * linky - 自動將聊天中的[[]]與{{}}換成Wiki系統的連結
+ * linky - 自動將聊天中的[[]]與{{}}換成 Wiki 系統的連結
  *
- * 配置方法：在config.js中
+ * 配置方法：在 config.js 中
 
-    plugins中加入一個 "wikilinky"，然後在末尾補一個：
+    plugins 中加入一個 "wikilinky"，然後在末尾補一個：
 
     "wikilinky": {
         "groups": [
@@ -31,7 +31,7 @@ const pad = (str) => {
 };
 
 const genlink = (v) => {
-    // 處理#
+    // 處理「#」
     let str = v.replace(/ /g, '_');
     let p = str.indexOf('#');
 
@@ -39,9 +39,9 @@ const genlink = (v) => {
         return encodeURI(str);
     } else {
         /*
-          對於#後面的內容：
+          對於「#」後面的內容：
 
-          不轉成ASCII的：字母、數字、-、.、:、_
+          不轉成 ASCII 的：字母、數字、「-」、「.」、「:」、「_」
           空白轉成「_」
          */
         let s1 = encodeURI(str.substring(0, p));

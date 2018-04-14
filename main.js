@@ -48,7 +48,7 @@ const pluginManager = {
 const config = require('./config.js');
 
 if (config.IRC && !config.IRC.disabled) {
-    // 載入IRC機器人程式
+    // 載入 IRC 機器人程式
     let botcfg = config.IRC.bot;
 
     pluginManager.log('Starting IRCBot...');

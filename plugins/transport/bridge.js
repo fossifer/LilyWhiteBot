@@ -30,7 +30,7 @@ const prepareMsg = (msg) => {
         }
     }
 
-    // 向msg中加入附加訊息
+    // 向 msg 中加入附加訊息
     msg.extra.clients = targets.length + 1;
     msg.extra.mapto = targets;
     if (aliases[msg.to_uid]) {
@@ -90,11 +90,11 @@ const bridge = {
     send(m) {
         let msg = getBridgeMsg(m);
         return prepareMsg(msg).then(() => {
-            // 全部訊息已傳送resolve(true)，部分訊息已傳送resolve(false)；
-            // 所有訊息被拒絕傳送reject()
-            // Hook需自行處理異常
+            // 全部訊息已傳送 resolve(true)，部分訊息已傳送 resolve(false)；
+            // 所有訊息被拒絕傳送 reject()
+            // Hook 需自行處理異常
 
-            // 向對應目標的handler觸發exchange
+            // 向對應目標的 handler 觸發 exchange
             let promises = [];
             let allresolved = true;
 

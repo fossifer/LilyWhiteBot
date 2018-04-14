@@ -1,5 +1,5 @@
 /*
- * 在Telegram群組中取得群組的ID，以便於配置互聯機器人
+ * 在 Telegram 群組中取得群組的 ID，以便於配置互聯機器人
  */
 
 'use strict';

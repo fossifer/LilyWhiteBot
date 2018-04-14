@@ -112,7 +112,7 @@ module.exports = (bridge, options) => {
     };
 
     const getCmd = (msg) => {
-        // Telegram需要特殊處理
+        // Telegram 需要特殊處理
         if (msg.handler.type === 'Telegram') {
             return commands_telegram.get(msg.command);
         } else {
