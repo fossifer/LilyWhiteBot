@@ -36,7 +36,7 @@ module.exports = {
             "proxy": {                      // 代理伺服器。僅支援 HTTPS 代理。
                 "host": "",
                 "port": 0,
-                "TLS": true                    // 默認不繞過證書驗證，有需求可以改成 false（如 GoAgent）
+                "TLS": true                 // 默認不繞過證書驗證，有需求可以改成 false（如 GoAgent）
             },
             "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
