@@ -103,7 +103,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    if(tgcfg.options.proxy.TLS == 0) {
+    if(tgcfg.options.proxy.TLS === false) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     }
 
