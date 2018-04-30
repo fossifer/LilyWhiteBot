@@ -103,8 +103,10 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    if(tgcfg.options.proxy.TLS === false) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    let proxyTLS = tgcfg.options.proxy.TLS && true;
+
+    if(proxyTLS === false) {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
     }
 
     if (tgcfg.options.proxy && tgcfg.options.proxy.host) {
@@ -125,7 +127,18 @@ if (config.Telegram && !config.Telegram.disabled) {
         pluginManager.log(`TelegramBot Error: ${err.message}`, true);
     });
 
-    tgBot.startPolling();
+    if(tgcfg.bot.timeout === 0) { // 值有可能是 0 所以要進行判斷，「||」和「&&」都不太合適
+        var tgTimeout = 0; // 因與下文 startPolling 不在同一塊，被迫用 var
+    } else {
+        var tgTimeout = tgcfg.bot.timeout || 30;
+    }
+    if(tgcfg.bot.limit === 0) {
+        var tgLimit = 0;
+    } else {
+        var tgLimit = tgcfg.bot.limit || 100;
+    }
+
+    tgBot.startPolling(tgTimeout, tgLimit);
 
     let options2 = {
         botName: tgcfg.bot.name,

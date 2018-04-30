@@ -30,7 +30,9 @@ module.exports = {
         "disabled": false,                  // 設為 true 之後會禁止 Telegram 機器人
         "bot": {
             "name": "",                     // Bot 的 username
-            "token": ""                     // BotFather 給你的 Token，類似「123456789:q234fipjfjaewkflASDFASjaslkdf」
+            "token": "",                    // BotFather 給你的 Token，類似「123456789:q234fipjfjaewkflASDFASjaslkdf」
+            "timeout": 30,                  // 報超時的秒數
+            "limit": 100                    // 限定檢索的消息數
         },
         "options": {
             "proxy": {                      // 代理伺服器。僅支援 HTTPS 代理。
