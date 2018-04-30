@@ -1,8 +1,8 @@
 /**
- * QQ-Telegram-IRC
- * https://github.com/vjudge1/LilyWhiteBot
+ * LilyWhiteBot
+ * https://github.com/mrhso/LilyWhiteBot-Ishisashi
  *
- * @author      vjudge1
+ * @author      vjudge1、石𫁶
  * @description
  */
 'use strict';
