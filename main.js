@@ -132,11 +132,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     } else {
         var tgTimeout = tgcfg.bot.timeout || 30;
     }
-    if(tgcfg.bot.limit === 0) {
-        var tgLimit = 0;
-    } else {
-        var tgLimit = tgcfg.bot.limit || 100;
-    }
+    let tgLimit = tgcfg.bot.limit || 100;
 
     tgBot.startPolling(tgTimeout, tgLimit);
 
