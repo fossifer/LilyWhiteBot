@@ -55,7 +55,9 @@ module.exports = {
             "ignoreCash": true,             // 如果訊息疑似口令紅包則將其屏蔽
             "nickStyle": "groupcard",       // 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
             "CoolQPro": false,              // 如果使用酷 Q Pro，可將其開啟
-        }
+        },
+        "host": "127.0.0.1",                // 酷 Q 所在環境的 IP
+        "port": 11235                       // 酷 Q 的通信端口
     },
 
     "plugins": [
