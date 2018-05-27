@@ -27,16 +27,28 @@ module.exports = (pluginManager, options) => {
     const p = context => pia('(╯°Д°)╯︵ ~~~~~┻━┻', context);
     const m = context => pia('o(*￣3￣)o', context);
     const h = context => pia('(つ°ω°)つ', context);
+    const e = context => pia('🍴（≧□≦）🍴', context);
+    const f = context => pia('🐸', context);
+    const a = context => pia('🐸💢', context);
+    const g = context => pia('🐸👓', context);
 
     if (bridge) {
         bridge.addCommand('!pia', p, options);
         bridge.addCommand('!mua', m, options);
         bridge.addCommand('!hug', h, options);
+        bridge.addCommand('!eat', e, options);
+        bridge.addCommand('!frog', f, options);
+        bridge.addCommand('!agrfrog', a, options);
+        bridge.addCommand('!glssfrog', g, options);
     } else {
         for (let [type, handler] of pluginManager.handlers) {
             handler.addCommand('!pia', p);
             handler.addCommand('!mua', m);
             handler.addCommand('!hug', h);
+            handler.addCommand('!eat', e);
+            handler.addCommand('!frog', f);
+            handler.addCommand('!agrfrog', a);
+            handler.addCommand('!glssfrog', g);
         }
     }
 };
