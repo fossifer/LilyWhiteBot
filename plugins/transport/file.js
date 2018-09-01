@@ -109,6 +109,9 @@ const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
 const uploadToVimCN = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, callback) => request.post({
         url: 'https://img.vim-cn.com/',
+        headers: {
+            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot-Ishisashi)'
+        },
         formData: {
             name: pendingfile,
         },
@@ -150,7 +153,7 @@ const uploadToSmms = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, callback) => request.post({
         url: 'https://sm.ms/api/upload',
         headers: {
-            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/vjudge1/LilyWhiteBot)'
+            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot-Ishisashi)'
         },
         json: true,
         formData: {
