@@ -105,6 +105,8 @@ if (config.Telegram && !config.Telegram.disabled) {
 
     let proxyTLS = tgcfg.options.proxy.TLS && true;
 
+    let TGApiRoot = tgcfg.options.apiRoot || "https://api.telegram.org"
+
     if(proxyTLS === false) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
     }
@@ -119,6 +121,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     const tgBot = new Telegraf(tgcfg.bot.token, {
         telegram: {
             agent: myAgent,
+            apiRoot: TGApiRoot,
         },
         username: tgcfg.bot.name,
     });
