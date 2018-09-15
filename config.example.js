@@ -42,7 +42,7 @@ module.exports = {
             },
             "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
-            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP，我的意思，，，
+            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP，我的意思，，，不過考慮到證書的域名，這樣還是要把 proxy.TLS 設置成 false 的。
         }
     },
     /*
