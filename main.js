@@ -103,7 +103,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    let proxyTLS = tgcfg.options.proxy.TLS && true;
+    let proxyTLS = tgcfg.options.proxy.TLS;
 
     let TGApiRoot = tgcfg.options.apiRoot || "https://api.telegram.org"
 
