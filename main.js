@@ -130,11 +130,7 @@ if (config.Telegram && !config.Telegram.disabled) {
         pluginManager.log(`TelegramBot Error: ${err.message}`, true);
     });
 
-    if(tgcfg.bot.timeout === 0) { // 值有可能是 0 所以要進行判斷，「||」和「&&」都不太合適
-        var tgTimeout = 0; // 因與下文 startPolling 不在同一塊，被迫用 var
-    } else {
-        var tgTimeout = tgcfg.bot.timeout || 30;
-    }
+    let tgTimeout = tgcfg.bot.limit === 0 ? tgcfg.bot.limit || 100 : 0
     let tgLimit = tgcfg.bot.limit || 100;
 
     tgBot.startPolling(tgTimeout, tgLimit);
