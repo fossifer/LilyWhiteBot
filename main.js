@@ -130,7 +130,7 @@ if (config.Telegram && !config.Telegram.disabled) {
         pluginManager.log(`TelegramBot Error: ${err.message}`, true);
     });
 
-    let tgTimeout = tgcfg.bot.limit === 0 ? tgcfg.bot.limit || 100 : 0
+    let tgTimeout = tgcfg.bot.limit === 0 ? 0 : tgcfg.bot.limit || 100
     let tgLimit = tgcfg.bot.limit || 100;
 
     tgBot.startPolling(tgTimeout, tgLimit);
