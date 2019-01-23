@@ -2,7 +2,7 @@
  * LilyWhiteBot
  * https://github.com/mrhso/LilyWhiteBot-Ishisashi
  *
- * @author      vjudge1、石𫁶
+ * @author      vjudge1, Ishisashi
  * @description
  */
 'use strict';
@@ -103,7 +103,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    if(tgcfg.options.proxy && tgcfg.options.proxy.TLS === false) {
+    if(tgcfg.options.checkCertificate === false) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
     }
 
