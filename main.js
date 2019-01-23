@@ -103,11 +103,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    let proxyTLS = tgcfg.options.proxy.TLS;
-
-    let TGApiRoot = tgcfg.options.apiRoot || "https://api.telegram.org"
-
-    if(proxyTLS === false) {
+    if(tgcfg.options.proxy && tgcfg.options.proxy.TLS === false) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
     }
 
@@ -121,7 +117,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     const tgBot = new Telegraf(tgcfg.bot.token, {
         telegram: {
             agent: myAgent,
-            apiRoot: TGApiRoot,
+            apiRoot: tgcfg.options.apiRoot || "https://api.telegram.org",
         },
         username: tgcfg.bot.name,
     });
@@ -130,10 +126,7 @@ if (config.Telegram && !config.Telegram.disabled) {
         pluginManager.log(`TelegramBot Error: ${err.message}`, true);
     });
 
-    let tgTimeout = tgcfg.bot.timeout === undefined ? 30 : tgcfg.bot.timeout
-    let tgLimit = tgcfg.bot.limit || 100;
-
-    tgBot.startPolling(tgTimeout, tgLimit);
+    tgBot.startPolling(tgcfg.bot.timeout === undefined ? 30 : tgcfg.bot.timeout, tgcfg.bot.limit || 100);
 
     let options2 = {
         botName: tgcfg.bot.name,
