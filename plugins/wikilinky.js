@@ -3,7 +3,7 @@
  *
  * 配置方法：在 config.js 中
 
-    plugins 中加入一個 "wikilinky"，然後在末尾補一個：
+    plugins 中加入一個「wikilinky」，然後在末尾補一個：
 
     "wikilinky": {
         "groups": [
