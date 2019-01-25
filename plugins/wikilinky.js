@@ -84,7 +84,7 @@ const linky = (string, prefix) => {
     return links;
 };
 
-const processlinky = (context) => {
+const processlinky = (context, bridge) => {
     try {
         let rule = map[BridgeMsg.getUIDFromContext(context, context.to)];
         if (rule) {
@@ -92,6 +92,13 @@ const processlinky = (context) => {
 
             if (links.length > 0) {
                 context.reply(links.map(l => l.link).join('  '));
+                // 若互聯且在公開群組調用，則讓其他群也看到連結
+                if (bridge && !context.isPrivate) {
+                    bridge.send(new BridgeMsg(context, {
+                        text: links.map(l => l.link).join('  '),
+                        isNotice: true,
+                    }));
+                }
             }
         }
     } catch (ex) {
@@ -100,6 +107,7 @@ const processlinky = (context) => {
 };
 
 module.exports = (pluginManager, options) => {
+    const bridge = pluginManager.plugins.transport;
     if (!options) {
         return;
     }
@@ -113,15 +121,21 @@ module.exports = (pluginManager, options) => {
     }
 
     let groups = options.groups || {};
-    for (let group in groups) {
-        let client = BridgeMsg.parseUID(groups[group].group);
+    for (let group of groups) {
+        for (let other in bridge.map[group.group]) {
+            groups.push({"group": other, "website": group.website});
+        }
+        break;
+    }
+    for (let group of groups) {
+        let client = BridgeMsg.parseUID(group.group);
         if (client.uid) {
-            map[client.uid] = groups[group].website;
+            map[client.uid] = group.website;
             types[client.client] = true;
         }
     }
 
     for (let type in types) {
-        pluginManager.handlers.get(type).on('text', processlinky);
+        pluginManager.handlers.get(type).on('text', (context) => {processlinky(context, bridge)});
     }
 };

@@ -73,12 +73,24 @@ module.exports = (bridge, options) => {
         if (opts.enables) {
             enables = [];
             for (let group of opts.enables) {
+                for (let other in bridge.map[opts.enables]) {
+                    opts.enables.push(other);
+                }
+                break;
+            }
+            for (let group of opts.enables) {
                 let client = BridgeMsg.parseUID(group);
                 if (client.uid) {
                     enables.push(client.uid);
                 }
             }
         } else if (opts.disables) {
+            for (let group of opts.disables) {
+                for (let other in bridge.map[opts.disables]) {
+                    opts.disables.push(other);
+                }
+                break;
+            }
             for (let group of opts.disables) {
                 let client = BridgeMsg.parseUID(group);
                 if (client.uid) {
