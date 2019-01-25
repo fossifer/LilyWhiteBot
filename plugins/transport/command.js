@@ -69,34 +69,39 @@ module.exports = (bridge, options) => {
 
         let enables = null;
         let disables = [];
+        let enablesOther = null;
+        let disablesOther = [];
 
         if (opts.enables) {
             enables = [];
+            enablesOther = [];
             for (let group of opts.enables) {
-                for (let other in bridge.map[opts.enables]) {
-                    opts.enables.push(other);
+                for (let other in bridge.map[group]) {
+                    enablesOther.push(other);
                 }
-                break;
             }
+            opts.enables.push(...enablesOther);
             for (let group of opts.enables) {
                 let client = BridgeMsg.parseUID(group);
                 if (client.uid) {
                     enables.push(client.uid);
                 }
             }
+            enables = [...new Set(enables)];
         } else if (opts.disables) {
             for (let group of opts.disables) {
-                for (let other in bridge.map[opts.disables]) {
-                    opts.disables.push(other);
+                for (let other in bridge.map[group]) {
+                    disablesOther.push(other);
                 }
-                break;
             }
+            opts.disables.push(...disablesOther);
             for (let group of opts.disables) {
                 let client = BridgeMsg.parseUID(group);
                 if (client.uid) {
                     disables.push(client.uid);
                 }
             }
+            disables = [...new Set(disables)];
         }
 
         let cmd = {

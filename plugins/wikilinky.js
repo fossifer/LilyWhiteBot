@@ -121,12 +121,14 @@ module.exports = (pluginManager, options) => {
     }
 
     let groups = options.groups || {};
+    let groupsOther = {};
     for (let group of groups) {
         for (let other in bridge.map[group.group]) {
-            groups.push({"group": other, "website": group.website});
+            groupsOther.push({"group": other, "website": group.website});
         }
-        break;
     }
+    groups.push(...groupsOther);
+    groups = [...new Set(groups)];
     for (let group of groups) {
         let client = BridgeMsg.parseUID(group.group);
         if (client.uid) {
