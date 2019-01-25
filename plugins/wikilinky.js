@@ -121,7 +121,7 @@ module.exports = (pluginManager, options) => {
     }
 
     let groups = options.groups || {};
-    let groupsOther = {};
+    let groupsOther = [];
     for (let group of groups) {
         for (let other in bridge.map[group.group]) {
             groupsOther.push({"group": other, "website": group.website});
