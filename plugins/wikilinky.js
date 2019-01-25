@@ -8,8 +8,7 @@
     "wikilinky": {
         "groups": [
             {
-                "group": 123123123,
-                "type": "QQ",
+                "group": "qq/123123123",
                 "website": "https://zh.wikipedia.org/wiki/$1"
             }
         ]
@@ -115,9 +114,9 @@ module.exports = (pluginManager, options) => {
 
     let groups = options.groups || {};
     for (let group in groups) {
-        let client = BridgeMsg.parseUID(group);
+        let client = BridgeMsg.parseUID(groups[group].group);
         if (client.uid) {
-            map[client.uid] = groups[group];
+            map[client.uid] = groups[group].website;
             types[client.client] = true;
         }
     }
