@@ -120,14 +120,6 @@ module.exports = (pluginManager, options) => {
     }
 
     let groups = options.groups || {};
-    let groupsOther = [];
-    for (let group in groups) {
-        for (let other in bridge.map[group]) {
-            groupOther[other] = groups[group];
-        }
-    }
-    groups.push(...groupsOther);
-    groups = [...new Set(groups)];
     for (let group in groups) {
         let client = BridgeMsg.parseUID(group);
         if (client.uid) {
