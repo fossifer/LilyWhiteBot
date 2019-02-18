@@ -11,11 +11,11 @@ const truncate = (str, maxLen = 10) => {
     return str;
 };
 
-let bannedMessage = LRU({
+let bannedMessage = new LRU({
     max: 500,
     maxAge: 300000,
 });
-let groupInfo = LRU({
+let groupInfo = new LRU({
     max: 500,
     maxAge: 3600000,
 });
