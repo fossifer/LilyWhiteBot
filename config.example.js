@@ -163,7 +163,7 @@ module.exports = {
                     "zhmrtbot": "[]",
                     "Sakura_fwdbot": "[]",
                     "orzdigbot": "[]",
-                    "sauketubot": "skt",
+                    "sauketubot": "[]",
                 },
                 "forwardCommands": true         // 如果有人使用 Telegram 命令亦轉發到其他群組（但由於 Telegram 設定的原因，Bot 無法看到命令結果）
             },
