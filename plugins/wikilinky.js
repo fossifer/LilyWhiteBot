@@ -28,7 +28,7 @@ const pad = (str) => {
 
 const genlink = (v) => {
     // 處理「#」
-    let str = v.replace(/ /g, '_');
+    let str = v.replace(/ /gu, '_');
     let p = str.indexOf('#');
 
     if (p === -1) {
@@ -45,7 +45,7 @@ const genlink = (v) => {
 
         let plain = Buffer.from(s2, 'utf-8').toString('binary');
 
-        s2 = plain.replace(/[^A-Za-z0-9\-\.:_]/g, (ch) => {
+        s2 = plain.replace(/[^A-Za-z0-9\-\.:_]/gu, (ch) => {
             return `.${pad(ch.charCodeAt(0).toString(16).toUpperCase())}`;
         });
 
@@ -57,7 +57,7 @@ const linky = (string, prefix) => {
     let text = {};      // 去重複
     let links = [];
 
-    string.replace(/\[\[\s*([^\[\|]+?)\s*(|\|.+?)\]\]/g, (s, l, _, offset) => {
+    string.replace(/\[\[\s*([^\[\|]+?)\s*(|\|.+?)\]\]/gu, (s, l, _, offset) => {
         if (!text[l]) {
             links.push({ pos: offset, link: prefix.replace('$1', genlink(l)) });
             text[l] = true;
@@ -65,7 +65,7 @@ const linky = (string, prefix) => {
         return s;
     });
 
-    string.replace(/([^{]|^){{\s*([^{#\[\]\|]+?)\s*(|\|.+?)}}/g, (s, _, l, __, offset) => {
+    string.replace(/([^{]|^){{\s*([^{#\[\]\|]+?)\s*(|\|.+?)}}/gu, (s, _, l, __, offset) => {
         let t = l;
         if (!t.startsWith(':') && !t.toLowerCase().startsWith('template:')) {
             t = 'Template:' + t;
@@ -127,6 +127,6 @@ module.exports = (pluginManager, options) => {
     }
 
     for (let type in types) {
-        pluginManager.handlers.get(type).on('text', (context) => {processlinky(context, bridge)});
+        pluginManager.handlers.get(type).on('text', (context) => { processlinky(context, bridge) });
     }
 };

@@ -30,7 +30,7 @@ module.exports = (bridge, options) => {
         clientFullNames[type.toLowerCase()] = type;
     }
 
-    const getNameForTelegram = (cmd) => cmd.replace(/[^A-Za-z0-9_]/g, '');
+    const getNameForTelegram = (cmd) => cmd.replace(/[^A-Za-z0-9_]/gu, '');
 
     bridge.addCommand = (command, callbacks, opts = {}) => {
         let cb;

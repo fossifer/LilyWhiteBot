@@ -411,7 +411,7 @@ const getQQPhotoUrl = name => new Promise((resolve, reject) => {
         } else {
             try {
                 let info = data.toString('ascii');
-                let [ ,url] = info.match(/url=(.*?)[\r\n]/) || [];
+                let [ ,url] = info.match(/url=(.*?)[\r\n]/u) || [];
 
                 resolve({ url: url });
             } catch (ex) {

@@ -4,7 +4,7 @@ const path = require('path');
 const BridgeMsg = require('../BridgeMsg.js');
 
 const htmlEscape = (str) => {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return str.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;');
 };
 
 let bridge = null;
@@ -20,14 +20,14 @@ const parseForwardBot = (username, text) => {
     let symbol = forwardBots[username];
     if (symbol === 'self') {
         // TODO 更換匹配方式
-        // [, , realNick, realText] = text.match(/^(|<.> )\[(.*?)\] ([^]*)$/m) || [];
-        [, realNick, realText] = text.match(/^\[(.*?)\] ([^]*)$/m) || [];
+        // [, , realNick, realText] = text.match(/^(|<.> )\[(.*?)\] ([^]*)$/mu) || [];
+        [, realNick, realText] = text.match(/^\[(.*?)\] ([^]*)$/mu) || [];
     } else if (symbol === '[]') {
-        [, realNick, realText] = text.match(/^\[(.*?)\]:? ([^]*)$/m) || [];
+        [, realNick, realText] = text.match(/^\[(.*?)\]:? ([^]*)$/mu) || [];
     } else if (symbol === '<>') {
-        [, realNick, realText] = text.match(/^<(.*?)>:? ([^]*)$/m) || [];
+        [, realNick, realText] = text.match(/^<(.*?)>:? ([^]*)$/mu) || [];
     } else if (symbol === 'skt') {
-        [, realNick, realText] = text.match(/^\[(.*?)\]:?\n([^]*)$/m) || [];
+        [, realNick, realText] = text.match(/^\[(.*?)\]:?\n([^]*)$/mu) || [];
     }
 
     return {realNick, realText};
@@ -51,7 +51,7 @@ const init = (b, h, c) => {
     // 將訊息加工好並發送給其他群組
     tgHandler.on('text', (context) => {
         let extra = context.extra;
-        if (context.text.match(/^\/([A-Za-z0-9_@]+)(\s+(.*)|\s*)$/) && !options.forwardCommands) {
+        if (context.text.match(/^\/([A-Za-z0-9_@]+)(\s+(.*)|\s*)$/u) && !options.forwardCommands) {
             return;
         }
 
@@ -92,7 +92,7 @@ const init = (b, h, c) => {
                 from: info.from.id,
                 to: info.to,
                 nick: info.from.nick,
-                text: `${info.from.nick} pinned: ${info.text.replace(/\n/g, ' ')}`,
+                text: `${info.from.nick} pinned: ${info.text.replace(/\n/gu, ' ')}`,
                 isNotice: true,
                 handler: tgHandler,
                 _rawdata: ctx,
