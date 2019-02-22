@@ -85,7 +85,7 @@ const init = (b, h, c) => {
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
-                        context.text = qqHandler.parseMessage(context.raw.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.getNick(info)}`));
+                        context.text = qqHandler.parseMessage(context.raw.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.getNick(info)}`)).text;
                     }
                 }
             }).catch(_ => {}).then(() => send());
