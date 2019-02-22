@@ -13,7 +13,6 @@
  */
 'use strict';
 
-const Buffer = require('buffer').Buffer;
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
 const compare = (x, y) => {
