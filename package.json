@@ -9,7 +9,7 @@
         "lru-cache": "^5.1.1",
         "request": "~2.88.0",
         "telegraf": "^3.26.0",
-        "text-encoding": "^0.7.0",
+        "ishisashiencoding": "^0.1.0",
         "tmp": "~0.0.33",
         "wechat4u": "^0.7.6"
     },
