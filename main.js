@@ -113,7 +113,7 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    if(tgcfg.options.checkCertificate === undefined ? false : !tgcfg.options.checkCertificate) {
+    if (!(tgcfg.options.checkCertificate === undefined ? true : tgcfg.options.checkCertificate)) {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
     }
 
