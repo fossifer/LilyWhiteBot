@@ -126,6 +126,6 @@ module.exports = (pluginManager, options) => {
     }
 
     for (let type in types) {
-        pluginManager.handlers.get(type).on('text', (context) => { processlinky(context, bridge) });
+        pluginManager.handlers.get(type).on('text', (context) => processlinky(context, bridge));
     }
 };
