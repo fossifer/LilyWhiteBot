@@ -1,7 +1,7 @@
 /*
-* 小冰
+* BabyQ
 *
-* command: '!bing'
+* command: '!bbq'
 * types: [
 *     'qq/123456'
 * ]
@@ -19,7 +19,7 @@ module.exports = (pluginManager, options) => {
     }
 
     let qqHandler = pluginManager.handlers.get('QQ');
-    let command = options.command || '!bing';
+    let command = options.command || '!bbq';
     let types = [];
 
     for (let t of (options.types || [])) {
@@ -35,7 +35,7 @@ module.exports = (pluginManager, options) => {
                 let client = BridgeMsg.parseUID(c);
                 if (client.client === 'QQ') {
                     if (types.indexOf(client.uid) > -1) {
-                        qqHandler.say(client.id, `[CQ:at,qq=2854196306] ${qqHandler.escape(context.param)}`, {
+                        qqHandler.say(client.id, `[CQ:at,qq=2854196300] ${qqHandler.escape(context.param)}`, {
                             noEscape: true,
                         });
                     }
