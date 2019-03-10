@@ -1,6 +1,6 @@
 /**
  * LilyWhiteBot
- * https://github.com/mrhso/LilyWhiteBot-Ishisashi
+ * https://github.com/mrhso/LilyWhiteBot
  *
  * @author      vjudge1, Ishisashi
  * @description

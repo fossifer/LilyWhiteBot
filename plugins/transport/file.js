@@ -110,7 +110,7 @@ const uploadToVimCN = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, callback) => request.post({
         url: 'https://img.vim-cn.com/',
         headers: {
-            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot-Ishisashi)'
+            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot)'
         },
         formData: {
             name: pendingfile,
@@ -153,7 +153,7 @@ const uploadToSmms = (file) => new Promise((resolve, reject) => {
     const post = (pendingfile, callback) => request.post({
         url: 'https://sm.ms/api/upload',
         headers: {
-            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot-Ishisashi)'
+            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot)'
         },
         json: true,
         formData: {
@@ -411,7 +411,7 @@ const getQQPhotoUrl = name => new Promise((resolve, reject) => {
         } else {
             try {
                 let info = data.toString('ascii');
-                let [ ,url] = info.match(/url=(.*?)[\r\n]/u) || [];
+                let [, url] = info.match(/url=(.*?)[\r\n]/u) || [];
 
                 resolve({ url: url });
             } catch (ex) {
@@ -420,7 +420,7 @@ const getQQPhotoUrl = name => new Promise((resolve, reject) => {
         }
     });
 });
-const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name)});
+const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name) });
 
 const processQQFile = file => new Promise((resolve, reject) => {
     if (file.type === 'photo') {

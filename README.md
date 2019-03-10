@@ -1,9 +1,9 @@
 LilyWhiteBot
 ===
 
-[简化字版](https://github.com/mrhso/LilyWhiteBot-Ishisashi/blob/master/README-hans.md)
+[简化字版](https://github.com/mrhso/LilyWhiteBot/blob/master/README-hans.md)
 
-[简化字版（内地用语）](https://github.com/mrhso/LilyWhiteBot-Ishisashi/blob/master/README-hans-cn.md)
+[简化字版（内地用语）](https://github.com/mrhso/LilyWhiteBot/blob/master/README-hans-cn.md)
 
 在多個群組間傳話的機器人。
 
