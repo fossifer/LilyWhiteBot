@@ -158,7 +158,7 @@ if (config.QQ && !config.QQ.disabled) {
     let options = config.QQ.options || {};
 
     let qqbot = new QQBot({
-        CoolQPro: options.CoolQPro,
+        CoolQAirA: options.CoolQAirA,
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11235,
         unicode: options.unicode,
@@ -187,7 +187,7 @@ if (config.QQ && !config.QQ.disabled) {
         ignoreCash: options.ignoreCash,
         badwords: badwords,
         nickStyle: options.nickStyle,
-        CoolQPro: options.CoolQPro,
+        CoolQAirA: options.CoolQAirA,
         keepSilence: options.keepSilence,
     };
 
@@ -205,7 +205,7 @@ if (config.WeChat && !config.WeChat.disabled) {
     let options = config.WeChat.options || {};
 
     let wechatbot = new WeChatBot({
-        CoolQPro: options.CoolQPro,
+        CoolQAirA: options.CoolQAirA,
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11337,
     });
