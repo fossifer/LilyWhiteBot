@@ -8,7 +8,7 @@
 'use strict';
 
 const https = require('https');
-const irc = require('irc');
+const irc = require('funsocietyirc-client');
 const Telegraf = require('telegraf');
 const QQBot = require('./lib/QQBot.js');
 const WeChatBot = require('./lib/WeChatBotClient.js');
