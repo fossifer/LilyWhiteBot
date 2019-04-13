@@ -46,7 +46,7 @@ module.exports = {
         }
     },
     /*
-      注意：QQ 機器人需要與酷 Q 和 https://github.com/vjudge1/cqsocketapi 配合使用！
+      注意：QQ 機器人需要與酷 Q 和 https://github.com/mrhso/cqsocketapi 配合使用！
      */
     "QQ": {
         "disabled": false,                  // 設定為 true 後會禁止 QQ 機器人。
@@ -195,6 +195,8 @@ module.exports = {
                  */
                 "type": "",                     // 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
                 "coolqCache": "",               // 酷 Q 快取存放位置，例如 /home/coolq/CoolQ/data（如果為 *nix 伺服器）或 C:\CoolQ\data（如果為 Windows 伺服器，注意 js 轉義）
+                "legacy": false,                // true 時讀取 cqimg 下載圖片，而不調用酷 Q 自身的 API 獲取圖片
+                                                // 圖片下載失敗（https://cqp.cc/t/42857）時啟用
                 "cachePath": "",                // type 為 self 時有效：快取存放位置
                 "serveUrl": "",                 // type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
                 "linxApiUrl": "",               // type 為 linx 時有效：linx API 位址，一般以斜線結尾

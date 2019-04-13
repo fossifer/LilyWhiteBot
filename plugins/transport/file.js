@@ -405,9 +405,33 @@ const processTelegramFile = file => new Promise((resolve, reject) => {
  */
 const getQQPhotoPath = (name) => handlers.get('QQ').image(name).then((path) => Promise.resolve({ path: path }));
 const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name) });
+const getQQPhotoUrl = name => new Promise((resolve, reject) => {
+    let p = path.join(servemedia.coolqCache, 'image', name) + '.cqimg';
+    fs.readFile(p, (err, data) => {
+        if (err) {
+            reject(err);
+        } else {
+            try {
+                let info = data.toString('ascii');
+                let [, url] = info.match(/url=(.*?)[\r\n]/u) || [];
+
+                resolve({ url: url });
+            } catch (ex) {
+                reject(ex);
+            }
+        }
+    });
+});
 
 const processQQFile = file => new Promise((resolve, reject) => {
-    if (file.type === 'photo') {
+    if (file.type === 'photo' && servemedia.legacy) {
+        cacheFile(getQQPhotoUrl(file.id), file.id).then((url) => {
+            resolve({
+                url: url,
+                type: 'photo',
+            });
+        }).catch((e) => reject(e));
+    } else if (file.type === 'photo') {
         cacheFile(getQQPhotoPath(file.id), file.id).then((url) => {
             resolve({
                 url: url,
