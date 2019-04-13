@@ -32,7 +32,7 @@ const pluginManager = {
     plugins: {},
     log: (message, isError = false) => {
         let date = new Date();
-        let zone = - date.getTimezoneOffset();
+        let zone = -date.getTimezoneOffset();
         let dateStr = new Date(date.getTime() + 60000 * zone).toISOString();
         let zoneStr;
         if (zone > 0) {
@@ -162,6 +162,7 @@ if (config.QQ && !config.QQ.disabled) {
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11235,
         unicode: options.unicode,
+        dir: config.QQ.dir,
     });
     pluginManager.log('Starting QQBot...');
 
