@@ -8,10 +8,11 @@
 'use strict';
 
 const https = require('https');
-const irc = require('funsocietyirc-client');
+const irc = require('irc-upd');
 const Telegraf = require('telegraf');
 const QQBot = require('./lib/QQBot.js');
 const WeChatBot = require('./lib/WeChatBotClient.js');
+const discord = require('discord.js');
 const proxy = require('./lib/proxy.js');
 
 const {Context, Message} = require('./lib/handlers/Context.js');
@@ -239,6 +240,23 @@ if (config.WeChat && !config.WeChat.disabled) {
     });
 
     pluginManager.log('WeChatBot started');
+}
+
+if (config.Discord && !config.Discord.disabled) {
+    let botcfg = config.Discord.bot;
+
+    pluginManager.log('Starting DiscordBot...');
+    const discordClient = new discord.Client();
+
+    discordClient.on('ready', (message) => {
+        pluginManager.log('DiscordBot is ready.');
+    });
+
+    discordClient.on('error', (message) => {
+        pluginManager.log(`DiscordBot Error: ${message.message}`, true);
+    });
+
+    discordClient.login(botcfg.token);
 }
 
 /**
