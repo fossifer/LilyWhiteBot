@@ -450,6 +450,19 @@ const processQQFile = file => new Promise((resolve, reject) => {
 
 
 /*
+ * 處理來自 Discord 的多媒體訊息
+ */
+const processDiscordFile = file => new Promise((resolve, reject) => {
+    cacheFile(Promise.resolve({ url: file.url }), file.id).then((url) => {
+        resolve({
+            url: url,
+            type: 'photo',
+        });
+    }).catch((e) => reject(e));
+});
+
+
+/*
  * 判斷訊息來源，將訊息中的每個檔案交給對應函式處理
  */
 const fileUploader = {
@@ -472,6 +485,8 @@ const fileUploader = {
                     promises.push(processTelegramFile(file));
                 } else if (file.client === 'QQ') {
                     promises.push(processQQFile(file));
+                } else if (file.client === 'Discord') {
+                    promises.push(processDiscordFile(file));
                 }
             }
         }
