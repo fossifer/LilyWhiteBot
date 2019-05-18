@@ -62,7 +62,7 @@ module.exports = {
         "port": 11235                       // 酷 Q 的通信端口
     },
     "Discord": {
-        "disabled": false,                  // 設為 true 之後會禁止 IRC 機器人
+        "disabled": false,                  // 設為 true 之後會禁止 Discord 機器人
         "bot": {
             "token": ""                     // Bot 的 Token
         },
