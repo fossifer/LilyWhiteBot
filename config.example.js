@@ -39,10 +39,10 @@ module.exports = {
                 "host": "",
                 "port": 0
             },
-            "checkCertificate": true,       // 默認不繞過證書驗證，有需求可以改成 false（如 GoAgent）
+            "noCheckCertificate": true,     // 默認不繞過證書驗證，有需求可以改成 true
             "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
-            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP。不過考慮到證書的域名，這樣還是要把 checkCertificate 設置成 false 的
+            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP。不過考慮到證書的域名，這樣還是要把 noCheckCertificate 設置成 true 的
         }
     },
     /*
@@ -65,6 +65,9 @@ module.exports = {
         "disabled": false,                  // 設為 true 之後會禁止 IRC 機器人
         "bot": {
             "token": ""                     // Bot 的 Token
+        },
+        "options": {
+            "nickStyle": "username"         // 可取「username」（使用者名稱）、「id」（ID）
         }
     },
 

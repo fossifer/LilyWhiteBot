@@ -115,8 +115,8 @@ if (config.Telegram && !config.Telegram.disabled) {
     // 代理
     let myAgent = https.globalAgent;
 
-    if (!(tgcfg.options.checkCertificate === undefined ? true : tgcfg.options.checkCertificate)) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // 禁用 TLS 證書驗證
+    if (tgcfg.options.noCheckCertificate) {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     }
 
     if (tgcfg.options.proxy && tgcfg.options.proxy.host) {
@@ -259,10 +259,16 @@ if (config.Discord && !config.Discord.disabled) {
 
     discordClient.login(botcfg.token);
 
+    let options = config.Discord.options || {};
+    let options2 = {
+        nickStyle: options.nickStyle,
+    };
+
     const discordHandler = new DiscordMessageHandler(discordClient);
     pluginManager.handlers.set('Discord', discordHandler);
     pluginManager.handlerClasses.set('Discord', {
         object: DiscordMessageHandler
+        options: options2,
     });
 }
 
