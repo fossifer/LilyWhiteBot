@@ -64,7 +64,7 @@ module.exports = {
     "Discord": {
         "disabled": false,                  // 設為 true 之後會禁止 IRC 機器人
         "bot": {
-            "token": ""                     // CLIENT SECRET
+            "token": ""                     // Bot 的 Token
         }
     },
 

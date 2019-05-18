@@ -20,6 +20,7 @@ const IRCMessageHandler = require('./lib/handlers/IRCMessageHandler.js');
 const TelegramMessageHandler = require('./lib/handlers/TelegramMessageHandler.js');
 const QQMessageHandler = require('./lib/handlers/QQMessageHandler.js');
 const WeChatMessageHandler = require('./lib/handlers/WeChatMessageHandler.js');
+const DiscordMessageHandler = require('./lib/handlers/DiscordMessageHandler.js');
 
 // 所有擴充套件包括傳話機器人都只與該物件打交道
 const pluginManager = {
@@ -257,6 +258,12 @@ if (config.Discord && !config.Discord.disabled) {
     });
 
     discordClient.login(botcfg.token);
+
+    const discordHandler = new DiscordMessageHandler(discordClient);
+    pluginManager.handlers.set('Discord', discordHandler);
+    pluginManager.handlerClasses.set('Discord', {
+        object: DiscordMessageHandler
+    });
 }
 
 /**
