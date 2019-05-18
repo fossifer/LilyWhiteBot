@@ -267,7 +267,7 @@ if (config.Discord && !config.Discord.disabled) {
     const discordHandler = new DiscordMessageHandler(discordClient);
     pluginManager.handlers.set('Discord', discordHandler);
     pluginManager.handlerClasses.set('Discord', {
-        object: DiscordMessageHandler
+        object: DiscordMessageHandler,
         options: options2,
     });
 }
