@@ -67,7 +67,8 @@ module.exports = {
             "token": ""                     // Bot 的 Token
         },
         "options": {
-            "nickStyle": "username"         // 可取「username」（使用者名稱）、「id」（ID）
+            "nickStyle": "username",        // 可取「username」（使用者名稱）、「id」（ID）
+            "useProxyURL": false            // 考慮到內地的特殊情形，若 https://cdn.discordapp.com 被 RST 請改為 true，以改用 https://media.discordapp.net
         }
     },
 

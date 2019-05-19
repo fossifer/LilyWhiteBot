@@ -262,6 +262,7 @@ if (config.Discord && !config.Discord.disabled) {
     let options = config.Discord.options || {};
     let options2 = {
         nickStyle: options.nickStyle,
+        useProxyURL: options.useProxyURL,
     };
 
     const discordHandler = new DiscordMessageHandler(discordClient);
