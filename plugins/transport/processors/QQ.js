@@ -82,14 +82,14 @@ const init = (b, h, c) => {
             }
 
             Promise.all(promises).then((infos) => {
-                let text = context._rawdata.raw;
+                context.text = context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
-                        text = text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info))}`);
+                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info))}`);
                     }
                 }
-                context.text = qqHandler.parseMessage(text).text;
+                context.text = qqHandler.parseMessage(context.text).text;
             }).catch(_ => {}).then(() => send());
         } else {
             send();
