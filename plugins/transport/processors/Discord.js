@@ -43,7 +43,7 @@ const init = (b, h, c) => {
 
         userInfo.set(context.from, context._rawdata.author);
 
-        if (context.text.match(/<@\d*?>/gu)) {
+        if (context.text.match(/<@\d*?>/u)) {
             // 處理 at
             let ats = [];
             let promises = [];
