@@ -8,7 +8,7 @@ LilyWhiteBot
 在多个群组间传话的机器人。
 
 ## 如何安装
-目前支援 QQ、Telegram 和 IRC 三种群组互联。
+目前支援 QQ、Telegram、IRC 和 Discord（[试验中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四种群组互联。
 
 ### 必需步骤
 * 根据实际需要准备机器人账号。（具体方法见后面）
@@ -26,7 +26,7 @@ node main.js
 goto a
 ```
 * 根据实际需要修改 config.example.js，并改名为 config.js。
-* QQ 群格式 `qq/QQ 群号`；Telegram 群格式 `telegram/一串数字`（该数字可透过`/thisgroupid`取得，后面有说明，而且请注意该数字是**负数**）；IRC 频道格式 `irc/#频道名`，别忘了`#`。
+* QQ 群格式 `qq/QQ 群号`；Telegram 群格式 `telegram/一串数字`（该数字可透过`/thisgroupid`取得，后面有说明，而且请注意该数字是**负数**）；IRC 频道格式 `irc/#频道名`，别忘了`#`；Discord 频道格式 `discord/频道 ID`。
 
 ### 设定 QQ 机器人
 1. 在正式启用互联之前，建议提前注册一个 QQ 小号，挂机挂到一定等级，并往钱包里塞一点钱，以减小被腾讯封杀的可能性。不过从实践情况来看，只有一颗星或不塞钱也无妨。
@@ -53,6 +53,11 @@ goto a
 
 ### 设定 IRC 机器人
 IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入正确的 userName、sasl_password，并将 sasl 设为 true。
+
+### 设定 Discord 机器人
+进入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，创建 Application。在 Bot 页面中 Add Bot。将 Token 填到 config.js 中。
+
+频道 ID 可以在网页版之 URL 看到，最后面的那串神秘数字便是。
 
 ## 提示
 1. 如果把 config.js 中的 `paeeye` 设为 `//`，那么在讯息之前加入 `//`（例如「//隐藏」）可防止被其他群组看见。

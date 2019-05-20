@@ -8,7 +8,7 @@ LilyWhiteBot
 在多個群組間傳話的機器人。
 
 ## 如何安裝
-目前支援 QQ、Telegram 和 IRC 三種群組互聯。
+目前支援 QQ、Telegram、IRC 和 Discord（[試驗中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四種群組互聯。
 
 ### 必需步驟
 * 根據實際需要準備機器人賬號。（具體方法見後面）
@@ -26,7 +26,7 @@ node main.js
 goto a
 ```
 * 根據實際需要修改 config.example.js，並改名為 config.js。
-* QQ 群格式 `qq/QQ 群號`；Telegram 群格式 `telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**）；IRC 頻道格式 `irc/#頻道名`，別忘了`#`。
+* QQ 群格式 `qq/QQ 群號`；Telegram 群格式 `telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**）；IRC 頻道格式 `irc/#頻道名`，別忘了`#`；Discord 頻道格式 `discord/頻道 ID`。
 
 ### 設定 QQ 機器人
 1. 在正式啟用互聯之前，建議提前註冊一個 QQ 小號，掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。不過從實踐情況來看，只有一顆星或不塞錢也無妨。
@@ -53,6 +53,11 @@ goto a
 
 ### 設定 IRC 機器人
 IRC 沒有什麼特別之處。如果你有 Cloak，請在 config.js 中輸入正確的 userName、sasl_password，並將 sasl 設為 true。
+
+### 設定 Discord 機器人
+進入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，創建 Application。在 Bot 頁面中 Add Bot。將 Token 填到 config.js 中。
+
+頻道 ID 可以在網頁版之 URL 看到，最後面的那串神祕數字便是。
 
 ## 提示
 1. 如果把 config.js 中的 `paeeye` 設為 `//`，那麼在訊息之前加入 `//`（例如「//隱藏」）可防止被其他群組看見。
