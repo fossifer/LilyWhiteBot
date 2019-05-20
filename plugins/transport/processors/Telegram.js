@@ -28,7 +28,7 @@ const parseForwardBot = (username, text) => {
         [, realNick, realText] = text.match(/^<(.*?)>(?::? |\n)([^]*)$/mu) || [];
     }
 
-    return {realNick, realText};
+    return { realNick, realText };
 };
 
 const init = (b, h, c) => {
@@ -55,12 +55,12 @@ const init = (b, h, c) => {
 
         // 檢查是不是自己在回覆自己，然後檢查是不是其他互聯機器人在說話
         if (extra.reply && forwardBots[extra.reply.username]) {
-            let {realNick, realText} = parseForwardBot(extra.reply.username, extra.reply.message);
+            let { realNick, realText } = parseForwardBot(extra.reply.username, extra.reply.message);
             if (realNick) {
                 [extra.reply.nick, extra.reply.message] = [realNick, realText];
             }
         } else if (extra.forward && forwardBots[extra.forward.username]) {
-            let {realNick, realText} = parseForwardBot(extra.forward.username, context.text);
+            let { realNick, realText } = parseForwardBot(extra.forward.username, context.text);
             if (realNick) {
                 [extra.forward.nick, context.text] = [realNick, realText];
             }
@@ -74,7 +74,7 @@ const init = (b, h, c) => {
 
         // 檢查是不是在回覆互聯機器人
         if (extra.reply && forwardBots[extra.reply.username]) {
-            let {realNick, realText} = parseForwardBot(extra.reply.username, extra.reply.message);
+            let { realNick, realText } = parseForwardBot(extra.reply.username, extra.reply.message);
             if (realNick) {
                 [extra.reply.nick, extra.reply.message] = [realNick, realText];
             }

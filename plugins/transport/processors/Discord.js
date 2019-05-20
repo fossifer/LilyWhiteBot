@@ -5,6 +5,7 @@
 'use strict';
 
 const BridgeMsg = require('../BridgeMsg.js');
+const LRU = require('lru-cache');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -13,6 +14,11 @@ const truncate = (str, maxLen = 10) => {
     }
     return str;
 };
+
+let userInfo = new LRU({
+    max: 500,
+    maxAge: 3600000,
+});
 
 let bridge = null;
 let config = null;
@@ -33,7 +39,39 @@ const init = (b, h, c) => {
 
     // 將訊息加工好並發送給其他群組
     discordHandler.on('text', (context) => {
-        bridge.send(context).catch(() => {});
+        const send = () => bridge.send(context).catch(() => {});
+
+        userInfo.set(context.from, context._rawdata.author);
+
+        if (context.text.match(/<@\d*?>/gu)) {
+            // 處理 at
+            let ats = [];
+            let promises = [];
+
+            context.text.replace(/<@(\d*?)>/gu, (_, id) => {
+                ats.push(id);
+            });
+            ats = [...new Set(ats)];
+
+            for (let at of ats) {
+                if (userInfo.has(at)) {
+                    promises.push(Promise.resolve(userInfo.get(at)));
+                } else {
+                    promises.push(discordHandler.fetchUser(at).catch(_ => {}));
+                }
+            }
+
+            Promise.all(promises).then((infos) => {
+                for (let info of infos) {
+                    if (info) {
+                        userInfo.set(info.id, info);
+                        context.text = context.text.replace(new RegExp(`<@${info.id}>`, 'gu'), `@${discordHandler.getNick(info)}`);
+                    }
+                }
+            }).catch(_ => {}).then(() => send());
+        } else {
+            send();
+        }
     });
 
 };

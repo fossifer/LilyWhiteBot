@@ -70,7 +70,7 @@ const init = (b, h, c) => {
         }
 
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
-            // 先處理 QQ 的「@」
+            // 先處理 QQ 的 at
             let promises = [];
 
             for (let at of context.extra.ats) {
