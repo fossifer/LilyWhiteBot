@@ -1,8 +1,8 @@
 /*
- * 集中處理檔案：將檔案上傳到圖床，取得 URL 並儲存至 context 中。
+ * 集中處理檔案：將檔案上傳到圖床，取得 URL 並儲存至 context 中
  *
  * 已知的問題：
- * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下。
+ * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下
  *
  * TODO
  * 將下面幾個 uploadToXXX 合併
