@@ -5,7 +5,7 @@ LilyWhiteBot
 
 [简化字版（内地用语）](https://github.com/mrhso/LilyWhiteBot/blob/master/README-hans-cn.md)
 
-在多个群组间传话的机器人。
+在多个群组间传话的机器人。原名为「qq-tg-irc」。
 
 ## 如何安装
 目前支援 QQ、Telegram、IRC 和 Discord（[试验中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四种群组互联。
