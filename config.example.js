@@ -35,30 +35,41 @@ module.exports = {
             "limit": 100                    // 限定檢索的消息數
         },
         "options": {
-            "proxy": {                      // 代理伺服器。僅支援 HTTPS 代理。
+            "proxy": {                      // 代理伺服器。僅支援 HTTPS 代理
                 "host": "",
                 "port": 0
             },
-            "checkCertificate": true,       // 默認不繞過證書驗證，有需求可以改成 false（如 GoAgent）
+            "noCheckCertificate": true,     // 默認不繞過證書驗證，有需求可以改成 true
             "nickStyle": "username",        // 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             // 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
-            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP，我的意思，，，不過考慮到證書的域名，這樣還是要把 checkCertificate 設置成 false 的。
+            "apiRoot": "https://api.telegram.org",   // Bot API 的根地址，必要的時候可以改成 IP。不過考慮到證書的域名，這樣還是要把 noCheckCertificate 設置成 true 的
         }
     },
     /*
-      注意：QQ 機器人需要與酷 Q 和 https://github.com/vjudge1/cqsocketapi 配合使用！
+      注意：QQ 機器人需要與酷 Q 和 https://github.com/mrhso/cqsocketapi 配合使用！
      */
     "QQ": {
-        "disabled": false,                  // 設定為 true 後會禁止 QQ 機器人。
+        "disabled": false,                  // 設定為 true 後會禁止 QQ 機器人
         "qq": "10000",                      // Bot 的 QQ 號碼
         "options": {
             "selfCensorship": true,         // 敏感詞列表，位於 badwords.js
             "ignoreCash": true,             // 如果訊息疑似口令紅包則將其屏蔽
             "nickStyle": "groupcard",       // 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
-            "CoolQPro": false,              // 如果使用酷 Q Pro，可將其開啟
+            "CoolQAirA": false,             // 如果使用酷 Q Air（A 組），可將其開啟
+            "dir": "",                      // 酷 Q 本體位置
         },
         "host": "127.0.0.1",                // 酷 Q 所在環境的 IP
         "port": 11235                       // 酷 Q 的通信端口
+    },
+    "Discord": {
+        "disabled": false,                  // 設為 true 之後會禁止 Discord 機器人
+        "bot": {
+            "token": ""                     // Bot 的 Token
+        },
+        "options": {
+            "nickStyle": "username",        // 可取「username」（使用者名稱）、「id」（ID）
+            "useProxyURL": false            // 考慮到內地的特殊情形，若 https://cdn.discordapp.com 被 RST 請改為 true，以改用 https://media.discordapp.net
+        }
     },
 
     "plugins": [
@@ -66,7 +77,7 @@ module.exports = {
         "groupid-tg",                       // 取得目前 Telegram 群組的 ID，
                                             // 可在正式連接之前啟用該套件，然後在 Telegram 群中使用 /thisgroupid 取得ID
         "ircquery",                         // 允許查詢 IRC 的一些訊息
-        "irccommand",                       // 允許向 IRC 發送一些命令（注意，不是 IRC 命令而是給頻道內機器人使用的命令）。
+        "irccommand",                       // 允許向 IRC 發送一些命令（注意，不是 IRC 命令而是給頻道內機器人使用的命令）
         "pia",
     ],
 
@@ -75,7 +86,7 @@ module.exports = {
             // 說明：
             // 1. 可以填任意個群組
             // 2. 群組格式：「irc/#頻道」、「telegram/-12345678」或「qq/群號」
-            // 3. 聊天軟體名不區分大小寫，可簡寫為 i、t、q。
+            // 3. 聊天軟體名不區分大小寫，可簡寫為 i、t、q
             // 4. 如果需要，可以加入多個互聯體
             [
                 'irc/#test',
@@ -96,7 +107,7 @@ module.exports = {
 
         /*
         // 如果希望把同一軟體的多個群組連接到一起，可為不同的群組設置不同的別名，
-        // 這樣互聯機器人在轉發訊息時會採用自訂群組名，以防混淆。
+        // 這樣互聯機器人在轉發訊息時會採用自訂群組名，以防混淆
         "aliases": {
             'qq/87665432': '分部',
             'qq/87665432': ['簡稱', '群組全稱']
@@ -136,7 +147,7 @@ module.exports = {
                        可用顏色：white、black、navy、green、red、brown、purple、
                                olive、yellow、lightgreen、teal、cyan、blue、pink、gray、silver
                     */
-                    "enabled": true,            // 是否允許在 IRC 頻道中使用顏色。
+                    "enabled": true,            // 是否允許在 IRC 頻道中使用顏色
                     "broadcast": "green",       // < 整行通知的顏色 >
                     "client": "navy",           // 用於標記用戶端「<T>」的顏色
                     "nick": "colorful",            // nick 的顏色。除標準顏色外，亦可設為 colorful
@@ -145,7 +156,7 @@ module.exports = {
                     "fwdfrom": "cyan",          // Fwd fwdfrom 的顏色
                     "linesplit": "silver",      // 行分隔符的顏色
 
-                    // 如果 nick 為 colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數。
+                    // 如果 nick 為 colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數
                     "nickcolors": ["green", "blue", "purple", "olive", "pink", "teal", "red"]
                 },
                 "receiveCommands": true,        // 是否允許 Telegram 和 QQ 使用 irccommand
@@ -177,11 +188,11 @@ module.exports = {
                 }
             },
 
-            "paeeye": "//",                     // 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能。
+            "paeeye": "//",                     // 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能
             "hidenick": false,                  // 轉發時不顯示暱稱（建議不要開啟）
             "servemedia": {
                 /*
-                   本節用於處理圖片等檔案。
+                   本節用於處理圖片等檔案
 
                    type為檔案的處置方式，可取：
                    省略/留空/none：不處理。只顯示「<Photo>」或「[圖片]」等文字
@@ -194,17 +205,19 @@ module.exports = {
                  */
                 "type": "",                     // 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
                 "coolqCache": "",               // 酷 Q 快取存放位置，例如 /home/coolq/CoolQ/data（如果為 *nix 伺服器）或 C:\CoolQ\data（如果為 Windows 伺服器，注意 js 轉義）
+                "legacy": false,                // true 時讀取 cqimg 下載圖片，而不調用酷 Q 自身的 API 獲取圖片
+                                                // 圖片下載失敗（https://cqp.cc/t/42857）時啟用
                 "cachePath": "",                // type 為 self 時有效：快取存放位置
                 "serveUrl": "",                 // type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
                 "linxApiUrl": "",               // type 為 linx 時有效：linx API 位址，一般以斜線結尾
-                "UguuApiUrl": "",               // type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾。
+                "UguuApiUrl": "",               // type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
                 "imgur": {                      // type 為 imgur 時有效
                     "apiUrl": "https://api.imgur.com/3/",     // 以斜線結尾
                     "clientId": ""              // 從 imgur 申請到的 client_id
                 },
-                "sizeLimit": 4096,              // 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效。
+                "sizeLimit": 4096,              // 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效
 
-                // 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式。
+                // 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式
                 // 如果設為 true，那麼需要額外配置伺服器，具體步驟見 https://github.com/Intervox/node-webp
                 "webp2png": false,
                 "webpPath": "",                 // 如果無法取得 root 權限，可借此指定 dwebp 二進位檔案位址

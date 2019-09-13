@@ -1,8 +1,8 @@
 /*
- * 集中處理檔案：將檔案上傳到圖床，取得 URL 並儲存至 context 中。
+ * 集中處理檔案：將檔案上傳到圖床，取得 URL 並儲存至 context 中
  *
  * 已知的問題：
- * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下。
+ * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下
  *
  * TODO
  * 將下面幾個 uploadToXXX 合併
@@ -403,6 +403,8 @@ const processTelegramFile = file => new Promise((resolve, reject) => {
 /*
  * 處理來自 QQ 的多媒體訊息
  */
+const getQQPhotoPath = (name) => handlers.get('QQ').image(name).then((path) => Promise.resolve({ path: path }));
+const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name) });
 const getQQPhotoUrl = name => new Promise((resolve, reject) => {
     let p = path.join(servemedia.coolqCache, 'image', name) + '.cqimg';
     fs.readFile(p, (err, data) => {
@@ -420,11 +422,17 @@ const getQQPhotoUrl = name => new Promise((resolve, reject) => {
         }
     });
 });
-const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name) });
 
 const processQQFile = file => new Promise((resolve, reject) => {
-    if (file.type === 'photo') {
+    if (file.type === 'photo' && servemedia.legacy) {
         cacheFile(getQQPhotoUrl(file.id), file.id).then((url) => {
+            resolve({
+                url: url,
+                type: 'photo',
+            });
+        }).catch((e) => reject(e));
+    } else if (file.type === 'photo') {
+        cacheFile(getQQPhotoPath(file.id), file.id).then((url) => {
             resolve({
                 url: url,
                 type: 'photo',
@@ -438,6 +446,19 @@ const processQQFile = file => new Promise((resolve, reject) => {
             });
         }).catch((e) => reject(e));
     }
+});
+
+
+/*
+ * 處理來自 Discord 的多媒體訊息
+ */
+const processDiscordFile = file => new Promise((resolve, reject) => {
+    cacheFile(Promise.resolve({ url: file.url }), file.id).then((url) => {
+        resolve({
+            url: url,
+            type: 'photo',
+        });
+    }).catch((e) => reject(e));
 });
 
 
@@ -464,6 +485,8 @@ const fileUploader = {
                     promises.push(processTelegramFile(file));
                 } else if (file.client === 'QQ') {
                     promises.push(processQQFile(file));
+                } else if (file.client === 'Discord') {
+                    promises.push(processDiscordFile(file));
                 }
             }
         }

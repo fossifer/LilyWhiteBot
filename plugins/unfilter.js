@@ -1,7 +1,7 @@
 /*
  * unfilter.js 過濾不符合特定規則的訊息
  *
- * 使用方法同 filter.js，不建議建立衝突的規則。
+ * 使用方法同 filter.js，不建議建立衝突的規則
  */
 
 'use strict';
