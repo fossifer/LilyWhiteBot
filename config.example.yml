@@ -1,0 +1,235 @@
+#
+# 机器人配置文件
+#
+# 请将本文件复制为 config.yml，并参照注释进行设置
+#
+
+IRC:
+  disabled: true                            # 如果需要 IRC 机器人，请设置为 false
+  bot:
+    server: irc.freenode.net
+    nick: ""                                # IRC 暱稱
+    userName: ""
+    realName: ""
+    channels: ["#channel1", "#channel2"]    # 需要加入的頻道
+    autoRejoin: true
+    secure: true
+    port: 6697
+    floodProtection: true
+    floodProtectionDelay: 300
+    sasl: false                             # 如果開啟 SASL，那麼需要正確設定前面的 userName 和下面的 sasl_password
+    sasl_password: ""
+    encoding: UTF-8
+  options:
+    maxLines: 4                             # 一次性容許最多四行訊息（包括因為太長而被迫分割的）
+
+Telegram:
+  disabled: true                            # 如果需要 Telegram 机器人，请设置为 false
+  bot:
+    name: ""                                # Bot 的 username
+    token: ""                               # BotFather 給你的 Token，類似「123456789:q234fipjfjaewkflASDFASjaslkdf」
+    timeout: 30                             # 報超時的秒數
+    limit: 100                              # 限定檢索的消息數
+  options:
+    nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
+                                            # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
+    # 如果使用中国国内网络，无法直连 Telegram 服务器，可通过设置 proxy（仅支持 HTTPS 代理）来翻墙
+    # 或者自行在国外架设 Bot API（api.telegram.org）反向代理服务器然后修改 apiRoot 的值
+    proxy:
+      host: ""                              # HTTPS 代理服务器地址、端口
+      port: 0
+
+    apiRoot: "https://api.telegram.org"     # 无特殊需要的话勿动
+    noCheckCertificate: false               # 无特殊需要的话勿动
+
+# QQ 注意事项：需要和[酷Q](https://cqp.cc)与[CoolQ HTTP API插件](https://cqhttp.cc)配合使用！
+QQ:
+  disabled: true                            # 如果需要 QQ 机器人，请设置为 false
+  qq: "10000"                               # 机器人的 QQ 号
+
+  # 以下设置用于与 CoolQ HTTP API 插件连接
+  apiRoot: "http://127.0.0.1:5700/"
+  accessToken: "123"
+  secret: "abc"
+
+  # 以下两参数用于兼容旧版 [cqsocketapi](https://github.com/mrhso/cqsocketapi)
+  # 已弃用，建议将酷Q插件换成 CoolQ HTTP API 插件
+  # host: "127.0.0.1"
+  # port: 11235
+
+  options:
+    selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
+    ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
+    nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
+    CoolQAirA: true                         # true - 酷Q Air，false - 酷Q Pro
+    # dir: ""                               # 酷 Q 安装位置（CQA.exe/CQP.exe 所在目录） -- 已弃用
+
+Discord:
+  disabled: true                            # 如果需要 Discord 机器人，请设置为 false
+  bot:
+    token: ""
+  options:
+    nickStyle: username                     # 可取「username」（使用者名稱）、「id」（ID）
+    useProxyURL: false                      # 考虑到中国网络情况，若 https://cdn.discordapp.com 被屏蔽请改成 true（对应 https://media.discordapp.net）
+
+# 系统日志
+logging:
+  level: info                               # 日志等级：从详细到简单分别是debug、info、warning、error
+  logfile: ""                               # 日志文件名，如留空则只向屏幕输出
+
+# 启用的插件（繁体字用户叫套件）
+plugins:
+  - transport                               # 啟用互聯功能，不想禁止互聯的話請勿移除
+  - groupid-tg                              # 取得目前 Telegram 群組的 ID，
+                                            # 可在正式連接之前啟用該套件，然後在 Telegram 群中使用 /thisgroupid 取得ID
+  - ircquery                                # 允許查詢 IRC 的一些訊息
+  - irccommand                              # 允許向 IRC 發送一些命令（注意，不是 IRC 命令而是給頻道內機器人使用的命令）
+  - pia
+
+# 各插件（套件）设置
+transport:
+  # 說明：
+  # 1. 可以填任意個群組
+  # 2. 群組格式：「irc/#頻道」、「telegram/-12345678」或「qq/群號」
+  # 3. 聊天軟體名不區分大小寫，可簡寫為 i、t、q
+  # 4. 如果需要，可以加入多個互聯體
+  groups:
+    - ['irc/#test', 'telegram/-12345678', 'qq/12345678']
+    # 可以在同一组内增加软件相同、群号不同的群，例如
+    # - ['irc/#test', 'telegram/-12345678', 'qq/12345678', 'qq/87654321'] 
+    # 另外如有多组互联需求，可继续增加互联关系
+
+  # 如果希望把同一軟體的多個群組連接到一起，可為不同的群組設置不同的別名，
+  # 這樣互聯機器人在轉發訊息時會採用自訂群組名，以免混淆
+  aliases:
+    "qq/87665432": "分部"
+    "qq/12345678": ["简称", "本群全称"]
+
+  # 如果需要设置单向转发/不转发，例如 Telegram 群不向 QQ 转发，请在下面设置
+  disables:
+    "telegram/-12345678": ["qq/12345678"]
+
+  options:
+    IRC:
+      notify:
+        join: false                         # 有人進入頻道是否在其他群發出提醒
+        rename: onlyactive                  # 有人更名的話是否在其他群組發出提醒，可取
+                                            # 「all」（所有人都提醒）、「onlyactive」（只有說過話的人更名才提醒）、
+                                            # 「none」（不提醒）
+        leave: onlyactive                   # 有人離開頻道的話是否在其他群組提醒，也可取 all/onlyactive/none
+        timeBeforeLeave: 600                # 如果 leave 為 onlyactive 的話：最後一次說話後多長時間內離開才會提醒
+        topic: true                         # 頻道更換 Topic 時是否提醒
+      
+      # 這裡可以設定機器人在 IRC 頻道中使用顏色。在啟用顏色功能之前，IRC 頻道的管理員需要解除頻道的 +c 模式，即
+      #  /msg ChanServ SET #頻道 MLOCK -c
+
+      #  轉發機器人的訊息有以下三種格式：
+      #  <T> [nick] message
+      #  <T> [nick] Re replyto 「repliedmessage」: message
+      #  <T> [nick] Fwd fwdfrom: message
+
+      #  （兩群互聯不會出現用於標識軟體的「<T>」）
+
+      #  可用顏色：white、black、navy、green、red、brown、purple、
+      #          olive、yellow、lightgreen、teal、cyan、blue、pink、gray、silver
+      colorize:
+        enabled: true                       # 是否允許在 IRC 頻道中使用顏色
+        broadcast: green                    # < 整行通知的顏色 >
+        client: navy                        # 用於標記用戶端「<T>」的顏色
+        nick: colorful                      # nick 的顏色。除標準顏色外，亦可設為 colorful
+        replyto: brown                      # Re replyto 的顏色
+        repliedmessage: olive               # 被 Re 的訊息的顏色
+        fwdfrom: cyan                       # Fwd fwdfrom 的顏色
+        linesplit: silver                   # 行分隔符的顏色
+
+        # 如果 nick 為 colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數
+        nickcolors: ["green", "blue", "purple", "olive", "pink", "teal", "red"]
+  
+      # 互联控制相关
+      receiveCommands: true                 # 是否允許 Telegram 和 QQ 使用 irccommand
+      allowQuery: true                      # 是否允許其他群組查詢 IRC 頻道資訊
+    
+    Telegram:
+      notify:
+        join: true
+        leave: true
+        pin: true
+
+      forwardCommands: true                 # 如果有人使用 Telegram 命令亦轉發到其他群組（但由於 Telegram 設定的原因，Bot 無法看到命令結果）
+
+      # 下面是其他群里面互联机器人的名称。在转发这些机器人的消息时，程序会尝试从消息中提取出真正的昵称，
+      # 而不是显示机器人的名称。参数“[]”、“<>”指真正发消息者昵称两边的括号样式，目前只支持这两种括号。
+      forwardBots:
+        XiaoT_bot: "[]"
+        zhmrtbot: "[]"
+        Sakura_fwdbot: "[]"
+        orgdigbot: "[]"
+        sauketubot: "[]"
+
+    QQ:
+      notify:
+        join: true                          # 有人加入 QQ 群的話是否提醒其他群組
+        leave: true                         # 有人離開 QQ 群的話是否提醒其他群組
+        setadmin: true                      # 是否提醒設定/取消管理員
+        sysmessage: true                    # 是否提醒系統消息，包括禁言和全體禁言
+
+    # 其他设置
+    paeeye: "//"                            # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能
+    hidenick: false                         # 轉發時不顯示暱稱（建議不要開啟）
+    
+    # 本節用於處理圖片等檔案
+    #
+    # type為檔案的處置方式，可取：
+    # 省略/留空/none：不處理。只顯示「<Photo>」或「[圖片]」等文字
+    # self：將檔案保存在自己的伺服器中
+    # vim-cn：將檔案上傳到 img.vim-cn.com
+    # linx：將檔案上傳到一個 linx（https://github.com/andreimarcu/linx-server）伺服器中
+    # uguu: 將檔案上傳到一個 uguu（https://github.com/nokonoko/Uguu）伺服器中
+    #
+    # 另外，如果使用酷 Q 的話，您需要定期自行清理酷 Q 的快取！
+    servemedia:
+      type: ""                              # 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
+      # coolqCache: '',                     # （仅用于兼容旧版 cqsocketapi）酷 Q 快取存放位置，例如 /home/coolq/CoolQ/data（如果為 *nix 伺服器）或 C:\CoolQ\data（如果為 Windows 伺服器，注意 js 轉義）
+      # legacy: false                       # （仅用于兼容旧版 cqsocketapi）true 時讀取 cqimg 下載圖片，而不調用酷 Q 自身的 API 獲取圖片
+                                            # 圖片下載失敗（https://cqp.cc/t/42857）時啟用
+
+      cachePath: ""                         # type 為 self 時有效：快取存放位置
+      serveUrl": ""                         # type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
+
+      linxApiUrl": ""                       # type 為 linx 時有效：linx API 位址，一般以斜線結尾
+
+      UguuApiUrl": ""                       # type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
+
+      imgur":                               # type 為 imgur 時有效
+        apiUrl": "https://api.imgur.com/3/" # 以斜線結尾
+        clientId": ""                       # 從 imgur 申請到的 client_id
+
+      sizeLimit: 4096                       # 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效
+
+      # 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式
+      # 如果設為 true，那麼需要安装 webp，具體步驟見 https://github.com/Intervox/node-webp
+      webp2png: false
+      webpPath: ""                          # dwebp 二进制文件地址，留空则从 PATH 搜索
+
+
+ircquery:
+  disables:                                 # 不要在這些群組使用 ircquery 功能
+    - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
+  
+  # 如果是只希望在特定群組使用，用這個
+  # enables:
+  #  - "qq/12345678"
+
+  prefix: "irc"                             # 如果使用，命令會變成 /irctopic、/ircnames 等
+
+irccommand:
+  echo: true                                # 是否在目前的用戶端顯示命令已傳送
+
+  disables:                                 # 不要在這些群組使用 ircquery 功能
+    - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
+  
+  # 如果是只希望在特定群組使用，用這個
+  # enables:
+  #  - "qq/12345678"
+
+  prefix: "irc"                             # 如果使用，命令會變成 /irctopic、/ircnames 等

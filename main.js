@@ -7,6 +7,7 @@
  */
 'use strict';
 
+const fs = require('fs');
 const https = require('https');
 const irc = require('irc-upd');
 const Telegraf = require('telegraf');
@@ -14,6 +15,7 @@ const QQBot = require('./lib/QQBot.js');
 const WeChatBot = require('./lib/WeChatBotClient.js');
 const discord = require('discord.js');
 const proxy = require('./lib/proxy.js');
+const yaml = require('js-yaml');
 
 const {Context, Message} = require('./lib/handlers/Context.js');
 const IRCMessageHandler = require('./lib/handlers/IRCMessageHandler.js');
@@ -54,10 +56,35 @@ const pluginManager = {
     },
 };
 
+// 用于加载配置文件
+const isFileExists = (name) => {
+    try {
+        fs.accessSync(name, fs.constants.R_OK);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+// 加载配置文件
+const loadConfig = (name) => {
+    // 优先读取yaml格式配置文件
+    if (isFileExists(`${name}.yml`)) {
+        return yaml.safeLoad(fs.readFileSync(`${name}.yml`, 'utf8'));
+    } else if (isFileExists(`${name}.yaml`)) {
+        return yaml.safeLoad(fs.readFileSync(`${name}.yaml`, 'utf8'));
+    } else if (isFileExists(`${name}.js`)) {
+        winston.warn(`* DEPRECATED: ${name}.js format is deprecated, please use yaml format instead.`);
+        return require(`./${name}.js`);
+    } else {
+        return null;
+    }
+};
+
 /**
  * 啟動機器人
  */
-const config = require('./config.js');
+const config = loadConfig('config');
 
 if (config.IRC && !config.IRC.disabled) {
     // 載入 IRC 機器人程式
@@ -175,13 +202,16 @@ if (config.QQ && !config.QQ.disabled) {
     qqbot.start();
 
     // 載入敏感詞清單
-    let badwords = [];
+    let badwords = null;
     if (options.selfCensorship) {
         try {
-            badwords = require('./badwords.js');
+            badwords = loadConfig('badwords');
         } catch (ex) {
             pluginManager.log('Failed to load badwords.js', true);
         }
+    }
+    if (badwords === null) {
+        badwords = [];
     }
 
     let options2 = {
@@ -221,11 +251,16 @@ if (config.WeChat && !config.WeChat.disabled) {
     wechatbot.start();
 
     // 載入敏感詞清單
-    let ungoodwords = [];
-    try {
-        ungoodwords = require('./ungoodwords.js');
-    } catch (ex) {
-        pluginManager.log('Failed to load ungoodwords.js', true);
+    let ungoodwords = null;
+    if (options.selfCensorship) {
+        try {
+            ungoodwords = loadConfig('ungoodwords');
+        } catch (ex) {
+            pluginManager.log('Failed to load ungoodwords.js', true);
+        }
+    }
+    if (ungoodwords === null) {
+        ungoodwords = [];
     }
 
     let options2 = {
