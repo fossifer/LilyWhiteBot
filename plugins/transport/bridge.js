@@ -1,5 +1,6 @@
 'use strict';
 
+const winston = require('winston');
 const Context = require('../../lib/handlers/Context.js');
 const BridgeMsg = require('./BridgeMsg.js');
 
@@ -89,6 +90,14 @@ const bridge = {
 
     send(m) {
         let msg = getBridgeMsg(m);
+
+        let currMsgId = msg.msgId;
+        winston.debug(`[bridge.js] <UserSend> #${currMsgId} ${msg.from_uid} ---> ${msg.to_uid}: ${msg.text}`);
+        let extraJson = JSON.stringify(msg.extra);
+        if (extraJson !== 'null' && extraJson !== '{}') {
+            winston.debug(`[bridge.js] <UserSend> #${currMsgId} extra: ${extraJson}`);
+        }
+
         return prepareMsg(msg).then(() => {
             // 全部訊息已傳送 resolve(true)，部分訊息已傳送 resolve(false)；
             // 所有訊息被拒絕傳送 reject()
@@ -102,20 +111,27 @@ const bridge = {
                 let msg2 = new BridgeMsg(msg, {
                     to_uid: t
                 });
-                let client = BridgeMsg.parseUID(t).client;
+                let new_uid = BridgeMsg.parseUID(t);
+                let client = new_uid.client;
 
                 promises.push(bridge.emitHook('bridge.receive', msg2).then(_ => {
                     let processor = processors.get(client);
                     if (processor) {
+                        winston.debug(`[bridge.js] <BotTransport> #${currMsgId} ---> ${new_uid.uid}`);
                         return processor.receive(msg2);
+                    } else {
+                        winston.debug(`[bridge.js] <BotTransport> #${currMsgId} -X-> ${new_uid.uid}: No processor`);
                     }
                 }));
             }
 
             return Promise.all(promises)
-                .catch(() => { allresolved = false; })
-                .then(() => {
+                .catch((e) => {
+                    allresolved = false;
+                    winston.error(`[bridge.js] <BotSend> Rejected: `, e);
+                }).then(() => {
                     bridge.emitHook('bridge.sent', msg);
+                    winston.debug(`[bridge.js] <BotSend> #${currMsgId} done.`);
                     return Promise.resolve(allresolved);
                 });
         });

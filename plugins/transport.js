@@ -5,6 +5,7 @@
 'use strict';
 
 const BridgeMsg = require('./transport/BridgeMsg.js');
+const winston = require('winston');
 
 module.exports = (pluginManager, options) => {
     /*
@@ -68,7 +69,7 @@ module.exports = (pluginManager, options) => {
             }
         } else if (typeof group === 'object') {
             // 舊版
-            pluginManager.log('* Deprecated: config.example.json changed, please update "groups" in your config.js.');
+            winston.warn('* Deprecated: config.example.json changed, please update "groups" in your config.js.');
 
             for (let client1 of ['QQ', 'Telegram', 'IRC']) {
                 let g1 = group[client1];
@@ -81,7 +82,9 @@ module.exports = (pluginManager, options) => {
                             let uid1 = `${client1.toLowerCase()}/${g1}`;
                             let uid2 = `${client2.toLowerCase()}/${g2}`;
 
-                            if (!map[uid1]) { map[uid1] = {}; }
+                            if (!map[uid1]) {
+                                map[uid1] = {};
+                            }
                             map[uid1][uid2] = {
                                 disabled: false,
                             };
@@ -115,7 +118,7 @@ module.exports = (pluginManager, options) => {
     for (let c1 in disables) {
         let client1 = BridgeMsg.parseUID(c1).uid;
 
-        if (client1) {
+        if (client1 && map[client1]) {
             let list = disables[c1];
             if (typeof list === 'string') {
                 list = [list];
@@ -131,6 +134,19 @@ module.exports = (pluginManager, options) => {
     }
 
     bridge.map = map;
+
+    // 调试日志
+    winston.debug();
+    winston.debug('[transport.js] Bridge Map:');
+    for (let client1 in map) {
+        for (let client2 in map[client1]) {
+            if (map[client1][client2].disabled) {
+                winston.debug(`${client1} -X-> ${client2}`);
+            } else {
+                winston.debug(`${client1} ---> ${client2}`);
+            }
+        }
+    }
 
     // 處理用戶端別名
     let aliases = options.aliases || {};
@@ -156,6 +172,18 @@ module.exports = (pluginManager, options) => {
         }
     }
     bridge.aliases = aliases2;
+
+    // 调试日志
+    winston.debug();
+    winston.debug('[transport.js] Aliases:');
+    let aliasesCount = 0;
+    for (let alias in aliases2) {
+        winston.debug(`${alias}: ${aliases2[alias].shortname} ---> ${aliases2[alias].fullname}`);
+        aliasesCount++;
+    }
+    if (aliasesCount === 0) {
+        winston.debug('None');
+    }
 
     // 載入各用戶端的處理程式，並連接到 bridge 中
     for (let [type, handler] of pluginManager.handlers) {

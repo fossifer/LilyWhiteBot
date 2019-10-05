@@ -15,21 +15,14 @@ const path = require('path');
 const request = require('request');
 const DWebp = require('cwebp').DWebp;
 const tmp = require('tmp');
+const winston = require('winston');
 
 let options = {};
 let servemedia;
 let handlers;
 
-const log = (message, isError = false) => {
-    let date = new Date().toISOString();
-    let output = `[${date.substring(0,10)} ${date.substring(11,19)}] ${message}`;
-
-    if (isError) {
-        console.error(output);
-    } else {
-        console.log(output);
-    }
-};
+const pkg = require('../../package.json');
+const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
 
 /*
  * 轉檔
@@ -104,27 +97,101 @@ const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
 });
 
 /*
- * 上傳到 https://img.vim-cn.com
+ * 上传到各种图床
  */
-const uploadToVimCN = (file) => new Promise((resolve, reject) => {
-    const post = (pendingfile, callback) => request.post({
-        url: 'https://img.vim-cn.com/',
-        headers: {
-            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot)'
-        },
-        formData: {
-            name: pendingfile,
-        },
-    }, (error, response, body) => {
-        if (typeof callback === 'function') {
-            callback();
+const uploadToHost = (host, file) => new Promise((resolve, reject) => {
+    const post = (pendingfile, callback) => {
+        const requestOptions = {
+            timeout: servemedia.timeout,
+            headers: {
+                'User-Agent': servemedia.userAgent || USERAGENT,
+            },
+        };
+
+        switch (host) {
+            case 'vim-cn':
+            case 'vimcn':
+                requestOptions.url = 'https://img.vim-cn.com/';
+                requestOptions.formData = {
+                    name: pendingfile,
+                };
+                break;
+
+            case 'sm.ms':
+                requestOptions.url = 'https://sm.ms/api/upload';
+                requestOptions.json = true;
+                requestOptions.formData = {
+                    smfile: pendingfile,
+                };
+                break;
+
+            case 'imgur':
+                if (servemedia.imgur.apiUrl.endsWith('/')) {
+                    requestOptions.url = servemedia.imgur.apiUrl + 'upload';
+                } else {
+                    requestOptions.url = servemedia.imgur.apiUrl + '/upload';
+                }
+                requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
+                requestOptions.json = true;
+                requestOptions.formData = {
+                    type: 'file',
+                    image: pendingfile,
+                };
+                break;
+
+            case 'uguu':
+            case 'Uguu':
+                requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
+                requestOptions.formData = {
+                    "file": {
+                        value: pendingfile,
+                        options: {
+                            filename: name
+                        }
+                    },
+                    randomname: "true"
+                };
+                break;
+
+            default:
+                reject(new Error('Unknown host type'));
         }
-        if (!error && response.statusCode === 200) {
-            resolve(body.trim());
-        } else {
-            reject(error);
-        }
-    });
+
+        return request.post(requestOptions, (error, response, body) => {
+            if (typeof callback === 'function') {
+                callback();
+            }
+            if (!error && response.statusCode === 200) {
+                switch (host) {
+                    case 'vim-cn':
+                    case 'vimcn':
+                        resolve(body.trim().replace('http://', 'https://'));
+                        break;
+                    case 'uguu':
+                    case 'Uguu':
+                        resolve(body.trim());
+                        break;
+                    case 'sm.ms':
+                        if (body && body.code !== 'success') {
+                            reject(new Error(body.msg));
+                        } else {
+                            resolve(body.data.url);
+                        }
+                        break;
+                    case 'imgur':
+                        if (body && !body.success) {
+                            reject(body.data.error);
+                        } else {
+                            resolve(body.data.link);
+                        }
+                        break;
+
+                }
+            } else {
+                reject(new Error(error));
+            }
+        });
+    };
 
     if (file.url) {
         preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
@@ -132,7 +199,7 @@ const uploadToVimCN = (file) => new Promise((resolve, reject) => {
                 if (filename) {
                     fs.unlink(filename, (err) => {
                         if (err) {
-                            console.log(`Unable to unlink ${filename}`);
+                            winston.error(`Unable to unlink ${filename} `, err);
                         }
                     });
                 }
@@ -141,100 +208,7 @@ const uploadToVimCN = (file) => new Promise((resolve, reject) => {
     } else if (file.path) {
         post(fs.createReadStream(file.path));
     } else {
-        reject('Invalid file');
-        return;
-    }
-});
-
-/*
- * 上傳到 https://sm.ms
- */
-const uploadToSmms = (file) => new Promise((resolve, reject) => {
-    const post = (pendingfile, callback) => request.post({
-        url: 'https://sm.ms/api/upload',
-        headers: {
-            'User-Agent': 'LilyWhiteBot/1.3 (https://github.com/mrhso/LilyWhiteBot)'
-        },
-        json: true,
-        formData: {
-            smfile: pendingfile,
-        },
-    }, (error, response, body) => {
-        if (typeof callback === 'function') {
-            callback();
-        }
-        if (error) {
-            reject(error);
-        } else if (body && body.code !== 'success') {
-            reject(body.msg);
-        } else {
-            resolve(body.data.url);
-        }
-    });
-
-    if (file.url) {
-        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
-            post(f, () => {
-                if (filename) {
-                    fs.unlink(filename, (err) => {
-                        if (err) {
-                            console.log(`Unable to unlink ${filename}`);
-                        }
-                    });
-                }
-            });
-        });
-    } else if (file.path) {
-        post(fs.createReadStream(file.path));
-    } else {
-        reject('Invalid file');
-        return;
-    }
-});
-
-/*
- * 上傳到 https://imgur.com
- */
-const uploadToImgur = (file, config) => new Promise((resolve, reject) => {
-    const post = (pendingfile, callback) => request.post({
-        url: config.apiUrl + 'upload',
-        headers: {
-            'Authorization': `Client-ID ${config.clientId}`,
-        },
-        json: true,
-        formData: {
-            type: 'file',
-            image: pendingfile,
-        },
-    }, (error, response, body) => {
-        if (typeof callback === 'function') {
-            callback();
-        }
-        if (error) {
-            reject(error);
-        } else if (body && !body.success) {
-            reject(body.data.error);
-        } else {
-            resolve(body.data.link);
-        }
-    });
-
-    if (file.url) {
-        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
-            post(f, () => {
-                if (filename) {
-                    fs.unlink(filename, (err) => {
-                        if (err) {
-                            console.log(`Unable to unlink ${filename}`);
-                        }
-                    });
-                }
-            });
-        });
-    } else if (file.path) {
-        post(fs.createReadStream(file.path));
-    } else {
-        reject('Invalid file');
+        reject(new Error('Invalid file'));
         return;
     }
 });
@@ -249,7 +223,7 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
         if (!error && response.statusCode === 200) {
             resolve(body.trim());
         } else {
-            reject(error);
+            reject(new Error(error));
         }
     };
 
@@ -261,69 +235,23 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
             .pipe(request.put({
                 url: servemedia.linxApiUrl + name,
                 headers: {
+                    'User-Agent': servemedia.userAgent || USERAGENT,
                     'Linx-Randomize': 'yes'
                 }
             }, response));
     } else if (file.path) {
         name = path.basename(file.path);
         fs.createReadStream(file.path)
-            .on('error', (e) => { reject(e); })
+            .on('error', (e) => { reject(new Error(e)); })
             .pipe(request.put({
                 url: servemedia.linxApiUrl + name,
                 headers: {
+                    'User-Agent': servemedia.userAgent || USERAGENT,
                     'Linx-Randomize': 'yes'
                 }
             }, response));
     } else {
         reject('Invalid file');
-    }
-});
-
-/*
- * 上傳到自行架設的 Uguu 圖床上面
- */
-const uploadToUguu = (file) => new Promise((resolve, reject) => {
-    const post = (pendingfile, name, callback) => request.post({
-        url: servemedia.UguuApiUrl,
-        formData: {
-            "file": {
-                value: pendingfile,
-                options: {
-                    filename: name
-                }
-            },
-            randomname: "true"
-        },
-    }, (error, response, body) => {
-        if (typeof callback === 'function') {
-            callback();
-        }
-        if (!error && response.statusCode === 200) {
-            resolve(body.trim());
-        } else {
-            reject(error);
-        }
-    });
-
-    if (file.url) {
-        let name = preprocessFileName(path.basename(file.url));
-        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
-            post(f, name, () => {
-                if (filename) {
-                    fs.unlink(filename, (err) => {
-                        if (err) {
-                            console.log(`Unable to unlink ${filename}`);
-                        }
-                    });
-                }
-            });
-        });
-    } else if (file.path) {
-        let name = path.basename(file.path);
-        post(fs.createReadStream(file.path), name);
-    } else {
-        reject('Invalid file');
-        return;
     }
 });
 
@@ -335,15 +263,11 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
         switch (servemedia.type) {
             case 'vimcn':
             case 'vim-cn':
-                uploadToVimCN(file).then((url) => resolve(url), (e) => reject(e));
-                break;
-
             case 'sm.ms':
-                uploadToSmms(file).then((url) => resolve(url), (e) => reject(e));
-                break;
-
             case 'imgur':
-                uploadToImgur(file, servemedia.imgur || {}).then((url) => resolve(url), (e) => reject(e));
+            case 'uguu':
+            case 'Uguu':
+                uploadToHost(servemedia.type, file).then((url) => resolve(url), (e) => reject(e));
                 break;
 
             case 'self':
@@ -352,11 +276,6 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
 
             case 'linx':
                 uploadToLinx(file).then((url) => resolve(url), (e) => reject(e));
-                break;
-
-            case 'uguu':
-            case 'Uguu':
-                uploadToUguu(file).then((url) => resolve(url), (e) => reject(e));
                 break;
 
             default:
@@ -476,8 +395,10 @@ const fileUploader = {
         let promises = [];
 
         if (context.extra.files && servemedia.type && servemedia.type !== 'none') {
-            for (let file of context.extra.files) {
+            let fileCount = context.extra.files.length;
+            for (let [index, file] of context.extra.files.entries()) {
                 if (servemedia.sizeLimit && servemedia.sizeLimit > 0 && file.size && file.size > servemedia.sizeLimit*1024) {
+                    winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${fileCount}: Size limit exceeded. Ignore.`);
                     continue;
                 }
 
@@ -492,6 +413,10 @@ const fileUploader = {
         }
 
         Promise.all(promises).then((uploads) => {
+            let fileCount = uploads.length;
+            for (let [index, upload] of uploads.entries()) {
+                winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${fileCount} (${upload.type}): ${upload.url}`);
+            }
             resolve(uploads);
         }).catch((e) => {
             reject(e);
@@ -506,7 +431,7 @@ module.exports = (bridge, options) => {
     bridge.addHook('bridge.send', (msg) => fileUploader.process(msg).then((uploads) => {
         msg.extra.uploads = uploads;
     }).catch((e) => {
-        log(`Error on processing files: ${e}`, true);
+        winston.error(`Error on processing files: `, e);
         msg.callbacks.push(new bridge.BridgeMsg(msg, {
             text: 'File upload error',
             isNotice: true,

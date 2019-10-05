@@ -149,9 +149,9 @@ const init = (b, h, c) => {
 const receive = (msg) => new Promise((resolve, reject) => {
     if (msg.isNotice) {
         if (msg.extra.clients >= 3) {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${msg.extra.clientName.fullname}: ${htmlEscape(msg.text)} &gt;</pre>`);
+            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${msg.extra.clientName.fullname}: ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
         } else {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${htmlEscape(msg.text)} &gt;</pre>`);
+            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
         }
     } else {
         let output = '';
@@ -172,7 +172,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
         output = `${prefix}${htmlEscape(msg.text)}`;
 
         // TODO 圖片在文字之前發出
-        tgHandler.sayWithHTML(msg.to, output);
+        tgHandler.sayWithHTML(msg.to, output).catch(e => reject(e));
 
         // 如果含有相片和音訊
         if (msg.extra.uploads) {
@@ -180,12 +180,12 @@ const receive = (msg) => new Promise((resolve, reject) => {
 
             for (let upload of msg.extra.uploads) {
                 if (upload.type === 'audio') {
-                    tgHandler.sendAudio(msg.to, upload.url);
+                    tgHandler.sendAudio(msg.to, upload.url).catch(e => reject(e));
                 } else if (upload.type === 'photo') {
                     if (path.extname(upload.url) === '.gif') {
-                        tgHandler.sendDocument(msg.to, upload.url);
+                        tgHandler.sendDocument(msg.to, upload.url).catch(e => reject(e));
                     } else {
-                        tgHandler.sendPhoto(msg.to, upload.url);
+                        tgHandler.sendPhoto(msg.to, upload.url).catch(e => reject(e));
                     }
                 } else {
                     files.push(upload.url);

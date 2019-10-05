@@ -15,6 +15,7 @@ const QQBot = require('./lib/QQBot.js');
 const WeChatBot = require('./lib/WeChatBotClient.js');
 const discord = require('discord.js');
 const proxy = require('./lib/proxy.js');
+const winston = require('winston');
 const yaml = require('js-yaml');
 
 const {Context, Message} = require('./lib/handlers/Context.js');
@@ -34,27 +35,41 @@ const pluginManager = {
         Message,
     },
     plugins: {},
-    log: (message, isError = false) => {
-        let date = new Date();
-        let zone = -date.getTimezoneOffset();
-        let dateStr = new Date(date.getTime() + 60000 * zone).toISOString();
-        let zoneStr;
-        if (zone > 0) {
-            zoneStr = `UTC+${zone / 60}`;
-        } else if (zone === 0) {
-            zoneStr = `UTC`;
-        } else {
-            zoneStr = `UTC${zone / 60}`;
-        }
-        let output = `[${dateStr.substring(0, 10)} ${dateStr.substring(11, 19)} (${zoneStr})] ${message}`;
-
-        if (isError) {
-            console.error(output);
-        } else {
-            console.log(output);
-        }
-    },
 };
+
+// 日志初始化
+const logFormat = winston.format(info => {
+    info.level = info.level.toUpperCase();
+    if (info.stack) {
+        info.message = `${info.message}\n${info.stack}`;
+    }
+    return info;
+});
+winston.add(new winston.transports.Console({
+    format: winston.format.combine(
+        logFormat(),
+        winston.format.colorize(),
+        winston.format.timestamp({
+            format: 'YYYY-MM-DD HH:mm:ss'
+        }),
+        winston.format.printf(info => `${info.timestamp} [${info.level}] ${info.message}`)
+    ),
+}));
+
+process.on('unhandledRejection', (reason, promise) => {
+    promise.catch(e => {
+        winston.error('Unhandled Rejection: ', e);
+    });
+});
+
+process.on('uncaughtException', (err, origin) => {
+    winston.error(`Caught exception: ${err}`);
+    winston.error(`Exception origin: ${origin}`);
+});
+
+process.on('rejectionHandled', promise => {
+    // 忽略
+});
 
 // 用于加载配置文件
 const isFileExists = (name) => {
@@ -81,16 +96,46 @@ const loadConfig = (name) => {
     }
 };
 
-/**
- * 啟動機器人
- */
 const config = loadConfig('config');
 
+// 日志等级、文件设置
+if (config.logging && config.logging.level) {
+    winston.level = config.logging.level;
+} else {
+    winston.level = 'info';
+}
+
+if (config.logging && config.logging.logfile) {
+    const files = new winston.transports.File({
+        filename: config.logging.logfile,
+        format: winston.format.combine(
+            logFormat(),
+            winston.format.timestamp({
+                format: 'YYYY-MM-DD HH:mm:ss'
+            }),
+            winston.format.printf(info => `${info.timestamp} [${info.level}] ${info.message}`)
+        )
+    });
+    winston.add(files);
+}
+
+// 欢迎信息
+winston.info('LilyWhiteBot: Multi-platform message transport bot.');
+winston.info(`Version: ${require('./package.json').version}`);
+winston.info();
+let enabledClients = [];
+for (let type of ['IRC', 'Telegram', 'QQ', 'WeChat', 'Discord']) {
+    if (config[type] && !config[type].disabled) {
+        enabledClients.push(type);
+    }
+}
+winston.info(`Enabled clients: ${enabledClients.join(', ')}`);
+
+// 載入 IRC 機器人程式
 if (config.IRC && !config.IRC.disabled) {
-    // 載入 IRC 機器人程式
     let botcfg = config.IRC.bot;
 
-    pluginManager.log('Starting IRCBot...');
+    winston.info('Starting IRCBot...');
     const ircClient = new irc.Client(botcfg.server, botcfg.nick, {
         userName: botcfg.userName,
         realName: botcfg.realName,
@@ -107,17 +152,17 @@ if (config.IRC && !config.IRC.disabled) {
     });
 
     ircClient.on('registered', (message) => {
-        pluginManager.log('IRCBot Registered.');
+        winston.info('IRCBot has been registered.');
     });
 
     ircClient.on('join', (channel, nick, message) => {
         if (nick === ircClient.nick) {
-            pluginManager.log(`IRCBot has joined channel: ${channel} as ${nick}`);
+            winston.info(`IRCBot has joined channel: ${channel} as ${nick}`);
         }
     });
 
     ircClient.on('error', (message) => {
-        pluginManager.log(`IRCBot Error: ${message.command}`, true);
+        winston.error(`IRCBot error: ${message.command} (${(message.args || []).join(' ')})`);
     });
 
     ircClient.connect();
@@ -137,13 +182,13 @@ if (config.IRC && !config.IRC.disabled) {
 
 if (config.Telegram && !config.Telegram.disabled) {
     let tgcfg = config.Telegram;
-    pluginManager.log('Starting TelegramBot...');
+    winston.info('Starting TelegramBot...');
 
     // 代理
     let myAgent = https.globalAgent;
 
     if (tgcfg.options.noCheckCertificate) {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
 
     if (tgcfg.options.proxy && tgcfg.options.proxy.host) {
@@ -156,16 +201,16 @@ if (config.Telegram && !config.Telegram.disabled) {
     const tgBot = new Telegraf(tgcfg.bot.token, {
         telegram: {
             agent: myAgent,
-            apiRoot: tgcfg.options.apiRoot || "https://api.telegram.org",
+            apiRoot: tgcfg.options.apiRoot || 'https://api.telegram.org',
         },
         username: tgcfg.bot.name,
     });
 
     tgBot.catch((err) => {
-        pluginManager.log(`TelegramBot Error: ${err.message}`, true);
+        winston.error(`TelegramBot error: ${err.message}`, err);
     });
 
-    tgBot.startPolling(tgcfg.bot.timeout === undefined ? 30 : tgcfg.bot.timeout, tgcfg.bot.limit || 100);
+    tgBot.startPolling(tgcfg.bot.timeout || 30, tgcfg.bot.limit || 100);
 
     let options2 = {
         botName: tgcfg.bot.name,
@@ -180,11 +225,18 @@ if (config.Telegram && !config.Telegram.disabled) {
         options: options2
     });
 
-    pluginManager.log('TelegramBot started');
+    winston.info('TelegramBot has started.');
 }
 
 if (config.QQ && !config.QQ.disabled) {
     let options = config.QQ.options || {};
+
+    // TODO 兼容旧版本机器人
+    if (!config.QQ.apiRoot) {
+
+    } else {
+
+    }
 
     let qqbot = new QQBot({
         CoolQAirA: options.CoolQAirA,
@@ -193,10 +245,10 @@ if (config.QQ && !config.QQ.disabled) {
         unicode: options.unicode,
         dir: config.QQ.dir,
     });
-    pluginManager.log('Starting QQBot...');
+    winston.info('Starting QQBot...');
 
     qqbot.on('Error', (err) => {
-        pluginManager.log(`QQBot Error: ${err.error.toString()} (${err.event})`, true);
+        winston.error(`QQBot error: ${err.error.toString()} (${err.event})`);
     });
 
     qqbot.start();
@@ -207,7 +259,7 @@ if (config.QQ && !config.QQ.disabled) {
         try {
             badwords = loadConfig('badwords');
         } catch (ex) {
-            pluginManager.log('Failed to load badwords.js', true);
+            winston.warn('Unable to load badwords list', true);
         }
     }
     if (badwords === null) {
@@ -231,7 +283,7 @@ if (config.QQ && !config.QQ.disabled) {
         options: options2,
     });
 
-    pluginManager.log('QQBot started');
+    winston.info('QQBot has started.');
 }
 
 if (config.WeChat && !config.WeChat.disabled) {
@@ -242,10 +294,10 @@ if (config.WeChat && !config.WeChat.disabled) {
         host: config.QQ.host || '127.0.0.1',
         port: config.QQ.port || 11337,
     });
-    pluginManager.log('Starting QQBot...');
+    winston.info('Starting WeChatBot...');
 
     wechatbot.on('Error', (err) => {
-        pluginManager.log(`WeChatBot Error: ${err.error.toString()} (${err.event})`, true);
+        winston.error(`WeChatBot Error: ${err.error.toString()} (${err.event})`);
     });
 
     wechatbot.start();
@@ -256,7 +308,7 @@ if (config.WeChat && !config.WeChat.disabled) {
         try {
             ungoodwords = loadConfig('ungoodwords');
         } catch (ex) {
-            pluginManager.log('Failed to load ungoodwords.js', true);
+            winston.warn('Unable to load ungoodwords.js.', true);
         }
     }
     if (ungoodwords === null) {
@@ -275,21 +327,21 @@ if (config.WeChat && !config.WeChat.disabled) {
         options: options2,
     });
 
-    pluginManager.log('WeChatBot started');
+    winston.info('WeChatBot has started.');
 }
 
 if (config.Discord && !config.Discord.disabled) {
     let botcfg = config.Discord.bot;
 
-    pluginManager.log('Starting DiscordBot...');
+    winston.info('Starting DiscordBot...');
     const discordClient = new discord.Client();
 
     discordClient.on('ready', (message) => {
-        pluginManager.log('DiscordBot is ready.');
+        winston.info('DiscordBot is ready.');
     });
 
     discordClient.on('error', (message) => {
-        pluginManager.log(`DiscordBot Error: ${message.message}`, true);
+        winston.error(`DiscordBot Error: ${message.message}`);
     });
 
     discordClient.login(botcfg.token);
@@ -311,9 +363,12 @@ if (config.Discord && !config.Discord.disabled) {
 /**
  * 載入擴充套件
  */
+winston.info();
+winston.info(`Loading plugins...`);
 pluginManager.config = config;
 for (let plugin of config.plugins) {
     try {
+        winston.info(`Loading plugin: ${plugin}`);
         let p = require(`./plugins/${plugin}.js`)(pluginManager, config[plugin] || {});
         if (p) {
             pluginManager.plugins[plugin] = p;
@@ -321,6 +376,9 @@ for (let plugin of config.plugins) {
             pluginManager.plugins[plugin] = true;
         }
     } catch (ex) {
-        pluginManager.log(`Error while loading plugin ${plugin}: ${ex.message}`, true);
+        winston.error(`Error while loading plugin ${plugin}: `, ex);
     }
+}
+if (!config.plugins || config.plugins.length === 0) {
+    winston.info('No plugins loaded.');
 }

@@ -17,6 +17,8 @@
 
 'use strict';
 
+const winston = require('winston');
+
 let commands = new Map();
 let commands_telegram = new Map();
 
@@ -133,6 +135,7 @@ module.exports = (bridge, options) => {
 
             // 判斷當前群組是否在處理範圍內
             if (disables.indexOf(msg.to_uid) !== -1) {
+                winston.debug(`[command.js] Msg #${msg.msgId} command ignored.`);
                 return Promise.resolve();
             }
 
@@ -141,6 +144,7 @@ module.exports = (bridge, options) => {
             }
 
             if (func && (typeof func === 'function')) {
+                winston.debug(`[command.js] Msg #${msg.msgId} command: ${msg.command}`);
                 return func(msg);
             } else {
                 return Promise.resolve();

@@ -33,6 +33,7 @@ Telegram:
   options:
     nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
+
     # 如果使用中国国内网络，无法直连 Telegram 服务器，可通过设置 proxy（仅支持 HTTPS 代理）来翻墙
     # 或者自行在国外架设 Bot API（api.telegram.org）反向代理服务器然后修改 apiRoot 的值
     proxy:
@@ -74,7 +75,7 @@ Discord:
 
 # 系统日志
 logging:
-  level: info                               # 日志等级：从详细到简单分别是debug、info、warning、error
+  level: info                               # 日志等级：从详细到简单分别是 debug、info、warning、error，推荐用 info
   logfile: ""                               # 日志文件名，如留空则只向屏幕输出
 
 # 启用的插件（繁体字用户叫套件）
@@ -186,6 +187,10 @@ transport:
     # linx：將檔案上傳到一個 linx（https://github.com/andreimarcu/linx-server）伺服器中
     # uguu: 將檔案上傳到一個 uguu（https://github.com/nokonoko/Uguu）伺服器中
     #
+    # 特别提醒：
+    # 1. vim-cn、sm.ms 为个人图床，资源有限。如果您的聊天群水量很大，请选择其他图床或自建服务器。
+    # 2. 如使用外部图床，请您设置合适的 User-Agent。
+    #
     # 另外，如果使用酷 Q 的話，您需要定期自行清理酷 Q 的快取！
     servemedia:
       type: ""                              # 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
@@ -194,17 +199,19 @@ transport:
                                             # 圖片下載失敗（https://cqp.cc/t/42857）時啟用
 
       cachePath: ""                         # type 為 self 時有效：快取存放位置
-      serveUrl": ""                         # type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
+      serveUrl: ""                          # type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
 
-      linxApiUrl": ""                       # type 為 linx 時有效：linx API 位址，一般以斜線結尾
+      linxApiUrl: ""                        # type 為 linx 時有效：linx API 位址，一般以斜線結尾
 
-      UguuApiUrl": ""                       # type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
+      uguuApiUrl: ""                        # type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
 
-      imgur":                               # type 為 imgur 時有效
-        apiUrl": "https://api.imgur.com/3/" # 以斜線結尾
-        clientId": ""                       # 從 imgur 申請到的 client_id
+      imgur:                                # type 為 imgur 時有效
+        apiUrl: "https://api.imgur.com/3/"
+        clientId: ""                        # 從 imgur 申請到的 client_id
 
       sizeLimit: 4096                       # 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效
+      timeout: 1000                         # 上传超时时间，单位毫秒，type 为 vim-cn、imgur 等外部图床时有效
+      userAgent: ""                         # 访问外部图床时的 User-Agent，如留空则使用默认的 LilyWhiteBot/版本号
 
       # 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式
       # 如果設為 true，那麼需要安装 webp，具體步驟見 https://github.com/Intervox/node-webp

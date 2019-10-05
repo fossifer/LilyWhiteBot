@@ -42,5 +42,9 @@ jspm_packages
 .tern-project
 
 # config
+config.yml
+config.yaml
 config.js
+badwords.yml
+badwords.yaml
 badwords.js

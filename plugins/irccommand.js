@@ -4,6 +4,7 @@
 
 'use strict';
 
+const winston = require('winston');
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
 module.exports = (pluginManager, options) => {
@@ -30,11 +31,18 @@ module.exports = (pluginManager, options) => {
                     context.reply(context.param);
                 }
 
+                let sentCount = 0;
                 for (let c of context.extra.mapto) {
                     let client = BridgeMsg.parseUID(c);
                     if (client.client === 'IRC') {
+                        sentCount++;
                         ircHandler.say(client.id, context.param);
+                        winston.debug(`[irccommand.js] Msg #${context.msgId}: IRC command has sent to ${client.id}. Param = ${context.param}`);
                     }
+                }
+
+                if (sentCount === 0) {
+                    winston.debug(`[irccommand.js] Msg #${context.msgId}: No IRC targets.`);
                 }
             } else {
                 context.reply(`用法: /${prefix}command <命令>`);

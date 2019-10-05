@@ -5,6 +5,7 @@
  */
 'use strict';
 
+const winston = require('winston');
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
 module.exports = (pluginManager, options) => {
@@ -12,6 +13,7 @@ module.exports = (pluginManager, options) => {
 
     const pia = (action, context) => {
         context.reply(`${action} ${context.param}`);
+        winston.debug(`[pia.js] Msg #${context.msgId}: ${action} ${context.param}`);
 
         // 如果開啟了互聯，而且是在公開群組中使用本命令，那麼讓其他群也看見掀桌
         if (bridge && !context.isPrivate) {

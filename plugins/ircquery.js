@@ -4,6 +4,7 @@
 
 'use strict';
 
+const winston = require('winston');
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
 let ircHandler = null;
@@ -39,7 +40,9 @@ const processWhois = (context) => {
                 }
             }
 
-            context.reply(output.join('\n'));
+            let outputStr = output.join('\n');
+            winston.debug(`[ircquery.js] Msg #${context.msgId} whois: ${outputStr}`);
+            context.reply(outputStr);
         });
     } else {
         context.reply('用法：/ircwhois IRC暱称');
@@ -74,7 +77,9 @@ const processNames = (context) => {
             }
         });
 
-        context.reply(`Users on ${chan}: ${userlist.join(', ')}`);
+        let outputStr = `Users on ${chan}: ${userlist.join(', ')}`;
+        context.reply(outputStr);
+        winston.debug(`[ircquery.js] Msg #${context.msgId} names: ${outputStr}`);
     }
 };
 
@@ -85,8 +90,10 @@ const processTopic = (context) => {
 
         if (topic) {
             context.reply(`Topic for channel ${chan}: ${topic}`);
+            winston.debug(`[ircquery.js] Msg #${context.msgId} topic: ${topic}`);
         } else {
             context.reply(`No topic for ${chan}`);
+            winston.debug(`[ircquery.js] Msg #${context.msgId} topic: No topic`);
         }
     }
 };

@@ -5,6 +5,7 @@
  */
 'use strict';
 
+const winston = require('winston');
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
 const eightballs = ['As I see it, yes', 'It is certain', 'It is decidedly so', 'Most likely',
@@ -22,6 +23,7 @@ module.exports = (pluginManager, options) => {
         let result = eightballs[parseInt(Math.random() * eightballs.length)];
 
         context.reply(result);
+        winston.debug(`[8ball.js] Msg #${context.msgId} 8ball: ${result}`);
 
         if (bridge && !context.isPrivate) {
             bridge.send(new BridgeMsg(context, {

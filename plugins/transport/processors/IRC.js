@@ -216,7 +216,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
         if (colorize.enabled && colorize.broadcast) {
             tmp2 = color[colorize.broadcast](tmp2);
         }
-        ircHandler.say(msg.to, tmp2);
+        ircHandler.say(msg.to, tmp2).catch(_ => {});
     } else {
         let output = [];
         let tmp;
@@ -278,7 +278,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
             output.push(...msg.extra.uploads.map(u => ` ${u.url}`));
         }
 
-        ircHandler.say(msg.to, output.join(''));
+        ircHandler.say(msg.to, output.join('')).catch(_ => {});
     }
     resolve();
 });
