@@ -22,7 +22,7 @@ const getChans = (context) => {
 
 const processWhois = (context) => {
     if (context.param) {
-        ircHandler.whois(context.param, (info) => {
+        ircHandler.whois(context.param).then((info) => {
             let output = [`${info.nick}: Unknown nick`];
 
             if (info.user) {

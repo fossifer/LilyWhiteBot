@@ -1,72 +1,105 @@
 LilyWhiteBot
 ===
+在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
-[简化字版](https://github.com/mrhso/LilyWhiteBot/blob/master/README-hans.md)
+## 旧版升级说明
+如果您从旧版本升级，请注意以下三点：
 
-[简化字版（内地用语）](https://github.com/mrhso/LilyWhiteBot/blob/master/README-hans-cn.md)
+1. Node.js 最低版本为 8。
+2. 配置文件格式由 json 换成了 yaml。json 配置文件仍然可用，但您会收到一条警告信息。
+3. 程序不再支持酷 Q 的 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk)插件，建议尽快更换成 [CoolQ HTTP API](https://cqhttp.cc/)。
 
-在多個群組間傳話的機器人。原名為「qq-tg-irc」。
+如需使用新插件，请按照以下形式重新设置：
+```yaml
+QQ:
+  # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
+  apiRoot: "http://127.0.0.1:5700/"
+  accessToken: "123"
+  secret: "abc"
+  listen:                                   # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
+    host: "127.0.0.1"                       # 使用Docker时请设置成0.0.0.0
+    port: 11234
+  # ...
+```
 
-## 如何安裝
-目前支援 QQ、Telegram、IRC 和 Discord（[試驗中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四種群組互聯。
+CoolQ HTTP API 也需要调整对应设置（详见[此页](https://cqhttp.cc/docs/4.11/#/Configuration)），例如：
+```json
+{
+    "host": "0.0.0.0",                      // 使用Docker时请设置成0.0.0.0
+    "post_url": "http://127.0.0.1:11234",   // 与上面 listen 保持一致
+    "serve_data_files": true,               // 需要设置为 true 否则无法获取图片消息内容
+    ...
+}
+```
 
-### 必需步驟
-* 根據實際需要準備機器人賬號。（具體方法見後面）
-* 安裝 Node.js，版本要求：>=7.x。
-* 下載機器人本體。
-* 執行：
+不修改设置的话则会继续使用旧的 cqsocketapi 插件。
+
+为方便容器化，以新接口形式配置之后，程序不再直接访问酷 Q 目录，任何指定酷 Q 目录的设置都将失效（例如 servemedia 部分的 coolqCache 参数）。
+
+## 如何安装
+目前支持 QQ、Telegram、IRC 和 Discord（[试验中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四种群组互联。
+
+### 必需步骤
+* 根据实际需要准备机器人账号。（具体方法见后面）
+* 安装 Node.js，版本要求：>=8.x。
+* 下载机器人本体。
+* 运行：
 ```
 npm install
 node main.js
 ```
-* 如果擔心 crash 的話請直接迴圈，例如 `while true; do node main.js; done`，或者：
-```batch
-:a
-node main.js
-goto a
-```
-* 根據實際需要修改 config.example.js，並改名為 config.js。
-* QQ 群格式 `qq/QQ 群號`；Telegram 群格式 `telegram/一串數字`（該數字可透過`/thisgroupid`取得，後面有說明，而且請注意該數字是**負數**）；IRC 頻道格式 `irc/#頻道名`，別忘了`#`；Discord 頻道格式 `discord/頻道 ID`。
+* 建议借助[forever](https://github.com/foreversd/forever)等能够常驻内存的工具来启动、监控程序。
+* 根据实际需要修改 config.example.yml，并改名为 config.yml。
+* QQ 群格式 `qq/QQ 群号`；Telegram 群格式 `telegram/一串数字`（该数字可通过`/thisgroupid`取得，后面有说明，而且请注意该数字是**负数**）；IRC 频道格式 `irc/#频道名`，别忘了`#`；Discord 频道格式 `discord/频道 ID`。
 
-### 設定 QQ 機器人
-1. 在正式啟用互聯之前，建議提前註冊一個 QQ 小號，掛機掛到一定等級，並往錢包裡塞一點錢，以減小被騰訊封殺的可能性。不過從實踐情況來看，只有一顆星或不塞錢也無妨。
-2. **下載[酷 Q](https://cqp.cc/)**，啟動一下以便完成安裝。
-3. 下載 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk)，並放到酷 Q 的 app 目錄中。
-4. 再次啟動酷 Q，登入機器人賬號，然後在插件設定中啟用「CoolQ Socket API (Node.js)」。
-5. 根據實際需要修改 badwords.example.js，並改名為 badwords.js。「敏感詞」功能僅對 QQ 機器人有效。
-6. 請記得定期清除快取。
-7. 因為目前沒做監控功能，所以還請自己盯一下酷 Q 的狀態。
+### 设置 QQ 机器人
+1. 在正式启用互联之前，建议提前注册一个 QQ 小号，挂机挂到一定等级，并往钱包里塞一点钱，以减小被腾讯封杀的可能性。不过从实践情况来看，只有一颗星或不塞钱也无妨。
+2. **下载[酷 Q](https://cqp.cc/)**，启动一下以便完成安装。
+3. 下載 [CoolQ HTTP API](https://cqhttp.cc/)，并放到酷 Q 的 app 目录中。
+4. 根据 [CoolQ HTTP API 文档](https://cqhttp.cc/docs/4.11/#/Configuration)配置插件，另外请留意前文“旧版升级说明”。
+5. 再次启动酷 Q，登录机器人账号，然后在插件设置中启用「CoolQ Socket API (Node.js)」。
+6. 根据实际需要修改 badwords.example.yml，并改名为 badwords.yml。「敏感词」功能仅对 QQ 机器人有效。
+7. 请记得定期清除缓存。
+8. 如果需要，可自行搜索监控或自动重启插件，或者将插件提供的 HTTP 接口纳入到 Zabbix 等监控系统中。
 
 注意：
-1. 本程式需要酷 Q Air/Pro 和這個專門的 cqsocketapi 才能收發 QQ 群訊息。
-2. 執行程式時，酷 Q 會有很大機率要求你開啟 QQ 的設備鎖，因此註冊小號時請不要亂填電話號。
-3. 酷 Q 模擬的是安卓 QQ，而且 QQ 不允許多個手機同時登入。如果已經開啟酷 Q，而且需要直接操作機器人賬號，請用電腦登入。
-4. 酷 Q 是私有軟體，和我沒關係。
-5. 酷 Q 可以透過 wine 在 Linux/Mac 系統中執行，可以參考[這篇教程](https://cqp.cc/t/30970)進行設定。
+1. 本程序需要酷 Q Air 和这个专门的 HTTP API 才能收发 QQ 群信息。
+2. 如无特殊需求，不建议使用 Pro，因本程序不支持 Pro 的附加功能。
+3. 不支持讨论组互联，如有需要，请将讨论组转成群。
+4. 运行程序时，酷 Q 会有很大机率要求你开启 QQ 的设备锁，因此注册小号时请不要乱填电话号。
+5. 酷 Q 模拟的是安卓 QQ，而且 QQ 不允许多个手机同时登录。如果已经开启酷 Q，而且需要直接操作机器人账号，请用电脑登录。
+6. 酷 Q 是私有软件，和腾讯、CoolQ HTTP API、本程序等均无关系。
+7. 酷 Q 可以通过 wine 在 Linux/Mac 系统中运行，可以参考[这篇教程](https://cqp.cc/t/30970)进行设置。
+8. 酷 Q 可以通过 Docker 运行，参见[其 GitHub 页面](https://github.com/CoolQ/docker-wine-coolq)。
 
-### 設定 Telegram 機器人
-@BotFather，與其交互，按照熒幕提示進行操作，建立一個機器人賬號。設定完成後，BotFather 會給一個 Token，你需要把這個 Token 填到 config.js 中。
+### 设置 Telegram 机器人
+@BotFather，与其交互，按照屏幕提示进行操作，建立一个机器人账号。设置完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.yml 中。
 
-之後請記得執行 `/setprivacy` 命令，將機器人的 Privacy 設為 DISABLED，以便於讓它看到群組內的訊息。
+之后请记得运行 `/setprivacy` 命令，将机器人的 Privacy 设为 DISABLED，以便于让它看到群组内的信息。
 
-在剛開始的時候，可以保留 config.js 之內「plugins」中的「groupid-tg」，然後執行程式，並且在群組中輸入 `/thisgroupid`，這樣機器人會自動給出群組 ID 以便設定互聯。如果沒看懂前面那句話，你也可以把 @combot 拉進群中，然後輸入 `/stat`，看機器人給出的數字是多少。注意，數字是負數。
+将 @GroupIDbot 拉入您的群组中，然后输入“/id”，便可获取群组的 ID。
 
-### 設定 IRC 機器人
-IRC 沒有什麼特別之處。如果你有 Cloak，請在 config.js 中輸入正確的 userName、sasl_password，並將 sasl 設為 true。
+### 设置 IRC 机器人
+IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入正确的 userName、sasl_password，并将 sasl 设为 true。
 
-### 設定 Discord 機器人
-進入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，創建 Application。在 Bot 頁面中 Add Bot。將 Token 填到 config.js 中。
+### 设置 Discord 机器人
+进入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，创建 Application。在 Bot 页面中 Add Bot。将 Token 填到 config.js 中。
 
-頻道 ID 可以在網頁版之 URL 看到，最後面的那串神祕數字便是。
+频道 ID 可以在网页版之 URL 看到，最后面的那串神秘数字便是。
+
+## 在 Docker 中运行
+注意：如果使用酷 Q，其插件需要使用 CoolQ HTTP API 而非 cqsockertapi，否则程序无法连接。
 
 ## 提示
-1. 如果把 config.js 中的 `paeeye` 設為 `//`，那麼在訊息之前加入 `//`（例如「//隱藏」）可防止被其他群組看見。
-2. 如果允許 IRC 接受命令（plugins 中有「irccommand」），那麼可在 Telegram 和 QQ 中使用 `/command 命令`。該命令並非 IRC 命令，而是為配合 IRC 頻道中的機器人而設。
-3. 如果允許查詢 IRC 的情況（plugins 中有「ircquery」），那麼可在 Telegram 和 QQ 中使用 `/names`（取得在線用戶清單）、`/whois 暱稱`（whois）和 `/topic`（取得 Topic）。
-4. 「敏感詞」功能僅在 QQ 有效，而且僅對機器人自己「張嘴」有效。啟用之後，程式會自動把敏感詞清單中的詞語轉為「*」，可使用正規表示式。具體的政治敏感詞彙可參照中文維基百科「中華人民共和國審查辭彙列表」條目製作，本專案不再提供。詳情見 badwords.example.js。
+1. 如果把 config.yml 中的 `paeeye` 设为 `//`，那么在信息之前加入 `//`（例如「//隐藏」）可防止被其他群组看见。
+2. 如果允许 IRC 接受命令（plugins 中有「irccommand」），那么可在 Telegram 和 QQ 中使用 `/command 命令`。该命令并非 IRC 命令，而是为配合 IRC 频道中的机器人而设。
+3. 如果允许查询 IRC 的情况（plugins 中有「ircquery」），那么可在 Telegram 和 QQ 中使用 `/names`（取得在线用户清单）、`/whois 昵称`（whois）和 `/topic`（取得 Topic）。
+
+## 关于 QQ 的特别提醒
+为保护机器人操作者，程序提供了「敏感词」功能，启用之后，程序会自动把敏感词清单中的词语转为「*」。然而**程序并未提供词库**，您需要自行去 GitHub 等网站搜集敏感词并制作词典。建议在启用机器人之前把敏感词功能设置好，除非您不在中国，或者能够保证没有群友会利用敏感词来陷害您。
 
 ### 其他功能
-以下各功能的設定方法均為改 config.js。
-* [filter](https://github.com/vjudge1/LilyWhiteBot/blob/master/plugins/filter.js)：過濾符合指定規則的訊息。
-* [qqxiaoice](https://github.com/vjudge1/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召喚 QQ 群的小冰。（需要 QQ 群群主開啟小冰/BabyQ 功能）
-* [wikilinky](https://github.com/vjudge1/LilyWhiteBot/blob/master/plugins/wikilinky.js)
+以下各功能的设定方法均为改 config.yml。
+* [filter](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
+* [qqxiaoice](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
+* [wikilinky](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/wikilinky.js)

@@ -288,14 +288,12 @@ const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
 /*
  * 處理來自 Telegram 的多媒體訊息
  */
-const getTelegramFileUrl = fileid => new Promise((resolve, reject) => {
-    handlers.get('Telegram').getFileLink(fileid).then((url) => {
-        resolve({ url: url });
-    }).catch((e) => {
-        reject(e);
-    });
-});
-const processTelegramFile = file => new Promise((resolve, reject) => {
+const getTelegramFileUrl = async (fileid) => {
+    return { 
+        url: await handlers.get('Telegram').getFileLink(fileid) 
+    };
+};
+const processTelegramFile = async (file) => {
     let type;
     switch (file.type) {
         case 'photo':
@@ -310,75 +308,50 @@ const processTelegramFile = file => new Promise((resolve, reject) => {
             type = 'file';
     }
 
-    cacheFile(getTelegramFileUrl(file.id), file.id).then((url) => {
-        resolve({
-            url: url,
-            type: type,
-        });
-    }).catch((e) => reject(e));
-});
+    const url = await cacheFile(getTelegramFileUrl(file.id), file.id);
+    return {
+        url: url,
+        type: type,
+    };
+};
 
 
 /*
  * 處理來自 QQ 的多媒體訊息
  */
-const getQQPhotoPath = (name) => handlers.get('QQ').image(name).then((path) => Promise.resolve({ path: path }));
-const getQQVoicePath = (name) => Promise.resolve({ path: path.join(servemedia.coolqCache, 'record', name) });
-const getQQPhotoUrl = name => new Promise((resolve, reject) => {
-    let p = path.join(servemedia.coolqCache, 'image', name) + '.cqimg';
-    fs.readFile(p, (err, data) => {
-        if (err) {
-            reject(err);
-        } else {
-            try {
-                let info = data.toString('ascii');
-                let [, url] = info.match(/url=(.*?)[\r\n]/u) || [];
-
-                resolve({ url: url });
-            } catch (ex) {
-                reject(ex);
-            }
-        }
-    });
-});
-
-const processQQFile = file => new Promise((resolve, reject) => {
-    if (file.type === 'photo' && servemedia.legacy) {
-        cacheFile(getQQPhotoUrl(file.id), file.id).then((url) => {
-            resolve({
-                url: url,
-                type: 'photo',
-            });
-        }).catch((e) => reject(e));
-    } else if (file.type === 'photo') {
-        cacheFile(getQQPhotoPath(file.id), file.id).then((url) => {
-            resolve({
-                url: url,
-                type: 'photo',
-            });
-        }).catch((e) => reject(e));
+const processQQFile = async (file) => {
+    let path = '';
+    let type = '';
+    let getitem;
+    if (file.type === 'photo') {
+        path = await handlers.get('QQ').image(file.id);
+        type = 'photo';
     } else {
-        cacheFile(getQQVoicePath(file.id), file.id).then((url) => {
-            resolve({
-                url: url,
-                type: 'file',
-            });
-        }).catch((e) => reject(e));
+        path = await handlers.get('QQ').voice(file.id);
+        type = 'file';
     }
-});
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        getitem = { url: path };
+    } else {
+        getitem = { path: path };
+    }
+    const url = await cacheFile(Promise.resolve(getitem), file.id);
+    return {
+        url: url,
+        type: type,
+    };
+};
 
 
 /*
  * 處理來自 Discord 的多媒體訊息
  */
-const processDiscordFile = file => new Promise((resolve, reject) => {
-    cacheFile(Promise.resolve({ url: file.url }), file.id).then((url) => {
-        resolve({
-            url: url,
-            type: 'photo',
-        });
-    }).catch((e) => reject(e));
-});
+const processDiscordFile = async (file) => {
+    return {
+        url: await cacheFile(Promise.resolve({ url: file.url }), file.id),
+        type: 'photo'
+    };
+};
 
 
 /*

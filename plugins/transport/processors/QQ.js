@@ -66,7 +66,7 @@ const init = (b, h, c) => {
         }
 
         if (!context.isPrivate) {
-            groupInfo.set(`${context.from}@${context.to}`, context._rawdata.user);
+            groupInfo.set(`${context.from}@${context.to}`, context._rawdata.sender || context._rawdata.user);
         }
 
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
@@ -82,7 +82,7 @@ const init = (b, h, c) => {
             }
 
             Promise.all(promises).then((infos) => {
-                context.text = context._rawdata.raw;
+                context.text = context._rawdata.raw_message || context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
@@ -167,14 +167,14 @@ const init = (b, h, c) => {
 const receive = (msg) => new Promise((resolve, reject) => {
     if (msg.isNotice) {
         if (msg.extra.clients >= 3) {
-            qqHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`);
+            qqHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`).catch(e => reject(e));
         } else {
-            qqHandler.say(msg.to, `< ${msg.text} >`);
+            qqHandler.say(msg.to, `< ${msg.text} >`).catch(e => reject(e));
         }
     } else {
         if (msg.extra.isAction) {
             // 一定是 IRC
-            qqHandler.say(msg.to, `* ${msg.nick} ${msg.text}`);
+            qqHandler.say(msg.to, `* ${msg.nick} ${msg.text}`).catch(e => reject(e));
             resolve();
         } else {
             let special = '';
@@ -202,9 +202,16 @@ const receive = (msg) => new Promise((resolve, reject) => {
                 }
             }
 
-            // 檔案
-            const attachFileUrls = () => (msg.extra.uploads || []).map(u => ` ${u.url}`).join('');
-            qqHandler.say(msg.to, prefix + msg.text + attachFileUrls());
+            // 处理图片附件
+            let pendingText = qqHandler.escape(prefix + msg.text);
+            if (qqHandler.isCoolQPro) {
+                // HTTP API 插件 + CoolQ Pro 直接插图
+                pendingText += (msg.extra.uploads || []).map(u => `[CQ:image,file=${u.url}]`).join('');
+            } else {
+                pendingText += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
+            }
+
+            qqHandler.say(msg.to, pendingText, { noEscape: true }).catch(e => reject(e));
         }
     }
     resolve();

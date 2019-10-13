@@ -131,7 +131,11 @@ const bridge = {
                     winston.error(`[bridge.js] <BotSend> Rejected: `, e);
                 }).then(() => {
                     bridge.emitHook('bridge.sent', msg);
-                    winston.debug(`[bridge.js] <BotSend> #${currMsgId} done.`);
+                    if (promises.length > 0) {
+                        winston.debug(`[bridge.js] <BotSend> #${currMsgId} done.`);
+                    } else {
+                        winston.debug(`[bridge.js] <BotSend> #${currMsgId} has no targets. Ignored.`);
+                    }
                     return Promise.resolve(allresolved);
                 });
         });

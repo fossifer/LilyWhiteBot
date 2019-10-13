@@ -7,21 +7,23 @@
  */
 'use strict';
 
+const CQHttp = require('cqhttp');
+const discord = require('discord.js');
 const fs = require('fs');
 const https = require('https');
 const irc = require('irc-upd');
-const Telegraf = require('telegraf');
-const QQBot = require('./lib/QQBot.js');
-const WeChatBot = require('./lib/WeChatBotClient.js');
-const discord = require('discord.js');
 const proxy = require('./lib/proxy.js');
+const QQSocketApiBot = require('./lib/QQSocketApiBot.js');
+const Telegraf = require('telegraf');
+const WeChatBot = require('./lib/WeChatBotClient.js');
 const winston = require('winston');
 const yaml = require('js-yaml');
 
 const {Context, Message} = require('./lib/handlers/Context.js');
 const IRCMessageHandler = require('./lib/handlers/IRCMessageHandler.js');
 const TelegramMessageHandler = require('./lib/handlers/TelegramMessageHandler.js');
-const QQMessageHandler = require('./lib/handlers/QQMessageHandler.js');
+const QQSocketApiMessageHandler = require('./lib/handlers/QQSocketApiMessageHandler.js');
+const QQHttpApiMessageHandler = require('./lib/handlers/QQHttpApiMessageHandler.js');
 const WeChatMessageHandler = require('./lib/handlers/WeChatMessageHandler.js');
 const DiscordMessageHandler = require('./lib/handlers/DiscordMessageHandler.js');
 
@@ -63,8 +65,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 process.on('uncaughtException', (err, origin) => {
-    winston.error(`Caught exception: ${err}`);
-    winston.error(`Exception origin: ${origin}`);
+    winston.error(`Uncaught exception:`, err);
 });
 
 process.on('rejectionHandled', promise => {
@@ -123,6 +124,10 @@ if (config.logging && config.logging.logfile) {
 winston.info('LilyWhiteBot: Multi-platform message transport bot.');
 winston.info(`Version: ${require('./package.json').version}`);
 winston.info();
+
+// 检查过期设置
+
+
 let enabledClients = [];
 for (let type of ['IRC', 'Telegram', 'QQ', 'WeChat', 'Discord']) {
     if (config[type] && !config[type].disabled) {
@@ -230,28 +235,57 @@ if (config.Telegram && !config.Telegram.disabled) {
 
 if (config.QQ && !config.QQ.disabled) {
     let options = config.QQ.options || {};
+    let QQHandler;
+    let qqbot;
 
-    // TODO 兼容旧版本机器人
+    // 兼容旧版本机器人
     if (!config.QQ.apiRoot) {
+        winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API instead.');
 
+        qqbot = new QQSocketApiBot({
+            CoolQAirA: options.CoolQAirA,
+            host: config.QQ.host || '127.0.0.1',
+            port: config.QQ.port || 11235,
+            unicode: options.unicode,
+            dir: config.QQ.dir,
+            coolqCache: (((config.transport || {}).options || {}).servemedia || {}).coolqCache || '',
+            legacy: (((config.transport || {}).options || {}).servemedia || {}).legacy || false,
+        });
+        winston.info('Starting QQBot (cqsocketapi)...');
+
+        qqbot.on('Error', (err) => {
+            winston.error(`QQBot (cqsocketapi) error: ${err.error.toString()} (${err.event})`);
+        });
+
+        qqbot.start();
+
+        QQHandler = QQSocketApiMessageHandler;
     } else {
+        qqbot = new CQHttp({
+            apiRoot: config.QQ.apiRoot || 'http://127.0.0.1:5700/',
+            accessToken: config.QQ.accessToken || '',
+            secret: config.QQ.secret || '',
+        });
 
+        let port = 11234;
+        let host = '127.0.0.1';
+
+        if (config.QQ.listen) {
+            port = config.QQ.listen.port || port;
+            host = config.QQ.listen.host || host;
+        }
+        qqbot.listen(port, host);
+
+        winston.info(`QQBot (HTTP API) is listening at ${host}:${port}...`);
+
+        qqbot('get_version_info').then((json) => {
+            winston.info(`QQBot (HTTP API) Get CoolQ Information: CoolQ ${json.coolq_edition}, HTTP Plugin ${json.plugin_version}`);
+        }).catch(e => {
+            winston.error(`QQBot (HTTP API) Get CoolQ Information Failed: `, e);
+        });
+
+        QQHandler = QQHttpApiMessageHandler;
     }
-
-    let qqbot = new QQBot({
-        CoolQAirA: options.CoolQAirA,
-        host: config.QQ.host || '127.0.0.1',
-        port: config.QQ.port || 11235,
-        unicode: options.unicode,
-        dir: config.QQ.dir,
-    });
-    winston.info('Starting QQBot...');
-
-    qqbot.on('Error', (err) => {
-        winston.error(`QQBot error: ${err.error.toString()} (${err.event})`);
-    });
-
-    qqbot.start();
 
     // 載入敏感詞清單
     let badwords = null;
@@ -274,12 +308,15 @@ if (config.QQ && !config.QQ.disabled) {
         nickStyle: options.nickStyle,
         CoolQAirA: options.CoolQAirA,
         keepSilence: options.keepSilence,
+        apiRoot: config.QQ.apiRoot,
+        accessToken: config.QQ.accessToken,
+        CoolQPro: options.CoolQPro,
     };
 
-    const qqHandler = new QQMessageHandler(qqbot, options2);
+    const qqHandler = new QQHandler(qqbot, options2);
     pluginManager.handlers.set('QQ', qqHandler);
     pluginManager.handlerClasses.set('QQ', {
-        object: QQMessageHandler,
+        object: QQHandler,
         options: options2,
     });
 
@@ -323,7 +360,7 @@ if (config.WeChat && !config.WeChat.disabled) {
     const wechatHandler = new WeChatMessageHandler(wechatbot, options2);
     pluginManager.handlers.set('WeChat', wechatHandler);
     pluginManager.handlerClasses.set('WeChat', {
-        object: QQMessageHandler,
+        object: WeChatMessageHandler,
         options: options2,
     });
 
