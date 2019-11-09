@@ -40,6 +40,16 @@ Telegram:
       host: ""                              # HTTPS 代理服务器地址、端口
       port: 0
 
+    # 使用 Webhook 模式，参见 https://core.telegram.org/bots/webhooks
+    webhook:
+      port: 0                               # Webhook 端口，为 0 时不启用 Webhook
+      path: ""                              # Webhook 路径
+      url: ""                               # Webhook 的完整 URL
+      ssl:
+        certPath: ""                        # SSL 证书，为空时使用 HTTP 协议
+        keyPath: ""                         # SSL 密钥
+        caPath: ""                          # 如使用自签名证书，CA 证书路径
+
     apiRoot: "https://api.telegram.org"     # 无特殊需要的话勿动
     noCheckCertificate: false               # 无特殊需要的话勿动
 

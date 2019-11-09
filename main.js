@@ -215,7 +215,29 @@ if (config.Telegram && !config.Telegram.disabled) {
         winston.error(`TelegramBot error: ${err.message}`, err);
     });
 
-    tgBot.startPolling(tgcfg.bot.timeout || 30, tgcfg.bot.limit || 100);
+    if (tgcfg.options.webhook && tgcfg.options.webhook.port > 0) {
+        let tlsOptions = null;
+        if (tgcfg.options.webhook.ssl && tgcfg.options.webhook.ssl.certPath) {
+            tlsOptions = {
+                key: fs.readFileSync(tgcfg.options.webhook.ssl.keyPath),
+                cert: fs.readFileSync(tgcfg.options.webhook.ssl.certPath),
+            };
+            if (tgcfg.options.webhook.ssl.caPath) {
+                tlsOptions.ca = [
+                    fs.readFileSync(tgcfg.options.webhook.ssl.caPath);
+                ];
+            }
+            bot.telegram.setWebhook(tgcfg.options.webhook.url, {
+                source: tgcfg.options.webhook.ssl.certPath
+            });
+        } else {
+            bot.telegram.setWebhook(tgcfg.options.webhook.url);
+        }
+
+        bot.startWebhook(tgcfg.options.webhook.path, tlsOptions, tgcfg.options.webhook.port);
+    } else {
+        tgBot.startPolling(tgcfg.bot.timeout || 30, tgcfg.bot.limit || 100);
+    }
 
     let options2 = {
         botName: tgcfg.bot.name,
