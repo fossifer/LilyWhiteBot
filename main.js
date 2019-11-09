@@ -215,7 +215,19 @@ if (config.Telegram && !config.Telegram.disabled) {
         winston.error(`TelegramBot error: ${err.message}`, err);
     });
 
-    if (tgcfg.options.webhook && tgcfg.options.webhook.port > 0) {
+    if (tgcfg.options.webhook && tgcfg.options.webhook.port > 0) {        
+        // 自动设置Webhook网址
+        if (tgcfg.options.webhook.url) {
+            if (tgcfg.options.webhook.ssl.certPath) {
+                tgBot.telegram.setWebhook(tgcfg.options.webhook.url, {
+                    source: tgcfg.options.webhook.ssl.certPath
+                });
+            } else {
+                tgBot.telegram.setWebhook(tgcfg.options.webhook.url);
+            }
+        }
+        
+        // 启动Webhook服务器
         let tlsOptions = null;
         if (tgcfg.options.webhook.ssl && tgcfg.options.webhook.ssl.certPath) {
             tlsOptions = {
@@ -227,15 +239,11 @@ if (config.Telegram && !config.Telegram.disabled) {
                     fs.readFileSync(tgcfg.options.webhook.ssl.caPath)
                 ];
             }
-            tgBot.telegram.setWebhook(tgcfg.options.webhook.url, {
-                source: tgcfg.options.webhook.ssl.certPath
-            });
-        } else {
-            tgBot.telegram.setWebhook(tgcfg.options.webhook.url);
         }
 
         tgBot.startWebhook(tgcfg.options.webhook.path, tlsOptions, tgcfg.options.webhook.port);
     } else {
+        // 使用轮询机制，开始轮询
         tgBot.startPolling(tgcfg.bot.timeout || 30, tgcfg.bot.limit || 100);
     }
 
