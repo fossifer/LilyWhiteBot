@@ -224,7 +224,7 @@ if (config.Telegram && !config.Telegram.disabled) {
             };
             if (tgcfg.options.webhook.ssl.caPath) {
                 tlsOptions.ca = [
-                    fs.readFileSync(tgcfg.options.webhook.ssl.caPath);
+                    fs.readFileSync(tgcfg.options.webhook.ssl.caPath)
                 ];
             }
             bot.telegram.setWebhook(tgcfg.options.webhook.url, {
