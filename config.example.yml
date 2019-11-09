@@ -44,7 +44,7 @@ Telegram:
     webhook:
       port: 0                               # Webhook 端口，为 0 时不启用 Webhook
       path: ""                              # Webhook 路径
-      url: ""                               # Webhook 的完整 URL
+      url: ""                               # Webhook 最终的完整 URL，可被外部访问，用于调用 Telegram 接口自动设置网址
       ssl:
         certPath: ""                        # SSL 证书，为空时使用 HTTP 协议
         keyPath: ""                         # SSL 密钥
