@@ -227,14 +227,14 @@ if (config.Telegram && !config.Telegram.disabled) {
                     fs.readFileSync(tgcfg.options.webhook.ssl.caPath)
                 ];
             }
-            bot.telegram.setWebhook(tgcfg.options.webhook.url, {
+            tgBot.telegram.setWebhook(tgcfg.options.webhook.url, {
                 source: tgcfg.options.webhook.ssl.certPath
             });
         } else {
-            bot.telegram.setWebhook(tgcfg.options.webhook.url);
+            tgBot.telegram.setWebhook(tgcfg.options.webhook.url);
         }
 
-        bot.startWebhook(tgcfg.options.webhook.path, tlsOptions, tgcfg.options.webhook.port);
+        tgBot.startWebhook(tgcfg.options.webhook.path, tlsOptions, tgcfg.options.webhook.port);
     } else {
         tgBot.startPolling(tgcfg.bot.timeout || 30, tgcfg.bot.limit || 100);
     }
