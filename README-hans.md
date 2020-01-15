@@ -42,7 +42,7 @@ goto a
 2. 执行程式时，酷 Q 会有很大机率要求你开启 QQ 的设备锁，因此注册小号时请不要乱填电话号。
 3. 酷 Q 模拟的是安卓 QQ，而且 QQ 不允许多个手机同时登入。如果已经开启酷 Q，而且需要直接操作机器人账号，请用电脑登入。
 4. 酷 Q 是私有软体，和我没关系。
-5. 酷 Q 可以透过 wine 在 Linux/Mac 系统中执行，可以参考[这篇教程](https://cqp.cc/t/30970)进行设定，不过该教程不再维护，请参见教程页面上方到酷 Q 的 Docker 版本的使用方法的连接。Docker 版使用者可参照[这里](https://github.com/yukixz/cqsocketapi/issues/19)与[这里](https://github.com/mrhso/cqsocketapi/blob/master/omake.md#docker-%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)解決到酷 Q 部分的 cqsocketapi 通讯的問題。
+5. 酷 Q 可以透过 wine 在 Linux/Mac 系统中执行，可以参考[这篇教程](https://cqp.cc/t/30970)进行设定，不过该教程不再维护，请参见教程页面上方到酷 Q 的 Docker 版本的使用方法的连接。Docker 版使用者可参照[这里](https://github.com/yukixz/cqsocketapi/issues/19)与[这里](https://github.com/mrhso/cqsocketapi/blob/master/omake.md#docker-%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)解決到酷 Q 部分的 cqsocketapi 通讯的问题。
 
 ### 设定 Telegram 机器人
 @BotFather，与其交互，按照荧幕提示进行操作，建立一个机器人账号。设定完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.js 中。
