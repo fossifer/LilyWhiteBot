@@ -71,10 +71,10 @@ module.exports = (pluginManager, options) => {
             // 舊版
             winston.warn('* Deprecated: config.example.json changed, please update "groups" in your config.js.');
 
-            for (let client1 of ['QQ', 'Telegram', 'IRC']) {
+            for (let client1 of ['QQ', 'Telegram', 'IRC', 'Discord']) {
                 let g1 = group[client1];
                 if (g1) {
-                    for (let client2 of ['QQ', 'Telegram', 'IRC']) {
+                    for (let client2 of ['QQ', 'Telegram', 'IRC', 'Discord']) {
                         if (client1 === client2) { continue; }
 
                         let g2 = group[client2];

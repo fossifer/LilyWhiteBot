@@ -110,7 +110,7 @@ transport:
   groups:
     - ['irc/#test', 'telegram/-12345678', 'qq/12345678']
     # 可以在同一组内增加软件相同、群号不同的群，例如
-    # - ['irc/#test', 'telegram/-12345678', 'qq/12345678', 'qq/87654321'] 
+    # - ['irc/#test', 'telegram/-12345678', 'qq/12345678', 'qq/87654321']
     # 另外如有多组互联需求，可继续增加互联关系
 
   # 如果希望把同一軟體的多個群組連接到一起，可為不同的群組設置不同的別名，
@@ -133,7 +133,7 @@ transport:
         leave: onlyactive                   # 有人離開頻道的話是否在其他群組提醒，也可取 all/onlyactive/none
         timeBeforeLeave: 600                # 如果 leave 為 onlyactive 的話：最後一次說話後多長時間內離開才會提醒
         topic: true                         # 頻道更換 Topic 時是否提醒
-      
+
       # 這裡可以設定機器人在 IRC 頻道中使用顏色。在啟用顏色功能之前，IRC 頻道的管理員需要解除頻道的 +c 模式，即
       #  /msg ChanServ SET #頻道 MLOCK -c
 
@@ -158,11 +158,11 @@ transport:
 
         # 如果 nick 為 colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數
         nickcolors: ["green", "blue", "purple", "olive", "pink", "teal", "red"]
-  
+
       # 互联控制相关
       receiveCommands: true                 # 是否允許 Telegram 和 QQ 使用 irccommand
       allowQuery: true                      # 是否允許其他群組查詢 IRC 頻道資訊
-    
+
     Telegram:
       notify:
         join: true
@@ -189,9 +189,12 @@ transport:
         notice: true                        # 发送群公告时是否提醒其他群组
 
     # 其他设置
-    paeeye: "//"                            # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能
+    paeeye:                                 # 留空或省略則禁用本功能
+      prepend: "//"                         # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。
+      inline: "--no-relay"                  # 在訊息中間使用「--no-relay」會阻止此條訊息向其他群組轉發。
     hidenick: false                         # 轉發時不顯示暱稱（建議不要開啟）
-    
+    showTitle: false                        # 轉發時顯示頭銜（被@者不會顯示）
+
     # 本節用於處理圖片等檔案
     #
     # type為檔案的處置方式，可取：
@@ -236,7 +239,7 @@ transport:
 ircquery:
   disables:                                 # 不要在這些群組使用 ircquery 功能
     - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
-  
+
   # 如果是只希望在特定群組使用，用這個
   # enables:
   #  - "qq/12345678"
@@ -248,7 +251,7 @@ irccommand:
 
   disables:                                 # 不要在這些群組使用 ircquery 功能
     - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
-  
+
   # 如果是只希望在特定群組使用，用這個
   # enables:
   #  - "qq/12345678"

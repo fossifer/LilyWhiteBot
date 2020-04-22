@@ -86,7 +86,7 @@ const init = (b, h, c) => {
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
-                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info))}`);
+                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info, false))}`);
                     }
                 }
                 context.text = qqHandler.parseMessage(context.text).text;
@@ -118,7 +118,7 @@ const init = (b, h, c) => {
         if (data.type === 1) {
             text = `${data.user_target.name} (${data.target}) 退出QQ群`;
         } else {
-            text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.adminQQ}) 踢出QQ群`;
+            text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.admin}) 踢出QQ群`;
         }
 
         if (groupInfo.has(`${data.target}@${data.group}`)) {
@@ -150,6 +150,30 @@ const init = (b, h, c) => {
         }
 
         if (options.notify.setadmin) {
+            bridge.send(new BridgeMsg({
+                from: data.group,
+                to: data.group,
+                nick: data.user.name,
+                text: text,
+                isNotice: true,
+                handler: qqHandler,
+                _rawdata: data,
+            })).catch(() => {});
+        }
+    });
+
+    /*
+     * 禁言與解禁
+     */
+    qqHandler.on('ban', (data) => {
+        let text;
+        if (data.type === 1) {
+            text = `${data.user.name} (${data.target}) 被禁言 ${data.duration}`;
+        } else {
+            text = `${data.user.name} (${data.target}) 被解除禁言`;
+        }
+
+        if (options.notify.ban) {
             bridge.send(new BridgeMsg({
                 from: data.group,
                 to: data.group,
