@@ -63,14 +63,11 @@ node main.js
 8. 如果需要，可自行搜索监控或自动重启插件，或者将插件提供的 HTTP 接口纳入到 Zabbix 等监控系统中。
 
 注意：
-1. 本程序需要酷 Q Air 和这个专门的 HTTP API 才能收发 QQ 群信息。
-2. 如无特殊需求，不建议使用 Pro，因本程序不支持 Pro 的附加功能。
-3. 不支持讨论组互联，如有需要，请将讨论组转成群。
-4. 运行程序时，酷 Q 会有很大机率要求你开启 QQ 的设备锁，因此注册小号时请不要乱填电话号。
-5. 酷 Q 模拟的是安卓 QQ，而且 QQ 不允许多个手机同时登录。如果已经开启酷 Q，而且需要直接操作机器人账号，请用电脑登录。
-6. 酷 Q 是私有软件，和腾讯、CoolQ HTTP API、本程序等均无关系。
-7. 酷 Q 可以通过 wine 在 Linux/Mac 系统中运行，可以参考[这篇教程](https://cqp.cc/t/30970)进行设置。
-8. 酷 Q 可以通过 Docker 运行，参见[其 GitHub 页面](https://github.com/CoolQ/docker-wine-coolq)。
+1. 本程式需要酷 Q Air/Pro 和這個專門的 cqsocketapi 才能收發 QQ 群訊息。
+2. 執行程式時，酷 Q 會有很大機率要求你開啟 QQ 的設備鎖，因此註冊小號時請不要亂填電話號。
+3. 酷 Q 模擬的是安卓 QQ，而且 QQ 不允許多個手機同時登入。如果已經開啟酷 Q，而且需要直接操作機器人賬號，請用電腦登入。
+4. 酷 Q 是私有軟體，和我沒關係。
+5. 酷 Q 可以透過 wine 在 Linux/Mac 系統中執行，可以參考[這篇教程](https://cqp.cc/t/30970)進行設定，不過該教程不再維護，請參見教程頁面上方到酷 Q 的 Docker 版本的使用方法的連接。Docker 版可參照[這裡](https://github.com/yukixz/cqsocketapi/issues/19)與[這裡](https://github.com/mrhso/cqsocketapi/blob/master/omake.md#docker-%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)解決到酷 Q 部分的 cqsocketapi 通訊的問題。
 
 ### 设置 Telegram 机器人
 @BotFather，与其交互，按照屏幕提示进行操作，建立一个机器人账号。设置完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.yml 中。
