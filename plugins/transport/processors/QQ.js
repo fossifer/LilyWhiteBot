@@ -53,7 +53,7 @@ const init = (b, h, c) => {
         }
 
         // 過濾口令紅包
-        if (context.extra.isCash) {
+        /*if (context.extra.isCash) {
             let key = `${context.to}: ${context.text}`;
             if (!bannedMessage.has(key)) {
                 bannedMessage.set(key, true);
@@ -63,14 +63,14 @@ const init = (b, h, c) => {
                 }));
             }
             return;
-        }
+        }*/
 
         if (!context.isPrivate) {
             groupInfo.set(`${context.from}@${context.to}`, context._rawdata.sender || context._rawdata.user);
         }
 
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
-            // 先處理 QQ 的 at
+            // 先處理 QQ 的 at。但是為啥context.text之前已經parse過現在又要拿_rawdata重新parse?
             let promises = [];
 
             for (let at of context.extra.ats) {
@@ -82,11 +82,11 @@ const init = (b, h, c) => {
             }
 
             Promise.all(promises).then((infos) => {
-                context.text = context._rawdata.raw_message || context._rawdata.raw;
+                context.text = context.text || context._rawdata.raw_message || context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
-                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info, false))}`);
+                        context.text = context.text.replace(new RegExp(`[CQ:at,qq=${info.qq||info.user_id}]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info, false))}`);
                     }
                 }
                 context.text = qqHandler.parseMessage(context.text).text;
@@ -228,7 +228,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
 
             // 处理图片附件
             let pendingText = qqHandler.escape(prefix + msg.text);
-            if (qqHandler.isCoolQPro) {
+            if (qqHandler.CoolQPro) {
                 // HTTP API 插件 + CoolQ Pro 直接插图
                 pendingText += (msg.extra.uploads || []).map(u => `[CQ:image,file=${u.url}]`).join('');
             } else {

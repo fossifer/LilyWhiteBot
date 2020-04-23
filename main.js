@@ -215,7 +215,7 @@ if (config.Telegram && !config.Telegram.disabled) {
         winston.error(`TelegramBot error: ${err.message}`, err);
     });
 
-    if (tgcfg.options.webhook && tgcfg.options.webhook.port > 0) {        
+    if (tgcfg.options.webhook && tgcfg.options.webhook.port > 0) {
         // 自动设置Webhook网址
         if (tgcfg.options.webhook.url) {
             if (tgcfg.options.webhook.ssl.certPath) {
@@ -226,7 +226,7 @@ if (config.Telegram && !config.Telegram.disabled) {
                 tgBot.telegram.setWebhook(tgcfg.options.webhook.url);
             }
         }
-        
+
         // 启动Webhook服务器
         let tlsOptions = null;
         if (tgcfg.options.webhook.ssl && tgcfg.options.webhook.ssl.certPath) {
@@ -336,6 +336,7 @@ if (config.QQ && !config.QQ.disabled) {
         ignoreCash: options.ignoreCash,
         badwords: badwords,
         nickStyle: options.nickStyle,
+        showTitle: options.showTitle,
         CoolQAirA: options.CoolQAirA,
         keepSilence: options.keepSilence,
         apiRoot: config.QQ.apiRoot,
