@@ -62,15 +62,6 @@ node main.js
 7. 请记得定期清除缓存。
 8. 如果需要，可自行搜索监控或自动重启插件，或者将插件提供的 HTTP 接口纳入到 Zabbix 等监控系统中。
 
-注意：
-1. 本程序需要酷 Q Air 和这个专门的 HTTP API 才能收发 QQ 群信息。
-2. 如无特殊需求，不建议使用 Pro，因本程序不支持 Pro 的附加功能。
-3. 不支持讨论组互联，如有需要，请将讨论组转成群。
-4. 运行程序时，酷 Q 会有很大机率要求你开启 QQ 的设备锁，因此注册小号时请不要乱填电话号。
-5. 酷 Q 模拟的是安卓 QQ，而且 QQ 不允许多个手机同时登录。如果已经开启酷 Q，而且需要直接操作机器人账号，请用电脑登录。
-6. 酷 Q 是私有软件，和腾讯、CoolQ HTTP API、本程序等均无关系。
-7. 酷 Q 可以通过 wine 在 Linux/Mac 系统中运行，可以参考[这篇教程](https://cqp.cc/t/30970)进行设置。
-
 ### 设置 Telegram 机器人
 @BotFather，与其交互，按照屏幕提示进行操作，建立一个机器人账号。设置完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.yml 中。
 
@@ -86,8 +77,10 @@ IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入�
 
 频道 ID 可以在网页版之 URL 看到，最后面的那串神秘数字便是。
 
-## 在 Docker 中运行
+## 在 Docker 中运行（推荐）
 推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/infnan/LilyWhiteBot/blob/master/README_Docker.md)。
+
+注意：如果使用酷 Q，其插件需要使用 CoolQ HTTP API 而非 cqsockertapi，否则程序无法连接。
 
 ## 提示
 1. 如果把 config.yml 中的 `paeeye` 设为 `//`，那么在信息之前加入 `//`（例如「//隐藏」）可防止被其他群组看见。
