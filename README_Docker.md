@@ -106,7 +106,7 @@ services:
     user: node
     working_dir: /home/node/app
     volumes:
-      - ./qq-tg-irc/LilyWhiteBot:/home/node/app
+      - ./LilyWhiteBot:/home/node/app
     command: "npm run install-start"
 ```
 
