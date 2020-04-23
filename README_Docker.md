@@ -94,8 +94,8 @@ services:
     volumes:
       - ./coolq:/home/user/coolq
     ports:
-      # 使用5911作为运维端口，VNC协议
-      - "5911:5911"
+      # 使用9000作为运维端口，HTTP协议
+      - "9000:9000"
     environment:
       VNC_PASSWD: VNC密码
       COOLQ_ACCOUNT: 你的机器人账号
@@ -116,7 +116,7 @@ services:
 docker-compose up -d
 ```
 
-第一次启动时，需安装配置酷 Q。调整服务器防火墙，放行5911端口，然后使用VNC客户端连接到服务器上，进行酷 Q 的安装与登录操作。登录成功后，启用 CoolQ HTTP API 插件，然后在界面中重启酷 Q。
+第一次启动时，需安装配置酷 Q。调整服务器防火墙，放行9000端口，然后使用浏览器访问`http://你的服务器IP:9000`，输入VNC密码，进行酷 Q 的安装与登录操作。登录成功后，启用 CoolQ HTTP API 插件，然后在界面中重启酷 Q。
 
 配置完成后，检查机器人是否正常运行。酷 Q 与 CoolQ HTTP API 插件可在酷 Q 软件中查看，而互联机器人日志可通过`docker logs bot_lilywhitebot_1`命令查看。
 
