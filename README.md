@@ -7,7 +7,7 @@ LilyWhiteBot
 
 1. Node.js 最低版本为 8。
 2. 配置文件格式由 json 换成了 yaml。json 配置文件仍然可用，但您会收到一条警告信息。
-3. 程序不再支持酷 Q 的 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk)插件，建议尽快更换成 [CoolQ HTTP API](https://cqhttp.cc/)。
+3. 程序不再支持酷 Q 的 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk) 插件（尽管还能继续使用，然而不保证效果），建议尽快更换成 [CoolQ HTTP API](https://cqhttp.cc/)。
 
 如需使用新插件，请按照以下形式重新设置：
 ```yaml
@@ -62,13 +62,6 @@ node main.js
 7. 请记得定期清除缓存。
 8. 如果需要，可自行搜索监控或自动重启插件，或者将插件提供的 HTTP 接口纳入到 Zabbix 等监控系统中。
 
-注意：
-1. 本程式需要酷 Q Air/Pro 和這個專門的 cqsocketapi 才能收發 QQ 群訊息。
-2. 執行程式時，酷 Q 會有很大機率要求你開啟 QQ 的設備鎖，因此註冊小號時請不要亂填電話號。
-3. 酷 Q 模擬的是安卓 QQ，而且 QQ 不允許多個手機同時登入。如果已經開啟酷 Q，而且需要直接操作機器人賬號，請用電腦登入。
-4. 酷 Q 是私有軟體，和我沒關係。
-5. 酷 Q 可以透過 wine 在 Linux/Mac 系統中執行，可以參考[這篇教程](https://cqp.cc/t/30970)進行設定，不過該教程不再維護，請參見教程頁面上方到酷 Q 的 Docker 版本的使用方法的連接。Docker 版可參照[這裡](https://github.com/yukixz/cqsocketapi/issues/19)與[這裡](https://github.com/mrhso/cqsocketapi/blob/master/omake.md#docker-%E7%9A%84%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)解決到酷 Q 部分的 cqsocketapi 通訊的問題。
-
 ### 设置 Telegram 机器人
 @BotFather，与其交互，按照屏幕提示进行操作，建立一个机器人账号。设置完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.yml 中。
 
@@ -84,7 +77,9 @@ IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入�
 
 频道 ID 可以在网页版之 URL 看到，最后面的那串神秘数字便是。
 
-## 在 Docker 中运行
+## 在 Docker 中运行（推荐）
+推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/infnan/LilyWhiteBot/blob/master/README_Docker.md)。
+
 注意：如果使用酷 Q，其插件需要使用 CoolQ HTTP API 而非 cqsockertapi，否则程序无法连接。
 
 ## 提示
@@ -93,7 +88,7 @@ IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入�
 3. 如果允许查询 IRC 的情况（plugins 中有「ircquery」），那么可在 Telegram 和 QQ 中使用 `/names`（取得在线用户清单）、`/whois 昵称`（whois）和 `/topic`（取得 Topic）。
 
 ## 关于 QQ 的特别提醒
-为保护机器人操作者，程序提供了「敏感词」功能，启用之后，程序会自动把敏感词清单中的词语转为「*」。然而**程序并未提供词库**，您需要自行去 GitHub 等网站搜集敏感词并制作词典。建议在启用机器人之前把敏感词功能设置好，除非您不在中国，或者能够保证没有群友会利用敏感词来陷害您。
+为保护机器人操作者，程序提供了「敏感词」功能，启用之后，程序会自动把敏感词清单中的词语转为「*」。然而**程序并未提供词库**，您需要自行去 GitHub 等网站搜集敏感词并制作词典。建议在启用机器人之前把敏感词功能设置好，除非您不在中国，或者能够保证没有群友会利用敏感话题来陷害您。
 
 ### 其他功能
 以下各功能的设定方法均为改 config.yml。
