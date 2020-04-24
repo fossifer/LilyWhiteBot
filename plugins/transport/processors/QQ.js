@@ -53,7 +53,7 @@ const init = (b, h, c) => {
         }
 
         // 過濾口令紅包
-        /*if (context.extra.isCash) {
+        if (context.extra.isCash) {
             let key = `${context.to}: ${context.text}`;
             if (!bannedMessage.has(key)) {
                 bannedMessage.set(key, true);
@@ -63,7 +63,7 @@ const init = (b, h, c) => {
                 }));
             }
             return;
-        }*/
+        }
 
         if (!context.isPrivate) {
             groupInfo.set(`${context.from}@${context.to}`, context._rawdata.sender || context._rawdata.user);
@@ -85,7 +85,7 @@ const init = (b, h, c) => {
                 context.text = context.text || context._rawdata.raw_message || context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
-                        groupInfo.set(`${info.qq}@${context.to}`, info);
+                        groupInfo.set(`${info.qq||info.user_id}@${context.to}`, info);
                         context.text = context.text.replace(new RegExp(`[CQ:at,qq=${info.qq||info.user_id}]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info, false))}`);
                     }
                 }
