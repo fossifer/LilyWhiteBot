@@ -273,7 +273,7 @@ if (config.QQ && !config.QQ.disabled) {
 
     // 兼容旧版本机器人
     if (!config.QQ.apiRoot) {
-        winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API instead.');
+        winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API (https://cqhttp.cc/) instead.');
 
         qqbot = new QQSocketApiBot({
             CoolQAirA: options.CoolQAirA,
