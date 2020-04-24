@@ -92,6 +92,9 @@ const loadConfig = (name) => {
     } else if (isFileExists(`${name}.js`)) {
         winston.warn(`* DEPRECATED: ${name}.js format is deprecated, please use yaml format instead.`);
         return require(`./${name}.js`);
+    } else if (isFileExists(`${name}.json`)) {
+        winston.warn(`* DEPRECATED: ${name}.json format is deprecated, please use yaml format instead.`);
+        return require(`./${name}.json`);
     } else {
         return null;
     }
