@@ -92,6 +92,9 @@ const loadConfig = (name) => {
     } else if (isFileExists(`${name}.js`)) {
         winston.warn(`* DEPRECATED: ${name}.js format is deprecated, please use yaml format instead.`);
         return require(`./${name}.js`);
+    } else if (isFileExists(`${name}.json`)) {
+        winston.warn(`* DEPRECATED: ${name}.json format is deprecated, please use yaml format instead.`);
+        return require(`./${name}.json`);
     } else {
         return null;
     }
@@ -270,7 +273,7 @@ if (config.QQ && !config.QQ.disabled) {
 
     // 兼容旧版本机器人
     if (!config.QQ.apiRoot) {
-        winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API instead.');
+        winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API (https://cqhttp.cc/) instead.');
 
         qqbot = new QQSocketApiBot({
             CoolQAirA: options.CoolQAirA,
