@@ -20,6 +20,11 @@ let userInfo = new LRU({
     maxAge: 3600000,
 });
 
+let emojiInfo = new LRU({
+    max: 500,
+    maxAge: 3600000,
+});
+
 let bridge = null;
 let config = null;
 let discordHandler = null;
@@ -42,6 +47,41 @@ const init = (b, h, c) => {
         const send = () => bridge.send(context).catch(() => {});
 
         userInfo.set(context.from, context._rawdata.author);
+
+        if (context.text.match(/<:.+:\d*?>/u)) {
+          // 處理自定義表情符號
+          let emojis = [];
+          let promises = [];
+
+          context.text.replace(/<:.+:(\d*?)>/gu, (_, id) => {
+              if (id) {emojis.push(id)};
+          });
+          emojis = [...new Set(emojis)];
+          for (let emoji of emojis) {
+            if (emojiInfo.has(emoji)) {
+                promises.push(Promise.resolve(emojiInfo.get(emoji)));
+            } else {
+                promises.push(discordHandler.fetchEmoji(emoji).catch(_ => {}))
+            }
+          }
+
+          Promise.all(promises).then((infos) => {
+              for (let info of infos) {
+                  if (info) {
+                      let proxyURL = info.url.replace("cdn.discordapp.com", "media.discordapp.net")
+                      emojiInfo.set(info.id, info);
+                      context.text = context.text.replace(new RegExp(`<:.+:${info.id}>`, 'gu'), `<emoji: ${info.name}>`);
+                      context.extra.files.push({
+                          client: 'Discord',
+                          type: 'photo',
+                          id: info.id,
+                          size: 262144,
+                          url: discordHandler._useProxyURL ? proxyURL : info.url,
+                      })
+                  }
+              }
+          }).catch(_ => {})
+        }
 
         if (context.text.match(/<@\d*?>/u)) {
             // 處理 at
