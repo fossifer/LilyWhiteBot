@@ -65,12 +65,8 @@ const init = (b, h, c) => {
             return;
         }
 
-        if (!context.isPrivate) {
-            groupInfo.set(`${context.from}@${context.to}`, context._rawdata.sender || context._rawdata.user);
-        }
-
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
-            // 先處理 QQ 的 at。但是為啥context.text之前已經parse過現在又要拿_rawdata重新parse?
+            // 查询 QQ 的 at
             let promises = [];
 
             for (let at of context.extra.ats) {
@@ -82,14 +78,22 @@ const init = (b, h, c) => {
             }
 
             Promise.all(promises).then((infos) => {
-                context.text = context.text || context._rawdata.raw_message || context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq||info.user_id}@${context.to}`, info);
-                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq||info.user_id}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info, false))}`);
+
+                        const user = {
+                            sender: {
+                                user_id: info.qq||info.user_id,
+                                nickname: info.name||info.nickname,
+                                card: info.groupCard||info.card
+                            }
+                        };
+                        const searchReg = new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu');
+                        const atText = `＠${qqHandler.escape(qqHandler.getNick(user, false))}`;
+                        context.text = context.text.replace(searchReg, atText);
                     }
                 }
-                context.text = qqHandler.parseMessage(context.text).text;
             }).catch(_ => {}).then(() => send());
         } else {
             send();
