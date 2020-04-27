@@ -20,11 +20,6 @@ let userInfo = new LRU({
     maxAge: 3600000,
 });
 
-let emojiInfo = new LRU({
-    max: 500,
-    maxAge: 3600000,
-});
-
 let bridge = null;
 let config = null;
 let discordHandler = null;
@@ -48,39 +43,28 @@ const init = (b, h, c) => {
 
         userInfo.set(context.from, context._rawdata.author);
 
-        if (context.text.match(/<:.+:\d*?>/u)) {
+        if (context.text.match(/<:\w+:\d*?>/u)) {
           // 處理自定義表情符號
           let emojis = [];
-          let promises = [];
 
-          context.text.replace(/<:.+:(\d*?)>/gu, (_, id) => {
-              if (id) {emojis.push(id)};
+          context.text.replace(/<:(\w+):(\d*?)>/g, (_, name, id) => {
+              if (id && !emojis.filter(v=>v.id===id).length) {emojis.push({name:name, id:id})};
           });
-          emojis = [...new Set(emojis)];
+          if (!context.extra.files) { context.extra.files = [] }
           for (let emoji of emojis) {
-            if (emojiInfo.has(emoji)) {
-                promises.push(Promise.resolve(emojiInfo.get(emoji)));
-            } else {
-                promises.push(discordHandler.fetchEmoji(emoji).catch(_ => {}))
-            }
+              // TODO: 檢查是否動圖，使用.gif
+              let url = `https://cdn.discordapp.com/emojis/${emoji.id}.png`
+              let proxyURL = `https://media.discordapp.net/emojis/${emoji.id}.png`
+              context.text = context.text.replace(new RegExp(`<:${emoji.name}:${emoji.id}>`, 'gu'), `<emoji: ${emoji.name}>`);
+              context.extra.files.push({
+                  client: 'Discord',
+                  type: 'photo',
+                  id: emoji.id,
+                  size: 262144,
+                  url: discordHandler._useProxyURL ? proxyURL : url,
+              })
           }
-
-          Promise.all(promises).then((infos) => {
-              for (let info of infos) {
-                  if (info) {
-                      let proxyURL = info.url.replace("cdn.discordapp.com", "media.discordapp.net")
-                      emojiInfo.set(info.id, info);
-                      context.text = context.text.replace(new RegExp(`<:.+:${info.id}>`, 'gu'), `<emoji: ${info.name}>`);
-                      context.extra.files.push({
-                          client: 'Discord',
-                          type: 'photo',
-                          id: info.id,
-                          size: 262144,
-                          url: discordHandler._useProxyURL ? proxyURL : info.url,
-                      })
-                  }
-              }
-          }).catch(_ => {})
+          if (!context.extra.files.length) { delete context.extra.files }
         }
 
         if (context.text.match(/<@\d*?>/u)) {
