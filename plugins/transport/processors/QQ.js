@@ -65,12 +65,8 @@ const init = (b, h, c) => {
             return;
         }
 
-        if (!context.isPrivate) {
-            groupInfo.set(`${context.from}@${context.to}`, context._rawdata.sender || context._rawdata.user);
-        }
-
         if (!context.isPrivate && context.extra.ats && context.extra.ats.length > 0) {
-            // 先處理 QQ 的 at
+            // 查询 QQ 的 at
             let promises = [];
 
             for (let at of context.extra.ats) {
@@ -82,14 +78,22 @@ const init = (b, h, c) => {
             }
 
             Promise.all(promises).then((infos) => {
-                context.text = context._rawdata.raw_message || context._rawdata.raw;
                 for (let info of infos) {
                     if (info) {
                         groupInfo.set(`${info.qq}@${context.to}`, info);
-                        context.text = context.text.replace(new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu'), `@${qqHandler.escape(qqHandler.getNick(info))}`);
+
+                        const user = {
+                            sender: {
+                                user_id: info.qq,
+                                nickname: info.name,
+                                card: info.groupCard
+                            }
+                        };
+                        const searchReg = new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu');
+                        const atText = `＠${qqHandler.escape(qqHandler.getNick(user))}`;
+                        context.text = context.text.replace(searchReg, atText);
                     }
                 }
-                context.text = qqHandler.parseMessage(context.text).text;
             }).catch(_ => {}).then(() => send());
         } else {
             send();
