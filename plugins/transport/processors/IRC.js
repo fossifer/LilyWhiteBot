@@ -225,11 +225,13 @@ const receive = (msg) => new Promise((resolve, reject) => {
             output.push('[');
             if (msg.extra.clients >= 3) {
                 tmp = `${msg.extra.clientName.shortname}`;
-                if (colorize.enabled && colorize.client) {
-                    tmp = color[colorize.client](tmp);
+                if (tmp) {
+                    if (colorize.enabled && colorize.client) {
+                        tmp = color[colorize.client](tmp);
+                    }
+                    output.push(tmp);
+                    output.push(' - ');
                 }
-                output.push(tmp);
-                output.push(' - ');
             }
 
             tmp = msg.nick;
