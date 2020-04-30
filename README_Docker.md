@@ -111,7 +111,6 @@ services:
   lilywhitebot:
     build: ./LilyWhiteBot
     restart: always
-    user: node
     working_dir: /home/node/app
     volumes:
       - ./LilyWhiteBot:/home/node/app
