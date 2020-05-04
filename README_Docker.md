@@ -109,6 +109,7 @@ services:
       COOLQ_ACCOUNT: 你的机器人账号
 
   lilywhitebot:
+    # 如果不使用webp，而且处于中国，网络不好，那么直接换成 image: node:13 即可。
     build: ./LilyWhiteBot
     restart: always
     user: node
