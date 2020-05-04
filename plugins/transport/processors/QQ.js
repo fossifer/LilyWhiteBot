@@ -223,7 +223,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
                     special = `Fwd ${msg.extra.forward.nick}: `;
                 }
 
-                if (msg.extra.clients >= 3) {
+                if (msg.extra.clients >= 3 && msg.extra.clientName.shortname) {
                     prefix = `[${msg.extra.clientName.shortname} - ${msg.nick}] ${special}`;
                 } else {
                     prefix = `[${msg.nick}] ${special}`;

@@ -162,7 +162,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
             if (msg.extra.isAction) {
                 prefix = `* <b>${htmlEscape(msg.nick)}</b> `;
             } else {
-                if (msg.extra.clients >= 3) {
+                if (msg.extra.clients >= 3 && msg.extra.clientName.shortname) {
                     prefix = `[${htmlEscape(msg.extra.clientName.shortname)} - <b>${htmlEscape(msg.nick)}</b>] `;
                 } else {
                     prefix = `[<b>${htmlEscape(msg.nick)}</b>] `;
