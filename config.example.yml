@@ -76,7 +76,6 @@ QQ:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
     ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
     nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
-    # CoolQAirA: true                         # true - 酷Q Air，false - 酷Q Pro - 此参数已弃用
     CoolQPro: false                         # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
 
 Discord:
