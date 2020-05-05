@@ -10,7 +10,6 @@
         "irc-colors": "~1.5.0",
         "irc-upd": "~0.10.0",
         "ishisashiencoding": "^0.4.0",
-        "ishisashimap": "^1.0.1",
         "js-yaml": "^3.13.1",
         "lru-cache": "^5.1.1",
         "request": "~2.88.2",
