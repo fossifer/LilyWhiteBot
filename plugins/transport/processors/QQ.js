@@ -210,7 +210,7 @@ const receive = (msg) => new Promise((resolve, reject) => {
             let pendingText = qqHandler.escape(prefix + msg.text);
             if (qqHandler.isCoolQPro) {
                 // HTTP API 插件 + CoolQ Pro 直接插图
-                pendingText += (msg.extra.uploads || []).map(u => `[CQ:image,file=${u.url}]`).join('');
+                pendingText += '\n' + (msg.extra.uploads || []).map(u => `[CQ:image,file=${u.url}]`).join('');
             } else {
                 pendingText += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
             }
