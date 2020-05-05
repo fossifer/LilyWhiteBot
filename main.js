@@ -276,7 +276,7 @@ if (config.QQ && !config.QQ.disabled) {
         winston.warn('* DEPRECATED: CoolQ cqsocketapi plugin is deprecated, please use CoolQ HTTP API (https://cqhttp.cc/) instead.');
 
         qqbot = new QQSocketApiBot({
-            CoolQAirA: options.CoolQAirA,
+            CoolQPro: options.CoolQPro,
             host: config.QQ.host || '127.0.0.1',
             port: config.QQ.port || 11235,
             unicode: options.unicode,
