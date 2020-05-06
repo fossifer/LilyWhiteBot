@@ -168,18 +168,17 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
+const receive = async (msg) => {
     if (msg.isNotice) {
         if (msg.extra.clients >= 3) {
-            qqHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`).catch(e => reject(e));
+            await qqHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`);
         } else {
-            qqHandler.say(msg.to, `< ${msg.text} >`).catch(e => reject(e));
+            await qqHandler.say(msg.to, `< ${msg.text} >`);
         }
     } else {
         if (msg.extra.isAction) {
             // 一定是 IRC
-            qqHandler.say(msg.to, `* ${msg.nick} ${msg.text}`).catch(e => reject(e));
-            resolve();
+            await qqHandler.say(msg.to, `* ${msg.nick} ${msg.text}`);
         } else {
             let special = '';
             let prefix = '';
@@ -210,18 +209,17 @@ const receive = (msg) => new Promise((resolve, reject) => {
             let pendingText = qqHandler.escape(prefix + msg.text);
             if (qqHandler.isCoolQPro) {
                 // HTTP API 插件 + CoolQ Pro 直接插图
-                if (msg.extra.uploads) {
+                if (msg.extra.uploads && msg.extra.uploads.length > 0) {
                     pendingText += '\n' + msg.extra.uploads.map(u => `[CQ:image,file=${u.url}]`).join('');
                 }
             } else {
                 pendingText += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
             }
 
-            qqHandler.say(msg.to, pendingText, { noEscape: true }).catch(e => reject(e));
+            await qqHandler.say(msg.to, pendingText, { noEscape: true });
         }
     }
-    resolve();
-});
+};
 
 module.exports = {
     init,

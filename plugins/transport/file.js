@@ -7,6 +7,7 @@
  */
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
@@ -20,38 +21,47 @@ let handlers;
 const pkg = require('../../package.json');
 const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
 
-/*
- * 轉檔
+/**
+ * 根据已有文件名生成新文件名
+ * @param {string} name 文件名
+ * @returns {string} 新文件名
  */
-const preprocessFileName = (name) => {
-    if (path.extname(name) === '.webp') {
-        return name + '.png';
-    } else {
-        return name;
+const generateFileName = (url, name) => {
+    let extName = path.extname(name);
+    if (extName === '') {
+        extName = path.extname(url);
     }
+    if (extName === '.webp') {
+        extName = '.png';
+    }
+    return crypto.createHash('md5').update(name).digest('hex') + extName;
 };
 
 /**
  * 将各聊天软件的媒体类型转成标准类型
- * @param {string} type 
+ * @param {string} type 各Handler提供的文件类型
+ * @returns {string} 统一文件类型
  */
 const convertFileType = (type) => {
     switch (type) {
         case 'sticker':
             return 'photo';
-
         case 'voice':
             return 'audio';
-
         case 'video':
         case 'document':
             return 'file';
-
         default:
             return type;
     }
 };
 
+/**
+ * 下载/获取文件内容，对文件进行格式转换（如果需要的话），然后管道出去
+ * @param {*} file 
+ * @param {*} pipe 
+ * @returns {Promise}
+ */
 const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
     let filePath = file.url || file.path;
     let fileStream;
@@ -64,17 +74,17 @@ const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
         throw new TypeError('unknown file type');
     }
 
-    let stream = fileStream;
-    if (path.extname(filePath) === '.webp') {
-        if (file.type === 'sticker') {
-            // 缩小表情包尺寸，否则在QQ等屏幕上会刷屏
-            stream = sharp(fileStream).resize(256).png();
-        } else {
-            stream = sharp(fileStream).png();
-        }
+    // Telegram默认使用webp格式，转成png格式以便让其他聊天软件的用户查看
+    if ((file.type === 'sticker' || file.type === 'photo') && path.extname(filePath) === '.webp') {
+        // if (file.type === 'sticker' && servemedia.stickerMaxWidth !== 0) {
+        //     // 缩小表情包尺寸，因容易刷屏
+        //     fileStream = fileStream.pipe(sharp().resize(servemedia.stickerMaxWidth || 256).png());
+        // } else {
+            fileStream = fileStream.pipe(sharp().png());
+        // }
     }
 
-    stream.on('error', err => reject(err))
+    fileStream.on('error', err => reject(err))
         .on('end', () => resolve())
         .pipe(pipe);
 });
@@ -84,16 +94,10 @@ const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
  * 儲存至本機快取
  */
 const uploadToCache = async (file) => {
-    let targetName = file.id;
-    if (file.url && !path.extname(targetName)) {
-        targetName += path.extname(file.url);
-    }
-    targetName = preprocessFileName(targetName);
-
+    let targetName = generateFileName(file.url || file.path, file.id);
     let targetPath = path.join(servemedia.cachePath, targetName);
     let writeStream = fs.createWriteStream(targetPath).on('error', (e) => { throw e; });
     await pipeFile(file, writeStream);
-
     return servemedia.serveUrl + targetName;
 };
 
@@ -197,12 +201,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
  * 上傳到自行架設的 linx 圖床上面
  */
 const uploadToLinx = (file) => new Promise((resolve, reject) => {
-    let name;
-    if (file.url) {
-        name = preprocessFileName(path.basename(file.url));
-    } else if (file.path) {
-        name = preprocessFileName(path.basename(file.path));
-    }
+    let name = generateFileName(file.url || file.path, file.id);
 
     pipeFile(file, request.put({
         url: servemedia.linxApiUrl + name,
@@ -233,12 +232,15 @@ const uploadFile = async (file) => {
         case 'uguu':
         case 'Uguu':
             url = await uploadToHost(servemedia.type, file)
+            break;
 
         case 'self':
             url = await uploadToCache(file)
+            break;
 
         case 'linx':
             url = await uploadToLinx(file)
+            break;
 
         default:
 
@@ -265,10 +267,12 @@ const fileUploader = {
     get handlers() { return handlers; },
     set handlers(h) { handlers = h; },
     process: async (context) => {
+        // 上传文件
         if (context.extra.files && servemedia.type && servemedia.type !== 'none') {
             let promises = [];
             let fileCount = context.extra.files.length;
 
+            // 将聊天消息附带文件上传到服务器
             for (let [index, file] of context.extra.files.entries()) {
                 if (servemedia.sizeLimit && servemedia.sizeLimit > 0 && file.size && file.size > servemedia.sizeLimit*1024) {
                     winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${fileCount}: Size limit exceeded. Ignore.`);
@@ -277,6 +281,7 @@ const fileUploader = {
                 }
             }
 
+            // 整理上传到服务器之后到URL
             let uploads = (await Promise.all(promises)).filter(x => x);
             for (let [index, upload] of uploads.entries()) {
                 winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${uploads.length} (${upload.type}): ${upload.url}`);

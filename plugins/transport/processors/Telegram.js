@@ -146,12 +146,12 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
+const receive = async (msg) => {
     if (msg.isNotice) {
         if (msg.extra.clients >= 3) {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${msg.extra.clientName.fullname}: ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
+            await tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${msg.extra.clientName.fullname}: ${htmlEscape(msg.text)} &gt;</pre>`);
         } else {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
+            await tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${htmlEscape(msg.text)} &gt;</pre>`);
         }
     } else {
         let output = '';
@@ -171,34 +171,30 @@ const receive = (msg) => new Promise((resolve, reject) => {
         }
         output = `${prefix}${htmlEscape(msg.text)}`;
 
-        // TODO 圖片在文字之前發出
-        tgHandler.sayWithHTML(msg.to, output).catch(e => reject(e));
+        let newRawMsg = await tgHandler.sayWithHTML(msg.to, output);
 
         // 如果含有相片和音訊
         if (msg.extra.uploads) {
-            let files = [];
+            let replyOption = {
+                reply_to_message_id: newRawMsg.message_id
+            };
 
             for (let upload of msg.extra.uploads) {
                 if (upload.type === 'audio') {
-                    tgHandler.sendAudio(msg.to, upload.url).catch(e => reject(e));
+                    await tgHandler.sendAudio(msg.to, upload.url, replyOption);
                 } else if (upload.type === 'photo') {
                     if (path.extname(upload.url) === '.gif') {
-                        tgHandler.sendDocument(msg.to, upload.url).catch(e => reject(e));
+                        await tgHandler.sendAnimation(msg.to, upload.url, replyOption);
                     } else {
-                        tgHandler.sendPhoto(msg.to, upload.url).catch(e => reject(e));
+                        await tgHandler.sendPhoto(msg.to, upload.url, replyOption);
                     }
                 } else {
-                    files.push(upload.url);
+                    await tgHandler.sendDocument(msg.to, upload.url, replyOption);
                 }
-            }
-
-            if (files.length > 0) {
-                output += ` ${htmlEscape(files.join(' '))}`;
             }
         }
     }
-    resolve();
-});
+};
 
 module.exports = {
     init,
