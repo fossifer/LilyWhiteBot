@@ -5,7 +5,7 @@ LilyWhiteBot
 ## 旧版升级说明
 如果您从旧版本升级，请注意以下三点：
 
-1. Node.js 最低版本为 8。
+1. Node.js 最低版本为 12。
 2. 配置文件格式由 json 换成了 yaml。json 配置文件仍然可用，但您会收到一条警告信息。
 3. 程序不再支持酷 Q 的 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk) 插件（尽管还能继续使用，然而不保证效果），建议尽快更换成 [CoolQ HTTP API](https://cqhttp.cc/)。
 
@@ -41,7 +41,7 @@ CoolQ HTTP API 也需要调整对应设置（详见[此页](https://cqhttp.cc/do
 
 ### 必需步骤
 * 根据实际需要准备机器人账号。（具体方法见后面）
-* 安装 Node.js，版本要求：>=8.x。
+* 安装 Node.js，版本要求：>=12.x。
 * 下载机器人本体。
 * 运行：
 ```

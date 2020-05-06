@@ -27,6 +27,13 @@ const QQHttpApiMessageHandler = require('./lib/handlers/QQHttpApiMessageHandler.
 const WeChatMessageHandler = require('./lib/handlers/WeChatMessageHandler.js');
 const DiscordMessageHandler = require('./lib/handlers/DiscordMessageHandler.js');
 
+const allHandlers = new Map([
+    ['IRC', 'IRCMessageHandler'],
+    ['Telegram', 'TelegramMessageHandler'],
+    ['QQ', 'QQMessageHandler'],
+    ['Discord', 'DiscordMessageHandler']
+]);
+
 // 所有擴充套件包括傳話機器人都只與該物件打交道
 const pluginManager = {
     handlers: new Map(),
@@ -129,10 +136,10 @@ winston.info(`Version: ${require('./package.json').version}`);
 winston.info();
 
 // 检查过期设置
-
+// transport.options.servemedia.webp2png webpPath
 
 let enabledClients = [];
-for (let type of ['IRC', 'Telegram', 'QQ', 'WeChat', 'Discord']) {
+for (let type of allHandlers.keys()) {
     if (config[type] && !config[type].disabled) {
         enabledClients.push(type);
     }

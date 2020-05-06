@@ -222,19 +222,6 @@ const uploadFile = async (file) => {
     }
 };
 
-
-/*
- * 處理來自 QQ 的多媒體訊息
- */
-const processQQFile = async (file) => {
-    const url = await cacheFile(Promise.resolve(getitem), file.id);
-    return {
-        url: url,
-        type: type,
-    };
-};
-
-
 /*
  * 判斷訊息來源，將訊息中的每個檔案交給對應函式處理
  */
@@ -285,5 +272,5 @@ module.exports = (bridge, options) => {
                 extra: {},
             }));
         }
-    }
+    });
 };

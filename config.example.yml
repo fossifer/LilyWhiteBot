@@ -226,12 +226,6 @@ transport:
       timeout: 1000                         # 上传超时时间，单位毫秒，type 为 vim-cn、imgur 等外部图床时有效
       userAgent: ""                         # 访问外部图床时的 User-Agent，如留空则使用默认的 LilyWhiteBot/版本号
 
-      # 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式
-      # 如果設為 true，那麼需要安装 webp，具體步驟見 https://github.com/Intervox/node-webp
-      webp2png: false
-      webpPath: ""                          # dwebp 二进制文件地址，留空则从 PATH 搜索
-
-
 ircquery:
   disables:                                 # 不要在這些群組使用 ircquery 功能
     - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……

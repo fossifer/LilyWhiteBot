@@ -55,7 +55,6 @@ cp badwords.example.yml badwords.yml
 3. `qq.listen.host`设置为`0.0.0.0`。
 4. `qq.host`与`qq.port`参数需删除。
 5. 如需转发图片，建议使用图床（`transport.options.servemedia.type`不设置为`self`），因容器取文件比较麻烦。
-6. 如需将 Telegram Sticker 转为图片（`transport.options.servemedia.webp2png = true`），那么`transport.options.servemedia.webpPath`需设置为`/usr/local/bin/dwebp`。
 
 ### CoolQ HTTP API 配置
 执行
@@ -109,8 +108,7 @@ services:
       COOLQ_ACCOUNT: 你的机器人账号
 
   lilywhitebot:
-    # 如果不使用webp，而且处于中国，网络不好，那么直接换成 image: node:13 即可。
-    build: ./LilyWhiteBot
+    image: node:12
     restart: always
     working_dir: /home/node/app
     volumes:
