@@ -31,6 +31,27 @@ const preprocessFileName = (name) => {
     }
 };
 
+/**
+ * 将各聊天软件的媒体类型转成标准类型
+ * @param {string} type 
+ */
+const convertFileType = (type) => {
+    switch (type) {
+        case 'sticker':
+            return 'photo';
+
+        case 'voice':
+            return 'audio';
+
+        case 'video':
+        case 'document':
+            return 'file';
+
+        default:
+            return type;
+    }
+};
+
 const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
     let filePath = file.url || file.path;
     let fileStream;
@@ -62,8 +83,8 @@ const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
 /*
  * 儲存至本機快取
  */
-const uploadToCache = async (file, fileid) => {
-    let targetName = fileid;
+const uploadToCache = async (file) => {
+    let targetName = file.id;
     if (file.url && !path.extname(targetName)) {
         targetName += path.extname(file.url);
     }
@@ -202,6 +223,8 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
  * 決定檔案去向
  */
 const uploadFile = async (file) => {
+    let url;
+
     switch (servemedia.type) {
         case 'vimcn':
         case 'vim-cn':
@@ -209,16 +232,25 @@ const uploadFile = async (file) => {
         case 'imgur':
         case 'uguu':
         case 'Uguu':
-            return await uploadToHost(servemedia.type, file);
+            url = await uploadToHost(servemedia.type, file)
 
         case 'self':
-            return await uploadToCache(file, file.id);
+            url = await uploadToCache(file)
 
         case 'linx':
-            return await uploadToLinx(file);
+            url = await uploadToLinx(file)
 
         default:
 
+    }
+
+    if (url) {
+        return {
+            type: convertFileType(file.type),
+            url: url
+        };
+    } else {
+        return null;
     }
 };
 
@@ -245,7 +277,7 @@ const fileUploader = {
                 }
             }
 
-            let uploads = await Promise.all(promises);
+            let uploads = (await Promise.all(promises)).filter(x => x);
             for (let [index, upload] of uploads.entries()) {
                 winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${uploads.length} (${upload.type}): ${upload.url}`);
             }
