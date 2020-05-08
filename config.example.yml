@@ -18,6 +18,7 @@ IRC:
     floodProtection: true
     floodProtectionDelay: 300
     sasl: false                             # 如果開啟 SASL，那麼需要正確設定前面的 userName 和下面的 sasl_password
+    # 如果有 Cloak 也需要正确输入这两个参数。
     sasl_password: ""
     encoding: UTF-8
   options:
@@ -103,9 +104,12 @@ plugins:
 transport:
   # 說明：
   # 1. 可以填任意個群組
-  # 2. 群組格式：「irc/#頻道」、「telegram/-12345678」或「qq/群號」
-  # 3. 聊天軟體名不區分大小寫，可簡寫為 i、t、q
-  # 4. 如果需要，可以加入多個互聯體
+  # 2. 群組格式：
+  #    irc/#頻道 例如 irc/#test
+  #    telegram/-群组ID 例如 telegram/-12345678
+  #    qq/群号 例如 qq/12345678
+  #    discord/ID 例如 discord/123123123123
+  # 3. 如果需要，可以加入多個互聯體。例如将两个 QQ 分群连接到一起。
   groups:
     - ['irc/#test', 'telegram/-12345678', 'qq/12345678']
     # 可以在同一组内增加软件相同、群号不同的群，例如
