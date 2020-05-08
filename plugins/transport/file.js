@@ -27,14 +27,14 @@ const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
  * @returns {string} 新文件名
  */
 const generateFileName = (url, name) => {
-    let extName = path.extname(name);
+    let extName = path.extname(name || '');
     if (extName === '') {
-        extName = path.extname(url);
+        extName = path.extname(url || '');
     }
     if (extName === '.webp') {
         extName = '.png';
     }
-    return crypto.createHash('md5').update(name).digest('hex') + extName;
+    return crypto.createHash('md5').update(name || (Math.random()).toString()).digest('hex') + extName;
 };
 
 /**
@@ -111,96 +111,119 @@ const uploadToCache = async (file) => {
  */
 const uploadToHost = (host, file) => new Promise((resolve, reject) => {
     const requestOptions = {
-        timeout: servemedia.timeout,
+        timeout: servemedia.timeout || 3000,
         headers: {
             'User-Agent': servemedia.userAgent || USERAGENT,
         },
     };
 
-    const pendingFile = getFileStream(file);
+    let name = generateFileName(file.url || file.path, file.id);
+    let pendingFileStream = getFileStream(file);
 
-    switch (host) {
-        case 'vim-cn':
-        case 'vimcn':
-            requestOptions.url = 'https://img.vim-cn.com/';
-            requestOptions.formData = {
-                name: pendingFile,
-            };
-            break;
+    let buf = []
+    pendingFileStream
+        .on('data', d => buf.push(d))
+        .on('end', () => {
+            let pendingFile = Buffer.concat(buf);
 
-        case 'sm.ms':
-            requestOptions.url = 'https://sm.ms/api/upload';
-            requestOptions.json = true;
-            requestOptions.formData = {
-                smfile: pendingFile,
-            };
-            break;
-
-        case 'imgur':
-            if (servemedia.imgur.apiUrl.endsWith('/')) {
-                requestOptions.url = servemedia.imgur.apiUrl + 'upload';
-            } else {
-                requestOptions.url = servemedia.imgur.apiUrl + '/upload';
-            }
-            requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
-            requestOptions.json = true;
-            requestOptions.formData = {
-                type: 'file',
-                image: pendingFile,
-            };
-            break;
-
-        case 'uguu':
-        case 'Uguu':
-            requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
-            requestOptions.formData = {
-                'file': {
-                    value: pendingFile,
-                    options: {
-                        filename: name
-                    }
-                },
-                randomname: 'true'
-            };
-            break;
-
-        default:
-            reject(new Error('Unknown host type'));
-    }
-
-    request.post(requestOptions, (error, response, body) => {
-        if (typeof callback === 'function') {
-            callback();
-        }
-        if (!error && response.statusCode === 200) {
             switch (host) {
                 case 'vim-cn':
                 case 'vimcn':
-                    resolve(body.trim().replace('http://', 'https://'));
+                    requestOptions.url = 'https://img.vim-cn.com/';
+                    requestOptions.formData = {
+                        name: {
+                            value: pendingFile,
+                            options: {
+                                filename: name,
+                            },
+                        },
+                    };
                     break;
+
+                case 'sm.ms':
+                    requestOptions.url = 'https://sm.ms/api/upload';
+                    requestOptions.json = true;
+                    requestOptions.formData = {
+                        smfile: {
+                            value: pendingFile,
+                            options: {
+                                filename: name,
+                            },
+                        },
+                    };
+                    break;
+
+                case 'imgur':
+                    if (servemedia.imgur.apiUrl.endsWith('/')) {
+                        requestOptions.url = servemedia.imgur.apiUrl + 'upload';
+                    } else {
+                        requestOptions.url = servemedia.imgur.apiUrl + '/upload';
+                    }
+                    requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
+                    requestOptions.json = true;
+                    requestOptions.formData = {
+                        type: 'file',
+                        image: {
+                            value: pendingFile,
+                            options: {
+                                filename: name,
+                            },
+                        },
+                    };
+                    break;
+
                 case 'uguu':
                 case 'Uguu':
-                    resolve(body.trim());
+                    requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
+                    requestOptions.formData = {
+                        file: {
+                            value: pendingFile,
+                            options: {
+                                filename: name,
+                            }
+                        },
+                        randomname: 'true'
+                    };
                     break;
-                case 'sm.ms':
-                    if (body && body.code !== 'success') {
-                        reject(new Error(`sm.ms return: ${body.msg}`));
-                    } else {
-                        resolve(body.data.url);
-                    }
-                    break;
-                case 'imgur':
-                    if (body && !body.success) {
-                        reject(new Error(`Imgur return: ${body.data.error}`));
-                    } else {
-                        resolve(body.data.link);
-                    }
-                    break;
+
+                default:
+                    reject(new Error('Unknown host type'));
             }
-        } else {
-            reject(new Error(error));
-        }
-    });
+
+            request.post(requestOptions, (error, response, body) => {
+                if (typeof callback === 'function') {
+                    callback();
+                }
+                if (!error && response.statusCode === 200) {
+                    switch (host) {
+                        case 'vim-cn':
+                        case 'vimcn':
+                            resolve(body.trim().replace('http://', 'https://'));
+                            break;
+                        case 'uguu':
+                        case 'Uguu':
+                            resolve(body.trim());
+                            break;
+                        case 'sm.ms':
+                            if (body && body.code !== 'success') {
+                                reject(new Error(`sm.ms return: ${body.msg}`));
+                            } else {
+                                resolve(body.data.url);
+                            }
+                            break;
+                        case 'imgur':
+                            if (body && !body.success) {
+                                reject(new Error(`Imgur return: ${body.data.error}`));
+                            } else {
+                                resolve(body.data.link);
+                            }
+                            break;
+                    }
+                } else {
+                    reject(new Error(error));
+                }
+            });
+        });
 });
 
 /*
@@ -235,10 +258,13 @@ const uploadFile = async (file) => {
     switch (servemedia.type) {
         case 'vimcn':
         case 'vim-cn':
-        case 'sm.ms':
-        case 'imgur':
         case 'uguu':
         case 'Uguu':
+            url = await uploadToHost(servemedia.type, file);
+            break;
+
+        case 'sm.ms':
+        case 'imgur':
             // 公共图床只接受图片，不要上传其他类型文件
             if (fileType === 'photo') {
                 url = await uploadToHost(servemedia.type, file);
