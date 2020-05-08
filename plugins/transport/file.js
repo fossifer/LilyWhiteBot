@@ -218,7 +218,7 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
         }
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
-            resolve(body.direct_url);
+            resolve(JSON.parse(body).direct_url);
         } else {
             reject(new Error(error));
         }
@@ -230,6 +230,7 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
  */
 const uploadFile = async (file) => {
     let url;
+    let fileType = convertFileType(file.type);
 
     switch (servemedia.type) {
         case 'vimcn':
@@ -238,7 +239,10 @@ const uploadFile = async (file) => {
         case 'imgur':
         case 'uguu':
         case 'Uguu':
-            url = await uploadToHost(servemedia.type, file)
+            // 公共图床只接受图片，不要上传其他类型文件
+            if (fileType === 'photo') {
+                url = await uploadToHost(servemedia.type, file);
+            }
             break;
 
         case 'self':
@@ -255,7 +259,7 @@ const uploadFile = async (file) => {
 
     if (url) {
         return {
-            type: convertFileType(file.type),
+            type: fileType,
             url: url
         };
     } else {
