@@ -2,6 +2,7 @@
 
 const BridgeMsg = require('../BridgeMsg.js');
 const LRU = require('lru-cache');
+const format = require('string-format');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -168,58 +169,68 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
-    if (msg.isNotice) {
-        if (msg.extra.clients >= 3) {
-            qqHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`).catch(e => reject(e));
+const receive = async (msg) => {
+    // 元信息，用于自定义样式
+    let meta = {
+        nick: msg.nick,
+        from: msg.from,
+        to: msg.to,
+        text: msg.text,
+        client_short: msg.extra.clientName.shortname,
+        client_full: msg.extra.clientName.fullname,
+        command: msg.command,
+        param: msg.param
+    };
+    if (msg.extra.reply) {
+        let reply = msg.extra.reply;
+        meta.reply_nick = reply.nick;
+        meta.reply_user = reply.username;
+        if (reply.isText) {
+            meta.reply_text = truncate(reply.message);
         } else {
-            qqHandler.say(msg.to, `< ${msg.text} >`).catch(e => reject(e));
-        }
-    } else {
-        if (msg.extra.isAction) {
-            // 一定是 IRC
-            qqHandler.say(msg.to, `* ${msg.nick} ${msg.text}`).catch(e => reject(e));
-            resolve();
-        } else {
-            let special = '';
-            let prefix = '';
-            if (!config.options.hidenick) {
-                if (msg.extra.reply) {
-                    const reply = msg.extra.reply;
-                    special = `Re ${reply.nick} `;
-
-                    if (reply.isText) {
-                        special += `「${truncate(reply.message)}」`;
-                    } else {
-                        special += reply.message;
-                    }
-
-                    special += ': ';
-                } else if (msg.extra.forward) {
-                    special = `Fwd ${msg.extra.forward.nick}: `;
-                }
-
-                if (msg.extra.clients >= 3 && msg.extra.clientName.shortname) {
-                    prefix = `[${msg.extra.clientName.shortname} - ${msg.nick}] ${special}`;
-                } else {
-                    prefix = `[${msg.nick}] ${special}`;
-                }
-            }
-
-            // 处理图片附件
-            let pendingText = qqHandler.escape(prefix + msg.text);
-            if (qqHandler.isCoolQPro) {
-                // HTTP API 插件 + CoolQ Pro 直接插图
-                pendingText += (msg.extra.uploads || []).map(u => `[CQ:image,file=${u.url}]`).join('');
-            } else {
-                pendingText += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
-            }
-
-            qqHandler.say(msg.to, pendingText, { noEscape: true }).catch(e => reject(e));
+            meta.reply_text = reply.message;
         }
     }
-    resolve();
-});
+    if (msg.extra.forward) {
+        meta.forward_nick = msg.extra.forward.nick;
+        meta.forward_user = msg.extra.forward.username;
+    }
+
+    // 自定义消息样式
+    let messageStyle = config.options.messageStyle;
+    let styleMode = 'simple';
+    if (msg.extra.clients >= 3 && (msg.extra.clientName.shortname || msg.isNotice)) {
+        styleMode = 'complex';
+    }
+
+    let template;
+    if (msg.isNotice) {
+        template = messageStyle[styleMode].notice;
+    } else if (msg.extra.isAction) {
+        template = messageStyle[styleMode].action;
+    } else if (msg.extra.reply) {
+        template = messageStyle[styleMode].reply;
+    } else if (msg.extra.forward) {
+        template = messageStyle[styleMode].forward;
+    } else {
+        template = messageStyle[styleMode].message;
+    }
+
+    // 处理图片附件
+    let output = qqHandler.escape(format(template, meta));
+    if (qqHandler.isCoolQPro) {
+        // HTTP API 插件 + CoolQ Pro 直接插图
+        if (msg.extra.uploads && msg.extra.uploads.length > 0) {
+            output += '\n' + msg.extra.uploads.map(u => `[CQ:image,file=${u.url}]`).join('');
+        }
+    } else {
+        output += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
+    }
+
+    await qqHandler.say(msg.to, output, {
+        noEscape: true
+    });
+};
 
 module.exports = {
     init,

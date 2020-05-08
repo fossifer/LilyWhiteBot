@@ -7,6 +7,7 @@ LilyWhiteBot
 * 可根据需要配置单向互联，或者将同一聊天软件的多个分群互联到一起。
 * 支持图片转发。如不能发送图片（IRC），程序可将图片上传到图床并提供图片链接。
     * *由于 QQ 发言借助酷 Q 实现，在 QQ 发送图片需购买 Pro 授权。*
+* 支持自定义转发消息样式。
 * 支持 Docker 部署。
 * 可支持扩展。
 
@@ -97,7 +98,7 @@ node main.js
 ### 从其他版本升级
 如果您从其他版本升级，请注意以下三点：
 
-1. Node.js 最低版本为 8。
+1. Node.js 最低版本为 12。
 2. 配置文件格式由 json 换成了 yaml。json 配置文件仍然可用，但您会收到一条警告信息。
 3. 程序不再支持酷 Q 的 [me.cqp.ishisashi.cqsocketapi.cpk](https://dl.bintray.com/mrhso/cqsocketapi/me.cqp.ishisashi.cqsocketapi.cpk) 插件（尽管还能继续使用，然而不保证效果），建议尽快更换成 [CoolQ HTTP API](https://cqhttp.cc/)。
 
@@ -133,4 +134,3 @@ CoolQ HTTP API 也需要调整对应设置（详见[此页](https://cqhttp.cc/do
 * [filter](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
 * [qqxiaoice](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
 * [wikilinky](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/wikilinky.js)
-

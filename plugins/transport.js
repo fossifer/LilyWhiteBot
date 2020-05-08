@@ -7,6 +7,23 @@
 const BridgeMsg = require('./transport/BridgeMsg.js');
 const winston = require('winston');
 
+const defaultMessageStyle = {
+    simple: {
+        message: '[{nick}] {text}',
+        reply: '[{nick}] Re {reply_nick} 「{reply_text}」: {text}',
+        forward: '[{nick}] Fwd {forward_nick}: {text}',
+        action: '* {nick} {text}',
+        notice: '< {text} >'
+    },
+    complex: {
+        message: '[{client_short} - {nick}] {text}',
+        reply: '[{client_short} - {nick}] Re {reply_nick} 「{reply_text}」: {text}',
+        forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}',
+        action: '* {client_short} - {nick} {text}',
+        notice: '< {client_full}: {text} >'
+    }
+};
+
 module.exports = (pluginManager, options) => {
     /*
      * 準備「郵遞員」bridge
@@ -172,6 +189,11 @@ module.exports = (pluginManager, options) => {
         }
     }
     bridge.aliases = aliases2;
+
+    // 默认消息样式
+    if (!options.options.messageStyle) {
+        options.options.messageStyle = defaultMessageStyle;
+    }
 
     // 调试日志
     winston.debug();

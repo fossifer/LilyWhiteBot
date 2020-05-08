@@ -4,17 +4,14 @@
  * 已知的問題：
  * Telegram 音訊使用 ogg 格式，QQ 則使用 amr 和 silk，這個可以考慮互相轉換一下
  *
- * TODO
- * 將下面幾個 uploadToXXX 合併
  */
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
-const url = require('url');
 const path = require('path');
 const request = require('request');
-const DWebp = require('cwebp').DWebp;
-const tmp = require('tmp');
+const sharp = require('sharp');
 const winston = require('winston');
 
 let options = {};
@@ -24,335 +21,251 @@ let handlers;
 const pkg = require('../../package.json');
 const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
 
-/*
- * 轉檔
+/**
+ * 根据已有文件名生成新文件名
+ * @param {string} name 文件名
+ * @returns {string} 新文件名
  */
-const preprocessFileName = (name) => {
-    if (path.extname(name) === '.webp' && servemedia.webp2png) {
-        return name + '.png';
-    } else {
-        return name;
+const generateFileName = (url, name) => {
+    let extName = path.extname(name);
+    if (extName === '') {
+        extName = path.extname(url);
+    }
+    if (extName === '.webp') {
+        extName = '.png';
+    }
+    return crypto.createHash('md5').update(name).digest('hex') + extName;
+};
+
+/**
+ * 将各聊天软件的媒体类型转成标准类型
+ * @param {string} type 各Handler提供的文件类型
+ * @returns {string} 统一文件类型
+ */
+const convertFileType = (type) => {
+    switch (type) {
+        case 'sticker':
+            return 'photo';
+        case 'voice':
+            return 'audio';
+        case 'video':
+        case 'document':
+            return 'file';
+        default:
+            return type;
     }
 };
 
-const preprocessFile = (url, file) => {
-    if (path.extname(url) === '.webp' && servemedia.webp2png) {
-        return new DWebp(file, servemedia.webpPath).stream();
+/**
+ * 下载/获取文件内容，对文件进行格式转换（如果需要的话），然后管道出去
+ * @param {*} file 
+ * @param {*} pipe 
+ * @returns {Promise}
+ */
+const getFileStream = (file) => {
+    let filePath = file.url || file.path;
+    let fileStream;
+
+    if (file.url) {
+        fileStream = request.get(file.url);
+    } else if (file.path) {
+        fileStream = fs.createReadStream(file.path);
     } else {
-        return file;
+        throw new TypeError('unknown file type');
     }
+
+    // Telegram默认使用webp格式，转成png格式以便让其他聊天软件的用户查看
+    if ((file.type === 'sticker' || file.type === 'photo') && path.extname(filePath) === '.webp') {
+        // if (file.type === 'sticker' && servemedia.stickerMaxWidth !== 0) {
+        //     // 缩小表情包尺寸，因容易刷屏
+        //     fileStream = fileStream.pipe(sharp().resize(servemedia.stickerMaxWidth || 256).png());
+        // } else {
+            fileStream = fileStream.pipe(sharp().png());
+        // }
+    }
+
+    return fileStream;
+
 };
 
-// 不能直接轉檔因此以本機為快取
-const preprocessFile2 = (url, file) => new Promise((resolve, reject) => {
-    if (path.extname(url) === '.webp' && servemedia.webp2png) {
-        let fname = tmp.tmpNameSync();
-        new DWebp(file, servemedia.webpPath).write(fname, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(fs.createReadStream(fname), fname);
-            }
-        });
-    } else {
-        resolve(file);
-    }
+const pipeFileStream = (file, pipe) => new Promise((resolve, reject) => {
+    let fileStream = getFileStream(file);
+    fileStream.on('error', e => reject(e))
+        .on('end', () => resolve())
+        .pipe(pipe);
 });
 
 /*
  * 儲存至本機快取
  */
-const saveToCache = (file, fileid) => new Promise((resolve, reject) => {
-    try {
-        let t;
-        let targetDir = servemedia.cachePath;
-        let targetName = fileid;
-
-        if (file.url && !path.extname(targetName)) {
-            targetName += path.extname(file.url);
-        }
-        targetName = preprocessFileName(targetName);
-
-        let targetPath = path.join(targetDir, targetName);
-        let w = fs.createWriteStream(targetPath).on('error', (e) => {
-            reject(e);
-        });
-
-        if (file.url) {
-            // 下載
-            preprocessFile(file.url, request.get(file.url)).on('end', () => {
-                resolve(servemedia.serveUrl + targetName);
-            }).pipe(w);
-        } else if (file.path) {
-            // 複製到 cachePath
-            fs.createReadStream(file.path).on('end', () => {
-                resolve(servemedia.serveUrl + targetName);
-            }).pipe(w);
-        } else {
-            reject('Invalid file');
-        }
-    } catch (e) {
-        reject(e);
-    }
-});
+const uploadToCache = async (file) => {
+    let targetName = generateFileName(file.url || file.path, file.id);
+    let targetPath = path.join(servemedia.cachePath, targetName);
+    let writeStream = fs.createWriteStream(targetPath).on('error', (e) => { throw e; });
+    await pipeFileStream(file, writeStream);
+    return servemedia.serveUrl + targetName;
+};
 
 /*
  * 上传到各种图床
  */
 const uploadToHost = (host, file) => new Promise((resolve, reject) => {
-    const post = (pendingfile, callback) => {
-        const requestOptions = {
-            timeout: servemedia.timeout,
-            headers: {
-                'User-Agent': servemedia.userAgent || USERAGENT,
-            },
-        };
-
-        switch (host) {
-            case 'vim-cn':
-            case 'vimcn':
-                requestOptions.url = 'https://img.vim-cn.com/';
-                requestOptions.formData = {
-                    name: pendingfile,
-                };
-                break;
-
-            case 'sm.ms':
-                requestOptions.url = 'https://sm.ms/api/upload';
-                requestOptions.json = true;
-                requestOptions.formData = {
-                    smfile: pendingfile,
-                };
-                break;
-
-            case 'imgur':
-                if (servemedia.imgur.apiUrl.endsWith('/')) {
-                    requestOptions.url = servemedia.imgur.apiUrl + 'upload';
-                } else {
-                    requestOptions.url = servemedia.imgur.apiUrl + '/upload';
-                }
-                requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
-                requestOptions.json = true;
-                requestOptions.formData = {
-                    type: 'file',
-                    image: pendingfile,
-                };
-                break;
-
-            case 'uguu':
-            case 'Uguu':
-                requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
-                requestOptions.formData = {
-                    "file": {
-                        value: pendingfile,
-                        options: {
-                            filename: name
-                        }
-                    },
-                    randomname: "true"
-                };
-                break;
-
-            default:
-                reject(new Error('Unknown host type'));
-        }
-
-        return request.post(requestOptions, (error, response, body) => {
-            if (typeof callback === 'function') {
-                callback();
-            }
-            if (!error && response.statusCode === 200) {
-                switch (host) {
-                    case 'vim-cn':
-                    case 'vimcn':
-                        resolve(body.trim().replace('http://', 'https://'));
-                        break;
-                    case 'uguu':
-                    case 'Uguu':
-                        resolve(body.trim());
-                        break;
-                    case 'sm.ms':
-                        if (body && body.code !== 'success') {
-                            reject(new Error(body.msg));
-                        } else {
-                            resolve(body.data.url);
-                        }
-                        break;
-                    case 'imgur':
-                        if (body && !body.success) {
-                            reject(body.data.error);
-                        } else {
-                            resolve(body.data.link);
-                        }
-                        break;
-
-                }
-            } else {
-                reject(new Error(error));
-            }
-        });
+    const requestOptions = {
+        timeout: servemedia.timeout,
+        headers: {
+            'User-Agent': servemedia.userAgent || USERAGENT,
+        },
     };
 
-    if (file.url) {
-        preprocessFile2(file.url, request.get(file.url)).then((f, filename) => {
-            post(f, () => {
-                if (filename) {
-                    fs.unlink(filename, (err) => {
-                        if (err) {
-                            winston.error(`Unable to unlink ${filename} `, err);
-                        }
-                    });
-                }
-            });
-        });
-    } else if (file.path) {
-        post(fs.createReadStream(file.path));
-    } else {
-        reject(new Error('Invalid file'));
-        return;
+    const pendingFile = getFileStream(file);
+
+    switch (host) {
+        case 'vim-cn':
+        case 'vimcn':
+            requestOptions.url = 'https://img.vim-cn.com/';
+            requestOptions.formData = {
+                name: pendingFile,
+            };
+            break;
+
+        case 'sm.ms':
+            requestOptions.url = 'https://sm.ms/api/upload';
+            requestOptions.json = true;
+            requestOptions.formData = {
+                smfile: pendingFile,
+            };
+            break;
+
+        case 'imgur':
+            if (servemedia.imgur.apiUrl.endsWith('/')) {
+                requestOptions.url = servemedia.imgur.apiUrl + 'upload';
+            } else {
+                requestOptions.url = servemedia.imgur.apiUrl + '/upload';
+            }
+            requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
+            requestOptions.json = true;
+            requestOptions.formData = {
+                type: 'file',
+                image: pendingFile,
+            };
+            break;
+
+        case 'uguu':
+        case 'Uguu':
+            requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
+            requestOptions.formData = {
+                'file': {
+                    value: pendingFile,
+                    options: {
+                        filename: name
+                    }
+                },
+                randomname: 'true'
+            };
+            break;
+
+        default:
+            reject(new Error('Unknown host type'));
     }
+
+    request.post(requestOptions, (error, response, body) => {
+        if (typeof callback === 'function') {
+            callback();
+        }
+        if (!error && response.statusCode === 200) {
+            switch (host) {
+                case 'vim-cn':
+                case 'vimcn':
+                    resolve(body.trim().replace('http://', 'https://'));
+                    break;
+                case 'uguu':
+                case 'Uguu':
+                    resolve(body.trim());
+                    break;
+                case 'sm.ms':
+                    if (body && body.code !== 'success') {
+                        reject(new Error(`sm.ms return: ${body.msg}`));
+                    } else {
+                        resolve(body.data.url);
+                    }
+                    break;
+                case 'imgur':
+                    if (body && !body.success) {
+                        reject(new Error(`Imgur return: ${body.data.error}`));
+                    } else {
+                        resolve(body.data.link);
+                    }
+                    break;
+            }
+        } else {
+            reject(new Error(error));
+        }
+    });
 });
 
 /*
  * 上傳到自行架設的 linx 圖床上面
  */
 const uploadToLinx = (file) => new Promise((resolve, reject) => {
-    let name;
+    let name = generateFileName(file.url || file.path, file.id);
 
-    const response = (error, response, body) => {
+    pipeFileStream(file, request.put({
+        url: servemedia.linxApiUrl + name,
+        headers: {
+            'User-Agent': servemedia.userAgent || USERAGENT,
+            'Linx-Randomize': 'yes',
+            'Accept': 'application/json'
+        }
+    }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
-            resolve(body.trim());
+            resolve(JSON.parse(body).direct_url);
         } else {
             reject(new Error(error));
         }
-    };
-
-    if (file.url) {
-        name = preprocessFileName(path.basename(file.url));
-
-        preprocessFile(file.url, request.get(file.url))
-            .on('error', (e) => { reject(e); })
-            .pipe(request.put({
-                url: servemedia.linxApiUrl + name,
-                headers: {
-                    'User-Agent': servemedia.userAgent || USERAGENT,
-                    'Linx-Randomize': 'yes'
-                }
-            }, response));
-    } else if (file.path) {
-        name = path.basename(file.path);
-        fs.createReadStream(file.path)
-            .on('error', (e) => { reject(new Error(e)); })
-            .pipe(request.put({
-                url: servemedia.linxApiUrl + name,
-                headers: {
-                    'User-Agent': servemedia.userAgent || USERAGENT,
-                    'Linx-Randomize': 'yes'
-                }
-            }, response));
-    } else {
-        reject('Invalid file');
-    }
+    })).catch(err => reject(err));
 });
 
 /*
  * 決定檔案去向
  */
-const cacheFile = (getfile, fileid) => new Promise((resolve, reject) => {
-    getfile.then((file) => {
-        switch (servemedia.type) {
-            case 'vimcn':
-            case 'vim-cn':
-            case 'sm.ms':
-            case 'imgur':
-            case 'uguu':
-            case 'Uguu':
-                uploadToHost(servemedia.type, file).then((url) => resolve(url), (e) => reject(e));
-                break;
+const uploadFile = async (file) => {
+    let url;
+    let fileType = convertFileType(file.type);
 
-            case 'self':
-                saveToCache(file, fileid).then((url) => resolve(url), (e) => reject(e));
-                break;
-
-            case 'linx':
-                uploadToLinx(file).then((url) => resolve(url), (e) => reject(e));
-                break;
-
-            default:
-
-        }
-    }).catch((e) => reject(e));
-});
-
-
-/*
- * 處理來自 Telegram 的多媒體訊息
- */
-const getTelegramFileUrl = async (fileid) => {
-    return { 
-        url: await handlers.get('Telegram').getFileLink(fileid) 
-    };
-};
-const processTelegramFile = async (file) => {
-    let type;
-    switch (file.type) {
-        case 'photo':
-        case 'sticker':
-            type = 'photo';
+    switch (servemedia.type) {
+        case 'vimcn':
+        case 'vim-cn':
+        case 'sm.ms':
+        case 'imgur':
+        case 'uguu':
+        case 'Uguu':
+            // 公共图床只接受图片，不要上传其他类型文件
+            if (fileType === 'photo') {
+                url = await uploadToHost(servemedia.type, file);
+            }
             break;
-        case 'audio':
-        case 'voice':
-            type = 'audio';
+
+        case 'self':
+            url = await uploadToCache(file)
             break;
+
+        case 'linx':
+            url = await uploadToLinx(file)
+            break;
+
         default:
-            type = 'file';
+
     }
 
-    const url = await cacheFile(getTelegramFileUrl(file.id), file.id);
-    return {
-        url: url,
-        type: type,
-    };
-};
-
-
-/*
- * 處理來自 QQ 的多媒體訊息
- */
-const processQQFile = async (file) => {
-    let path = '';
-    let type = '';
-    let getitem;
-    if (file.type === 'photo') {
-        path = await handlers.get('QQ').image(file.id);
-        type = 'photo';
+    if (url) {
+        return {
+            type: fileType,
+            url: url
+        };
     } else {
-        path = await handlers.get('QQ').voice(file.id);
-        type = 'file';
+        return null;
     }
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        getitem = { url: path };
-    } else {
-        getitem = { path: path };
-    }
-    const url = await cacheFile(Promise.resolve(getitem), file.id);
-    return {
-        url: url,
-        type: type,
-    };
 };
-
-
-/*
- * 處理來自 Discord 的多媒體訊息
- */
-const processDiscordFile = async (file) => {
-    return {
-        url: await cacheFile(Promise.resolve({ url: file.url }), file.id),
-        type: 'photo'
-    };
-};
-
 
 /*
  * 判斷訊息來源，將訊息中的每個檔案交給對應函式處理
@@ -364,51 +277,48 @@ const fileUploader = {
     },
     get handlers() { return handlers; },
     set handlers(h) { handlers = h; },
-    process: context => new Promise((resolve, reject) => {
-        let promises = [];
-
+    process: async (context) => {
+        // 上传文件
         if (context.extra.files && servemedia.type && servemedia.type !== 'none') {
+            let promises = [];
             let fileCount = context.extra.files.length;
+
+            // 将聊天消息附带文件上传到服务器
             for (let [index, file] of context.extra.files.entries()) {
                 if (servemedia.sizeLimit && servemedia.sizeLimit > 0 && file.size && file.size > servemedia.sizeLimit*1024) {
                     winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${fileCount}: Size limit exceeded. Ignore.`);
-                    continue;
-                }
-
-                if (file.client === 'Telegram') {
-                    promises.push(processTelegramFile(file));
-                } else if (file.client === 'QQ') {
-                    promises.push(processQQFile(file));
-                } else if (file.client === 'Discord') {
-                    promises.push(processDiscordFile(file));
+                } else {
+                    promises.push(uploadFile(file));
                 }
             }
-        }
 
-        Promise.all(promises).then((uploads) => {
-            let fileCount = uploads.length;
+            // 整理上传到服务器之后到URL
+            let uploads = (await Promise.all(promises)).filter(x => x);
             for (let [index, upload] of uploads.entries()) {
-                winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${fileCount} (${upload.type}): ${upload.url}`);
+                winston.debug(`[file.js] <FileUploader> #${context.msgId} File ${index+1}/${uploads.length} (${upload.type}): ${upload.url}`);
             }
-            resolve(uploads);
-        }).catch((e) => {
-            reject(e);
-        });
-    }),
+
+            return uploads;
+        } else {
+            return [];
+        }
+    },
 };
 
 module.exports = (bridge, options) => {
     fileUploader.init(options);
     fileUploader.handlers = bridge.handlers;
 
-    bridge.addHook('bridge.send', (msg) => fileUploader.process(msg).then((uploads) => {
-        msg.extra.uploads = uploads;
-    }).catch((e) => {
-        winston.error(`Error on processing files: `, e);
-        msg.callbacks.push(new bridge.BridgeMsg(msg, {
-            text: 'File upload error',
-            isNotice: true,
-            extra: {},
-        }));
-    }));
+    bridge.addHook('bridge.send', async (msg) => {
+        try {
+            msg.extra.uploads = await fileUploader.process(msg);
+        } catch (e) {
+            winston.error(`Error on processing files: `, e);
+            msg.callbacks.push(new bridge.BridgeMsg(msg, {
+                text: 'File upload error',
+                isNotice: true,
+                extra: {},
+            }));
+        }
+    });
 };

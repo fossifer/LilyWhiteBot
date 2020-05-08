@@ -40,11 +40,17 @@ jspm_packages
 .idea
 .jshintrc
 .tern-project
+.vscode
+
+# Mac
+.DS_Store
 
 # config
 config.yml
 config.yaml
 config.js
+config.json
 badwords.yml
 badwords.yaml
 badwords.js
+badwords.json
