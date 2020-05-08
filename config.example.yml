@@ -31,9 +31,6 @@ Telegram:
     token: ""                               # BotFather 給你的 Token，類似「123456789:q234fipjfjaewkflASDFASjaslkdf」
     timeout: 30                             # 報超時的秒數
     limit: 100                              # 限定檢索的消息數
-  options:
-    nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
-                                            # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
 
     # 如果使用中国国内网络，无法直连 Telegram 服务器，可通过设置 proxy（仅支持 HTTPS 代理）来翻墙
     # 或者自行在国外架设 Bot API（api.telegram.org）反向代理服务器然后修改 apiRoot 的值
@@ -52,25 +49,24 @@ Telegram:
         caPath: ""                          # 如使用自签名证书，CA 证书路径
 
     apiRoot: "https://api.telegram.org"     # 无特殊需要的话勿动
-    noCheckCertificate: false               # 无特殊需要的话勿动
+    
+  options:
+    nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
+                                            # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
 
 # QQ 注意事项：需要和[酷Q](https://cqp.cc)与[CoolQ HTTP API插件](https://cqhttp.cc)配合使用！
 QQ:
   disabled: true                            # 如果需要 QQ 机器人，请设置为 false
-  qq: "10000"                               # 机器人的 QQ 号
+  bot:
+    qq: "10000"                             # 机器人的 QQ 号
 
-  # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
-  apiRoot: "http://127.0.0.1:5700/"
-  accessToken: "123"
-  secret: "abc"
-  listen:                                   # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
-    host: "127.0.0.1"                       # 使用Docker时请设置成0.0.0.0
-    port: 11234
-
-  # 以下两参数用于兼容旧版 [cqsocketapi](https://github.com/mrhso/cqsocketapi)
-  # 已弃用，建议将酷Q插件换成 CoolQ HTTP API 插件
-  # host: "127.0.0.1"
-  # port: 11235
+    # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
+    apiRoot: "http://127.0.0.1:5700/"
+    accessToken: "123"
+    secret: "abc"
+    listen:                                 # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
+      host: "127.0.0.1"                     # 使用Docker时请设置成0.0.0.0
+      port: 11234
 
   options:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
