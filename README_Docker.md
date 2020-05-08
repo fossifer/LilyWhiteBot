@@ -129,4 +129,37 @@ docker-compose up -d
 配置完成后，检查机器人是否正常运行。酷 Q 与 CoolQ HTTP API 插件日志可在酷 Q 软件中查看，而互联机器人日志可通过`docker logs bot_lilywhitebot_1`命令查看。
 
 ## 其他说明
+### 文件服务器
+```yaml
+version: "3"
+
+services:
+  # ...
+
+  lilywhitebot:
+    image: node:12
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./LilyWhiteBot:/home/node/app
+      # 在此处增加临时文件存放目录
+      - ./cache:/home/ndoe/cache
+    command: "npm run install-start"
+
+  nginx:
+    # ...
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # 与上面保持一致
+      - ./cache:/var/www/html
+```
+
+config.yml：
+* `transport.options.servemedia.type`设置为`self`
+* `transport.options.servemedia.cachePath`设置为`/home/node/cache`
+* `transport.options.servemedia.serveUrl`设置为你的（上面示例为nginx）服务器网址
+
+### 树莓派
 由于酷 Q 仅支持 x86_64 平台，因此在需要 QQ 的情况下，程序不能在树莓派等硬件上运行。

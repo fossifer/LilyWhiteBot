@@ -192,36 +192,44 @@ transport:
     hidenick: false                         # 轉發時不顯示暱稱（建議不要開啟）
     
     # 本節用於處理圖片等檔案
+    # 本节用于处理图片文件
     #
-    # type為檔案的處置方式，可取：
-    # 省略/留空/none：不處理。只顯示「<Photo>」或「[圖片]」等文字
-    # self：將檔案保存在自己的伺服器中
-    # vim-cn：將檔案上傳到 img.vim-cn.com
-    # linx：將檔案上傳到一個 linx（https://github.com/andreimarcu/linx-server）伺服器中
-    # uguu: 將檔案上傳到一個 uguu（https://github.com/nokonoko/Uguu）伺服器中
+    # 支持以下几种处理方式：
+    #
+    # 以下三个是公共图床，仅支持图片，其他类型文件会被忽略：
+    # vim-cn：将图片上传到 img.vim-cn.com。
+    # imgur：将图片上传到 imgur.com。
+    # sm.ms：将图片上传到 sm.ms 图床中。
+    #
+    # 以下三个需自建服务器：
+    # self：将文件保存在自己的服务器中。请确保您的服务器设置正确，URL 能够正常访问，否则将无法发送图片。
+    # linx：将文件上传到一个 linx（https://github.com/andreimarcu/linx-server）服务器中，支持所有文件格式。
+    # uguu: 将文件上传到一个 uguu（https://github.com/nokonoko/Uguu）服务器中。
     #
     # 特别提醒：
     # 1. vim-cn、sm.ms 为个人图床，资源有限。如果您的聊天群水量很大，请选择其他图床或自建服务器。
-    # 2. 如使用外部图床，请您设置合适的 User-Agent。
+    # 2. 如使用外部图床，建议您设置自己专用的 User-Agent。
     #
-    # 另外，如果使用酷 Q 的話，您需要定期自行清理酷 Q 的快取！
+    # 另外，如果使用酷 Q 的话，您需要定期自行清理酷 Q 的缓存！
     servemedia:
-      type: ""                              # 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
-      # coolqCache: '',                     # （仅用于兼容旧版 cqsocketapi，且在旧版 cqsocketapi 中为必填项）酷 Q 快取存放位置，例如 /home/coolq/CoolQ/data（如果為 *nix 伺服器）或 C:\CoolQ\data（如果為 Windows 伺服器，注意 js 轉義）
-      # legacy: false                       # （仅用于兼容旧版 cqsocketapi）true 時讀取 cqimg 下載圖片，而不調用酷 Q 自身的 API 獲取圖片
-                                            # 圖片下載失敗（https://cqp.cc/t/42857）時啟用
+      type: ""                              # 文件处理方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx、uguu
 
-      cachePath: ""                         # type 為 self 時有效：快取存放位置
-      serveUrl: ""                          # type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
+      # type为self时有效
+      cachePath: ""                         # 缓存存放位置
+      serveUrl: ""                          # URL 的前缀，通常需要以斜线结尾
 
-      linxApiUrl: ""                        # type 為 linx 時有效：linx API 位址，一般以斜線結尾
+      # type为linx时有效
+      linxApiUrl: ""                        # linx API 地址，通常以斜线结尾
 
-      uguuApiUrl: ""                        # type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
+      # type为uguu时有效
+      uguuApiUrl: ""                        # 请以 /api.php?d=upload-tool 结尾
 
-      imgur:                                # type 為 imgur 時有效
+      # type为imgur时有效
+      imgur:
         apiUrl: "https://api.imgur.com/3/"
         clientId: ""                        # 從 imgur 申請到的 client_id
 
+      # 其他设置
       sizeLimit: 4096                       # 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效
       timeout: 1000                         # 上传超时时间，单位毫秒，type 为 vim-cn、imgur 等外部图床时有效
       userAgent: ""                         # 访问外部图床时的 User-Agent，如留空则使用默认的 LilyWhiteBot/版本号
