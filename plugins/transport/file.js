@@ -62,7 +62,7 @@ const convertFileType = (type) => {
  * @param {*} pipe 
  * @returns {Promise}
  */
-const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
+const getFileStream = (file) => {
     let filePath = file.url || file.path;
     let fileStream;
 
@@ -84,11 +84,16 @@ const pipeFile = (file, pipe) => new Promise((resolve, reject) => {
         // }
     }
 
-    fileStream.on('error', err => reject(err))
+    return fileStream;
+
+};
+
+const pipeFileStream = (file, pipe) => new Promise((resolve, reject) => {
+    let fileStream = getFileStream(file);
+    fileStream.on('error', e => reject(e))
         .on('end', () => resolve())
         .pipe(pipe);
 });
-
 
 /*
  * 儲存至本機快取
@@ -97,7 +102,7 @@ const uploadToCache = async (file) => {
     let targetName = generateFileName(file.url || file.path, file.id);
     let targetPath = path.join(servemedia.cachePath, targetName);
     let writeStream = fs.createWriteStream(targetPath).on('error', (e) => { throw e; });
-    await pipeFile(file, writeStream);
+    await pipeFileStream(file, writeStream);
     return servemedia.serveUrl + targetName;
 };
 
@@ -112,12 +117,14 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
         },
     };
 
+    const pendingFile = getFileStream(file);
+
     switch (host) {
         case 'vim-cn':
         case 'vimcn':
             requestOptions.url = 'https://img.vim-cn.com/';
             requestOptions.formData = {
-                name: pendingfile,
+                name: pendingFile,
             };
             break;
 
@@ -125,7 +132,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
             requestOptions.url = 'https://sm.ms/api/upload';
             requestOptions.json = true;
             requestOptions.formData = {
-                smfile: pendingfile,
+                smfile: pendingFile,
             };
             break;
 
@@ -139,7 +146,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
             requestOptions.json = true;
             requestOptions.formData = {
                 type: 'file',
-                image: pendingfile,
+                image: pendingFile,
             };
             break;
 
@@ -148,7 +155,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
             requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
             requestOptions.formData = {
                 "file": {
-                    value: pendingfile,
+                    value: pendingFile,
                     options: {
                         filename: name
                     }
@@ -161,7 +168,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
             reject(new Error('Unknown host type'));
     }
 
-    pipeFile(file, request.post(requestOptions, (error, response, body) => {
+    request.post(requestOptions, (error, response, body) => {
         if (typeof callback === 'function') {
             callback();
         }
@@ -189,12 +196,11 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
                         resolve(body.data.link);
                     }
                     break;
-
             }
         } else {
             reject(new Error(error));
         }
-    }));
+    });
 });
 
 /*
@@ -203,7 +209,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
 const uploadToLinx = (file) => new Promise((resolve, reject) => {
     let name = generateFileName(file.url || file.path, file.id);
 
-    pipeFile(file, request.put({
+    pipeFileStream(file, request.put({
         url: servemedia.linxApiUrl + name,
         headers: {
             'User-Agent': servemedia.userAgent || USERAGENT,
