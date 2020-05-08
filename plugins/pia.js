@@ -30,7 +30,7 @@ module.exports = (pluginManager, options) => {
 
     const pia = async (context) => {
         let command = context.command;
-        let action = piaMap.get(command);
+        let action = piaMap.get(command.replace('!', ''));
 
         context.reply(`${action} ${context.param}`);
         winston.debug(`[pia.js] Msg #${context.msgId}: ${action} ${context.param}`);

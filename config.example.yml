@@ -219,7 +219,7 @@ transport:
       serveUrl: ""                          # URL 的前缀，通常需要以斜线结尾
 
       # type为linx时有效
-      linxApiUrl: ""                        # linx API 地址，通常以斜线结尾
+      linxApiUrl: ""                        # linx API 地址（例如 https://www.xxx.com/upload/），通常以斜线结尾
 
       # type为uguu时有效
       uguuApiUrl: ""                        # 请以 /api.php?d=upload-tool 结尾

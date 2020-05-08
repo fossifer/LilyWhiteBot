@@ -154,13 +154,13 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
         case 'Uguu':
             requestOptions.url = servemedia.uguuApiUrl || servemedia.UguuApiUrl; // 原配置文件以大写字母开头
             requestOptions.formData = {
-                "file": {
+                'file': {
                     value: pendingFile,
                     options: {
                         filename: name
                     }
                 },
-                randomname: "true"
+                randomname: 'true'
             };
             break;
 
@@ -213,11 +213,12 @@ const uploadToLinx = (file) => new Promise((resolve, reject) => {
         url: servemedia.linxApiUrl + name,
         headers: {
             'User-Agent': servemedia.userAgent || USERAGENT,
-            'Linx-Randomize': 'yes'
+            'Linx-Randomize': 'yes',
+            'Accept': 'application/json'
         }
     }, (error, response, body) => {
         if (!error && response.statusCode === 200) {
-            resolve(body.trim());
+            resolve(body.direct_url);
         } else {
             reject(new Error(error));
         }
