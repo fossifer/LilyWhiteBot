@@ -2,8 +2,100 @@ LilyWhiteBot
 ===
 在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
-## 旧版升级说明
-如果您从旧版本升级，请注意以下三点：
+## 功能
+* QQ、Telegram、IRC、Discord 等多组聊天群之间互联。
+* 可根据需要配置单向互联，或者将同一聊天软件的多个分群互联到一起。
+* 支持图片转发。如不能发送图片（IRC），程序可将图片上传到图床并提供图片链接。
+    * *由于 QQ 发言借助酷 Q 实现，在 QQ 发送图片需购买 Pro 授权。*
+* 支持 Docker 部署。
+* 可支持扩展。
+
+## 部署操作指南
+### 准备机器人账号
+#### QQ
+由于全新的 QQ 号无法直接进群，故建议提前两周注册 QQ 账号，并保持在线。尽量实名注册并绑定手机，以免在触发验证时无法验证账号。
+
+#### Telegram
+1. 与 @BotFather 私聊，输入`/newbot`命令，按照屏幕指示进行操作，创建机器人账号。
+2. 记录 BotFather 给出的 Token。
+3. 输入`/setprivacy`命令，根据屏幕提示选择机器人账号，然后选择`Disable`，关闭隐私模式。
+
+#### IRC
+IRC 不需要注册。为了提高安全性，您可以采取注册 Nick、增加 Cloak 等措施，需要的话请自行搜索教程。
+
+#### Discord
+1. 进入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，创建 Application。创建完成后记录 CLIENT ID。
+2. 进入 Bot 页面，点击 Add Bot，创建机器人。创建成功后记录 Token。
+3. 进入 OAuth2 页面，往下翻到“OAuth2 URL Generator”，找到 SCOPES 并勾选 bot，然后再继续勾选 BOT PERMISSIONS 中的权限（例如 Administrator），系统会生成一个链接。访问生成的链接，按照屏幕提示将机器人拉入到你的服务器与频道中。
+<!--
+#### 微信
+**警告：微信极容易被封号，请认真阅读[注意事项](https://github.com/infnan/LilyWhiteBot/wiki/%E5%BE%AE%E4%BF%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9%EF%BC%88%E4%BD%BF%E7%94%A8%E5%89%8D%E5%BF%85%E8%AF%BB%EF%BC%81%EF%BC%89)之后再进行操作！**
+
+1. 准备专用手机。除机器人账号外，不要登录其他账号。
+2. 启动微信，实名制注册。
+2. 绑定银行卡，并往微信钱包中塞一块钱。
+3. 加三个真实的好友。
+4. 在专用手机上挂机三周，以规避风控。
+-->
+
+### 配置互联程序（Docker）
+推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/infnan/LilyWhiteBot/blob/master/README_Docker.md)。
+
+### 配置互联程序（手工操作）
+#### 配置酷 Q（仅在涉及 QQ 时需要）
+1. 下载酷 Q。下载链接：[Air 版](http://dlsec.cqp.me/cqa-tuling)、[Pro 版](http://dlsec.cqp.me/cqp-full)
+    * 如果您使用 Windows 系统，可直接解压运行。预算充足的话甚至可以酷 Q 在 Windows 服务器上跑，而 LilyWhiteBot 在另一台 Linux 服务器上跑。
+    * 如果您使用 Linux 系统，需安装 wine、任意一个桌面环境（至少要把 X11 装好）与 x11vnc 等远程连接软件。由于这些软件配置麻烦，且容易“污染环境”，建议使用 Docker（[docker-wine-coolq](https://github.com/CoolQ/docker-wine-coolq)），免得自己配置。
+2. 解压。为方便叙述，假设解压到了 `~/coolq`。
+3. 下载[CoolQ HTTP API](https://github.com/richardchien/coolq-http-api/releases)。将 cpk 文件放置在 `~/coolq/app` 中。
+4. 建立 `~/coolq/app/io.github.richardchien.coolqhttpapi` 目录，并在其中放入 `config.json`。内容大体如下（需根据实际情况修改）：
+```json
+{
+    "general": {
+        "host": "0.0.0.0",
+        "use_http": true,
+        "use_ws": false,
+        "use_ws_reverse": false,
+        "post_url": "http://localhost:11234",
+        "log_level": "info",
+        "show_log_console": false,
+        "disable_coolq_log": false,
+        "serve_data_files": true,
+        "access_token": "随便一个字符串",
+        "secret": "随便一个字符串"
+    },
+    "机器人的QQ号": {
+        "port": 5700
+    }
+}
+```
+5. 启动酷 Q。登录自己的 QQ，然后在“插件管理”中启用 CoolQ HTTP API 插件。
+
+#### 配置 LilyWhiteBot
+1. 安装 Node.js，最小版本 12。
+2. 下载代码
+```
+git clone https://github.com/infnan/LilyWhiteBot
+```
+3. 修改配置文件：
+    * 将 config.example.yml 改名为 config.yml，按照配置文件中的提示填入参数。默认情况下各机器人都是关闭的，您需要将需要的机器人的 `disabled` 改为 `false`。
+    * 为避免群友乱说话导致封号，本程序有敏感词机制。需将 badwords.example.yml 改名为 badwords.yml。但是请注意，本程序未提供具体词库，且过滤机制较为简单，词库太大的话会影响性能。
+4. 运行
+```
+npm install
+node main.js
+```
+5. 检查互联机器人是否正常运行。
+
+如果已正常工作，建议使用 [forever](https://github.com/foreversd/forever) 启动机器人，保证程序随时运行。
+
+如何获取群组ID？
+* IRC、QQ：分别为频道名称（以 `#` 开头）和 QQ 群号码。在 LilyWhiteBot 配置文件中分别为 `irc/#频道名称` 与 `qq/群号`，例如 `irc/#test`、`qq/12345678`。
+* Telegram：将 [@GroupIDbot](https://t.me/GroupIDbot) 拉入到您的聊天群，然后输入 `/id`，机器人会返回聊天群的 ID。这个 ID 是一个负数，在 LilyWhiteBot 配置文件中需要写成类似 `telegram/-1234567890` 的格式。
+* Discord：进入 Discord 的用户设置（User Settings），找到 Appearance，启用“Enable Developer Mode”选项。然后右击聊天频道，在弹出菜单中选择“Copy ID”。在 LilyWhiteBot 配置文件中需要写成类似 `discord/1234567890` 的格式。
+
+### 从其他版本升级
+如果您从其他版本升级，请注意以下三点：
 
 1. Node.js 最低版本为 8。
 2. 配置文件格式由 json 换成了 yaml。json 配置文件仍然可用，但您会收到一条警告信息。
@@ -36,62 +128,9 @@ CoolQ HTTP API 也需要调整对应设置（详见[此页](https://cqhttp.cc/do
 
 为方便容器化，以新接口形式配置之后，程序不再直接访问酷 Q 目录，任何指定酷 Q 目录的设置都将失效（例如 servemedia 部分的 coolqCache 参数）。
 
-## 如何安装
-目前支持 QQ、Telegram、IRC 和 Discord（[试验中](https://github.com/mrhso/LilyWhiteBot/issues/4)）四种群组互联。
+## 实验性插件
+以下各功能的设定方法均为改 config.yml。接口与功能可能会有所调整。详细内容参见[插件](https://github.com/infnan/LilyWhiteBot/wiki/%E6%8F%92%E4%BB%B6)。
+* [filter](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
+* [qqxiaoice](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
+* [wikilinky](https://github.com/infnan/LilyWhiteBot/blob/master/plugins/wikilinky.js)
 
-### 必需步骤
-* 根据实际需要准备机器人账号。（具体方法见后面）
-* 安装 Node.js，版本要求：>=8.x。
-* 下载机器人本体。
-* 运行：
-```
-npm install
-node main.js
-```
-* 建议借助[forever](https://github.com/foreversd/forever)等能够常驻内存的工具来启动、监控程序。
-* 根据实际需要修改 config.example.yml，并改名为 config.yml。
-* QQ 群格式 `qq/QQ 群号`；Telegram 群格式 `telegram/一串数字`（该数字可通过`/thisgroupid`取得，后面有说明，而且请注意该数字是**负数**）；IRC 频道格式 `irc/#频道名`，别忘了`#`；Discord 频道格式 `discord/频道 ID`。
-
-### 设置 QQ 机器人
-1. 在正式启用互联之前，建议提前注册一个 QQ 小号，挂机挂到一定等级，并往钱包里塞一点钱，以减小被腾讯封杀的可能性。不过从实践情况来看，只有一颗星或不塞钱也无妨。
-2. **下载[酷 Q](https://cqp.cc/)**，启动一下以便完成安装。
-3. 下載 [CoolQ HTTP API](https://cqhttp.cc/)，并放到酷 Q 的 app 目录中。
-4. 根据 [CoolQ HTTP API 文档](https://cqhttp.cc/docs/4.11/#/Configuration)配置插件，另外请留意前文“旧版升级说明”。
-5. 再次启动酷 Q，登录机器人账号，然后在插件设置中启用「CoolQ Socket API (Node.js)」。
-6. 根据实际需要修改 badwords.example.yml，并改名为 badwords.yml。「敏感词」功能仅对 QQ 机器人有效。
-7. 请记得定期清除缓存。
-8. 如果需要，可自行搜索监控或自动重启插件，或者将插件提供的 HTTP 接口纳入到 Zabbix 等监控系统中。
-
-### 设置 Telegram 机器人
-@BotFather，与其交互，按照屏幕提示进行操作，建立一个机器人账号。设置完成后，BotFather 会给一个 Token，你需要把这个 Token 填到 config.yml 中。
-
-之后请记得运行 `/setprivacy` 命令，将机器人的 Privacy 设为 DISABLED，以便于让它看到群组内的信息。
-
-将 @GroupIDbot 拉入您的群组中，然后输入“/id”，便可获取群组的 ID。
-
-### 设置 IRC 机器人
-IRC 没有什么特别之处。如果你有 Cloak，请在 config.js 中输入正确的 userName、sasl_password，并将 sasl 设为 true。
-
-### 设置 Discord 机器人
-进入 [Discord Developer Portal](https://discordapp.com/developers/applications/)，创建 Application。在 Bot 页面中 Add Bot。将 Token 填到 config.js 中。
-
-频道 ID 可以在网页版之 URL 看到，最后面的那串神秘数字便是。
-
-## 在 Docker 中运行（推荐）
-推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/infnan/LilyWhiteBot/blob/master/README_Docker.md)。
-
-注意：如果使用酷 Q，其插件需要使用 CoolQ HTTP API 而非 cqsockertapi，否则程序无法连接。
-
-## 提示
-1. 如果把 config.yml 中的 `paeeye` 设为 `//`，那么在信息之前加入 `//`（例如「//隐藏」）可防止被其他群组看见。
-2. 如果允许 IRC 接受命令（plugins 中有「irccommand」），那么可在 Telegram 和 QQ 中使用 `/command 命令`。该命令并非 IRC 命令，而是为配合 IRC 频道中的机器人而设。
-3. 如果允许查询 IRC 的情况（plugins 中有「ircquery」），那么可在 Telegram 和 QQ 中使用 `/names`（取得在线用户清单）、`/whois 昵称`（whois）和 `/topic`（取得 Topic）。
-
-## 关于 QQ 的特别提醒
-为保护机器人操作者，程序提供了「敏感词」功能，启用之后，程序会自动把敏感词清单中的词语转为「*」。然而**程序并未提供词库**，您需要自行去 GitHub 等网站搜集敏感词并制作词典。建议在启用机器人之前把敏感词功能设置好，除非您不在中国，或者能够保证没有群友会利用敏感话题来陷害您。
-
-### 其他功能
-以下各功能的设定方法均为改 config.yml。
-* [filter](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
-* [qqxiaoice](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
-* [wikilinky](https://github.com/mrhso/LilyWhiteBot/blob/master/plugins/wikilinky.js)
