@@ -176,6 +176,7 @@ const receive = async (msg) => {
         template = messageStyle[styleMode].message;
     }
 
+    template = htmlEscape(template);
     let output = format(template, meta);
     let newRawMsg = await tgHandler.sayWithHTML(msg.to, output);
 

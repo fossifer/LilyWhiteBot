@@ -90,8 +90,9 @@ const receive = async (msg) => {
         param: msg.param
     };
     if (msg.extra.reply) {
-        meta.reply_nick = msg.extra.reply.nick;
-        meta.reply_user = msg.extra.reply.username;
+        let reply = msg.extra.reply;
+        meta.reply_nick = reply.nick;
+        meta.reply_user = reply.username;
         if (reply.isText) {
             meta.reply_text = truncate(reply.message);
         } else {
