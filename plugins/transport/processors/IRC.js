@@ -6,6 +6,7 @@
 
 const color = require('irc-colors');
 const BridgeMsg = require('../BridgeMsg.js');
+const format = require('string-format');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -203,87 +204,98 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
-    let colorize = options.colorize || {};
-
-    if (msg.isNotice) {
-        let tmp2;
-        if (msg.extra.clients >= 3) {
-            tmp2 = `< ${msg.extra.clientName.fullname}: ${msg.text} >`;
+const receive = async (msg) => {
+    // 元信息，用于自定义样式
+    let meta = {
+        nick: msg.nick,
+        from: msg.from,
+        to: msg.to,
+        text: msg.text,
+        client_short: msg.extra.clientName.shortname,
+        client_full: msg.extra.clientName.fullname,
+        command: msg.command,
+        param: msg.param
+    };
+    if (msg.extra.reply) {
+        meta.reply_nick = msg.extra.reply.nick;
+        meta.reply_user = msg.extra.reply.username;
+        if (reply.isText) {
+            meta.reply_text = truncate(reply.message);
         } else {
-            tmp2 = `< ${msg.text} >`;
+            meta.reply_text = reply.message;
         }
-        if (colorize.enabled && colorize.broadcast) {
-            tmp2 = color[colorize.broadcast](tmp2);
-        }
-        ircHandler.say(msg.to, tmp2).catch(_ => {});
+    }
+    if (msg.extra.forward) {
+        meta.forward_nick = msg.extra.forward.nick;
+        meta.forward_user = msg.extra.forward.username;
+    }
+
+    // 自定义消息样式
+    let messageStyle = config.options.messageStyle;
+    let styleMode = 'simple';
+    if (msg.extra.clients >= 3 && (msg.extra.clientName.shortname || msg.isNotice)) {
+        styleMode = 'complex';
+    }
+
+    let template;
+    if (msg.isNotice) {
+        template = messageStyle[styleMode].notice;
+    } else if (msg.extra.isAction) {
+        template = messageStyle[styleMode].action;
+    } else if (msg.extra.reply) {
+        template = messageStyle[styleMode].reply;
+    } else if (msg.extra.forward) {
+        template = messageStyle[styleMode].forward;
     } else {
-        let output = [];
-        let tmp;
+        template = messageStyle[styleMode].message;
+    }
 
-        if (!config.options.hidenick) {
-            output.push('[');
-            if (msg.extra.clients >= 3) {
-                tmp = `${msg.extra.clientName.shortname}`;
-                if (tmp) {
-                    if (colorize.enabled && colorize.client) {
-                        tmp = color[colorize.client](tmp);
-                    }
-                    output.push(tmp);
-                    output.push(' - ');
-                }
+    // 给消息上色
+    let output;
+    let colorize = options.colorize || {};
+    if (msg.isAction) {
+        output = format(template, meta);
+        if (colorize.enabled && colorize.broadcast) {
+            output = color[colorize.broadcast](output);
+        }
+    } else {
+        if (colorize.enabled) {
+            if (colorize.client) {
+                meta.client_short = color[colorize.client](meta.client_short);
+                meta.client_full = color[colorize.client](meta.client_full);
             }
-
-            tmp = msg.nick;
-            if (colorize.enabled && colorize.nick && tmp.length > 0) {
+            if (colorize.nick) {
                 if (colorize.nick === 'colorful') {
                     // hash
-                    let m = tmp.split('').map(x=>x.codePointAt(0)).reduce((x,y)=>x+y);
+                    let m = tmp.split('').map(x => x.codePointAt(0)).reduce((x, y) => x + y);
                     let n = colorize.nickcolors.length;
-                    tmp = color[colorize.nickcolors[m % n]](tmp);
+
+                    meta.nick = color[colorize.nickcolors[m % n]](meta.nick);
                 } else {
-                    tmp = color[colorize.nick](tmp);
+                    meta.nick = color[colorize.nick](meta.nick);
                 }
             }
-            output.push(tmp, '] ');
-
-            if (msg.extra.reply) {
-                const reply = msg.extra.reply;
-                tmp = `Re ${reply.nick} `;
-                if (colorize.enabled && colorize.replyto) {
-                    tmp = color[colorize.replyto](tmp);
-                }
-                output.push(tmp);
-
-                if (reply.isText) {
-                    tmp = `「${truncate(reply.message)}」`;
-                } else {
-                    tmp = reply.message;
-                }
-                if (colorize.enabled && colorize.repliedmessage) {
-                    tmp = color[colorize.repliedmessage](tmp);
-                }
-                output.push(tmp, ': ');
-            } else if (msg.extra.forward) {
-                tmp = `Fwd ${msg.extra.forward.nick}: `;
-                if (colorize.enabled && colorize.fwdfrom) {
-                    tmp = color[colorize.fwdfrom](tmp);
-                }
-                output.push(tmp);
+            if (msg.extra.reply && colorize.replyto) {
+                meta.reply_nick = color[colorize.replyto](meta.reply_nick);
+            }
+            if (msg.extra.reply && colorize.repliedmessage) {
+                meta.reply_text = color[colorize.repliedmessage](meta.reply_text);
+            }
+            if (msg.extra.forward && colorize.fwdfrom) {
+                meta.forward_nick = color[colorize.fwdfrom](meta.forward_nick);
             }
         }
 
-        output.push(msg.text);
+        output = format(template, meta);
 
         // 檔案
         if (msg.extra.uploads) {
-            output.push(...msg.extra.uploads.map(u => ` ${u.url}`));
+            output += msg.extra.uploads.map(u => ` ${u.url}`).join();
         }
-
-        ircHandler.say(msg.to, output.join('')).catch(_ => {});
     }
-    resolve();
-});
+
+    await ircHandler.say(msg.to, output);
+};
 
 module.exports = {
     init,

@@ -189,9 +189,30 @@ transport:
 
     # 其他设置
     paeeye: "//"                            # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能
-    hidenick: false                         # 轉發時不顯示暱稱（建議不要開啟）
+    # 自定义消息样式（使用 https://www.npmjs.com/package/string-format 库实现）
+    # 字段一览：
+    # 消息信息：from、to、nick、text、client_short、client_full、command、param
+    # 回复类：reply_nick、reply_text、reply_user
+    # 转发类：forward_nick、forward_user
+    # 注意：此处的 nick 并不一定是昵称，具体内容受前面各聊天软件机器人的 nickStyle 属性控制。例如 QQ.options.nickStyle 为 qq 的话，在转发 QQ 群消息时，nick 也会变成 QQ 号。
+    messageStyle:
+      simple:
+        # 两群互联样式
+        message: '[{nick}] {text}'
+        reply: '[{nick}] Re {reply_nick} 「{reply_text}」: {text}'
+        forward: '[{nick}] Fwd {forward_nick}: {text}'
+        action: '* {nick} {text}'
+        notice: '< {text} >'
+      
+      complex:
+        # 多群互联样式
+        # 备注：client_short 为空串时会使用 simple 的样式
+        message: '[{client_short} - {nick}] {text}'
+        reply: '[{client_short} - {nick}] Re {reply_nick} 「{reply_text}」: {text}'
+        forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}'
+        action: '* {client_short} - {nick} {text}'
+        notice: '< {client_full}: {text} >'
     
-    # 本節用於處理圖片等檔案
     # 本节用于处理图片文件
     #
     # 支持以下几种处理方式：

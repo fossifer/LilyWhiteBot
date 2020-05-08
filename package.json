@@ -17,6 +17,7 @@
         "lru-cache": "^5.1.1",
         "request": "~2.88.2",
         "sharp": "^0.25.2",
+        "string-format": "^2.0.0",
         "telegraf": "^3.38.0",
         "wechat4u": "^0.7.7",
         "winston": "^3.2.1"

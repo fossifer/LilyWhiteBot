@@ -96,7 +96,7 @@ winston.info('LilyWhiteBot: Multi-platform message transport bot.');
 winston.info(`Version: ${require('./package.json').version}`);
 winston.info();
 
-checkDeprecatedConfig(config, 'QQ.host', 'cqsocketapi is no longer maintained, please use CoolQ HTTP API (https://cqhttp.cc/) instead.');
+checkDeprecatedConfig(config, 'QQ.host', 'cqsocketapi is no longer maintained and will be removed in the next version, please use CoolQ HTTP API (https://cqhttp.cc/) instead.');
 checkDeprecatedConfig(config, 'QQ.port');
 checkDeprecatedConfig(config, 'QQ.qq', 'Move to QQ.bot.qq');
 checkDeprecatedConfig(config, 'QQ.apiRoot', 'Move to QQ.bot.apiRoot');
