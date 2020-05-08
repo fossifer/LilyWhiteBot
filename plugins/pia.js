@@ -13,7 +13,7 @@
 const winston = require('winston');
 const BridgeMsg = require('./transport/BridgeMsg.js');
 
-const piaMap = new Map(
+const piaMap = new Map([
     ['pia', '(╯°Д°)╯︵ ~~~~~┻━┻'],
     ['mua', 'o(*￣3￣)o'],
     ['hug', '(つ°ω°)つ'],
@@ -23,7 +23,7 @@ const piaMap = new Map(
     ['idk', '╮(￣▽￣)╭'],
     ['kick', '(ｏﾟﾛﾟ)┌┛Σ(ﾉ´*ω*`)ﾉ'],
     ['panic', '(ﾟДﾟ≡ﾟдﾟ)'],
-);
+]);
 
 module.exports = (pluginManager, options) => {
     const bridge = pluginManager.plugins.transport;
