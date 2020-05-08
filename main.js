@@ -137,7 +137,7 @@ for (let client of enabledClients) {
         options: options
     });
 
-    winston.info('${client} bot has started.');
+    winston.info(`${client} bot has started.`);
 }
 
 /**
