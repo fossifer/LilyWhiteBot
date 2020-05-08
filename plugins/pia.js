@@ -45,13 +45,13 @@ module.exports = (pluginManager, options) => {
     };
 
     if (bridge) {
-        for (let command of piaMap.keys) {
+        for (let command of piaMap.keys()) {
             bridge.addCommand(`!${command}`, pia, options);
         }
     } else {
         // 在完全不开启互联的情况下也能使用
         for (let [type, handler] of pluginManager.handlers) {
-            for (let command of piaMap.keys) {
+            for (let command of piaMap.keys()) {
                 handler.addCommand(`!${command}`, pia);
             }
         }
