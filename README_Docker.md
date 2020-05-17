@@ -1,8 +1,6 @@
 在 Docker 中运行
 ===
 
-注意：如果使用酷 Q，其插件需要使用 CoolQ HTTP API 而非 cqsockertapi，否则程序无法连接。
-
 下面是一个基于 Docker Compose 的示例配置方法：
 
 ## 1. 配置机器人账号
@@ -48,6 +46,8 @@ cp badwords.example.yml badwords.yml
 
 如果您是从旧版本升级而来，您可以继续使用json文件（然而程序会优先读取yaml文件，注意处理冲突）。因yaml更适合维护配置，建议花点时间转一下格式。
 
+另外 cqsocketapi 并非为 Docker 设计。启用 Docker 之后该插件将无法连接，需换成 CoolQ HTTP API 并重新配置。
+
 根据示例配置文件中的注释修改两个配置文件。其中，config.yml的 QQ 部分有几处需要留意的地方：
 
 1. `qq.apiRoot`设置为`http://coolq:5700`。
@@ -55,7 +55,6 @@ cp badwords.example.yml badwords.yml
 3. `qq.listen.host`设置为`0.0.0.0`。
 4. `qq.host`与`qq.port`参数需删除。
 5. 如需转发图片，建议使用图床（`transport.options.servemedia.type`不设置为`self`），因容器取文件比较麻烦。
-6. 如需将 Telegram Sticker 转为图片（`transport.options.servemedia.webp2png = true`），那么`transport.options.servemedia.webpPath`需设置为`/usr/local/bin/dwebp`。
 
 ### CoolQ HTTP API 配置
 执行
@@ -107,9 +106,11 @@ services:
     environment:
       VNC_PASSWD: VNC密码
       COOLQ_ACCOUNT: 你的机器人账号
+      # 如果使用酷Q Pro 则需要解除下面的注释
+      # COOLQ_URL: http://dlsec.cqp.me/cqp-full
 
   lilywhitebot:
-    build: ./LilyWhiteBot
+    image: node:12
     restart: always
     working_dir: /home/node/app
     volumes:
@@ -125,5 +126,40 @@ docker-compose up -d
 
 第一次启动时，需安装配置酷 Q。调整服务器防火墙，放行9000端口，然后使用浏览器访问`http://你的服务器IP:9000`，输入VNC密码，进行酷 Q 的安装与登录操作。登录成功后，启用 CoolQ HTTP API 插件，然后在界面中重启酷 Q。
 
-配置完成后，检查机器人是否正常运行。酷 Q 与 CoolQ HTTP API 插件可在酷 Q 软件中查看，而互联机器人日志可通过`docker logs bot_lilywhitebot_1`命令查看。
+配置完成后，检查机器人是否正常运行。酷 Q 与 CoolQ HTTP API 插件日志可在酷 Q 软件中查看，而互联机器人日志可通过`docker logs bot_lilywhitebot_1`命令查看。
 
+## 其他说明
+### 文件服务器
+```yaml
+version: "3"
+
+services:
+  # ...
+
+  lilywhitebot:
+    image: node:12
+    restart: always
+    working_dir: /home/node/app
+    volumes:
+      - ./LilyWhiteBot:/home/node/app
+      # 在此处增加临时文件存放目录
+      - ./cache:/home/ndoe/cache
+    command: "npm run install-start"
+
+  nginx:
+    # ...
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # 与上面保持一致
+      - ./cache:/var/www/html
+```
+
+config.yml：
+* `transport.options.servemedia.type`设置为`self`
+* `transport.options.servemedia.cachePath`设置为`/home/node/cache`
+* `transport.options.servemedia.serveUrl`设置为你的（上面示例为nginx）服务器网址
+
+### 树莓派
+由于酷 Q 仅支持 x86_64 平台，因此在需要 QQ 的情况下，程序不能在树莓派等硬件上运行。

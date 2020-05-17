@@ -18,6 +18,7 @@ IRC:
     floodProtection: true
     floodProtectionDelay: 300
     sasl: false                             # 如果開啟 SASL，那麼需要正確設定前面的 userName 和下面的 sasl_password
+    # 如果有 Cloak 也需要正确输入这两个参数。
     sasl_password: ""
     encoding: UTF-8
   options:
@@ -30,9 +31,6 @@ Telegram:
     token: ""                               # BotFather 給你的 Token，類似「123456789:q234fipjfjaewkflASDFASjaslkdf」
     timeout: 30                             # 報超時的秒數
     limit: 100                              # 限定檢索的消息數
-  options:
-    nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
-                                            # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
 
     # 如果使用中国国内网络，无法直连 Telegram 服务器，可通过设置 proxy（仅支持 HTTPS 代理）来翻墙
     # 或者自行在国外架设 Bot API（api.telegram.org）反向代理服务器然后修改 apiRoot 的值
@@ -51,32 +49,29 @@ Telegram:
         caPath: ""                          # 如使用自签名证书，CA 证书路径
 
     apiRoot: "https://api.telegram.org"     # 无特殊需要的话勿动
-    noCheckCertificate: false               # 无特殊需要的话勿动
+
+  options:
+    nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
+                                            # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
 
 # QQ 注意事项：需要和[酷Q](https://cqp.cc)与[CoolQ HTTP API插件](https://cqhttp.cc)配合使用！
 QQ:
   disabled: true                            # 如果需要 QQ 机器人，请设置为 false
-  qq: "10000"                               # 机器人的 QQ 号
+  bot:
+    qq: "10000"                             # 机器人的 QQ 号
 
-  # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
-  apiRoot: "http://127.0.0.1:5700/"
-  accessToken: "123"
-  secret: "abc"
-  listen:                                   # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
-    host: "127.0.0.1"                       # 使用Docker时请设置成0.0.0.0
-    port: 11234
-
-  # 以下两参数用于兼容旧版 [cqsocketapi](https://github.com/mrhso/cqsocketapi)
-  # 已弃用，建议将酷Q插件换成 CoolQ HTTP API 插件
-  # host: "127.0.0.1"
-  # port: 11235
+    # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
+    apiRoot: "http://127.0.0.1:5700/"
+    accessToken: "123"
+    secret: "abc"
+    listen:                                 # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
+      host: "127.0.0.1"                     # 使用Docker时请设置成0.0.0.0
+      port: 11234
 
   options:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
     ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
     nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
-    showTitle: false                        # 轉發時顯示頭銜（被@者不會顯示）
-    # CoolQAirA: true                       # true - 酷Q Air，false - 酷Q Pro - 此参数已弃用
     CoolQPro: false                         # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
 
 Discord:
@@ -105,9 +100,12 @@ plugins:
 transport:
   # 說明：
   # 1. 可以填任意個群組
-  # 2. 群組格式：「irc/#頻道」、「telegram/-12345678」或「qq/群號」
-  # 3. 聊天軟體名不區分大小寫，可簡寫為 i、t、q
-  # 4. 如果需要，可以加入多個互聯體
+  # 2. 群組格式：
+  #    irc/#頻道 例如 irc/#test
+  #    telegram/-群组ID 例如 telegram/-12345678
+  #    qq/群号 例如 qq/12345678
+  #    discord/ID 例如 discord/123123123123
+  # 3. 如果需要，可以加入多個互聯體。例如将两个 QQ 分群连接到一起。
   groups:
     - ['irc/#test', 'telegram/-12345678', 'qq/12345678']
     # 可以在同一组内增加软件相同、群号不同的群，例如
@@ -193,48 +191,72 @@ transport:
     paeeye:                                 # 留空或省略則禁用本功能
       prepend: "//"                         # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。
       inline: "--no-relay"                  # 在訊息中間使用「--no-relay」會阻止此條訊息向其他群組轉發。
-    hidenick: false                         # 轉發時不顯示暱稱（建議不要開啟）
+    # 自定义消息样式（使用 https://www.npmjs.com/package/string-format 库实现）
+    # 字段一览：
+    # 消息信息：from、to、nick、title、text、client_short、client_full、command、param
+    # 回复类：reply_nick、reply_text、reply_user
+    # 转发类：forward_nick、forward_user
+    # 注意：此处的 nick 并不一定是昵称，具体内容受前面各聊天软件机器人的 nickStyle 属性控制。例如 QQ.options.nickStyle 为 qq 的话，在转发 QQ 群消息时，nick 也会变成 QQ 号。
+    messageStyle:
+      simple:
+        # 两群互联样式
+        message: '[<{title}> {nick}] {text}'
+        reply: '[<{title}> {nick}] Re {reply_nick} 「{reply_text}」: {text}'
+        forward: '[<{title}> {nick}] Fwd {forward_nick}: {text}'
+        action: '* {nick} {text}'
+        notice: '< {text} >'
 
-    # 本節用於處理圖片等檔案
+      complex:
+        # 多群互联样式
+        # 备注：client_short 为空串时会使用 simple 的样式
+        message: '[{client_short} - {nick}] {text}'
+        reply: '[{client_short} - {nick}] Re {reply_nick} 「{reply_text}」: {text}'
+        forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}'
+        action: '* {client_short} - {nick} {text}'
+        notice: '< {client_full}: {text} >'
+
+    # 本节用于处理图片文件
     #
-    # type為檔案的處置方式，可取：
-    # 省略/留空/none：不處理。只顯示「<Photo>」或「[圖片]」等文字
-    # self：將檔案保存在自己的伺服器中
-    # vim-cn：將檔案上傳到 img.vim-cn.com
-    # linx：將檔案上傳到一個 linx（https://github.com/andreimarcu/linx-server）伺服器中
-    # uguu: 將檔案上傳到一個 uguu（https://github.com/nokonoko/Uguu）伺服器中
+    # 支持以下几种处理方式：
+    #
+    # 以下三个是公共图床，仅支持图片，其他类型文件会被忽略：
+    # vim-cn：将图片上传到 img.vim-cn.com。
+    # imgur：将图片上传到 imgur.com。
+    # sm.ms：将图片上传到 sm.ms 图床中。
+    #
+    # 以下三个需自建服务器：
+    # self：将文件保存在自己的服务器中。请确保您的服务器设置正确，URL 能够正常访问，否则将无法发送图片。
+    # linx：将文件上传到一个 linx（https://github.com/andreimarcu/linx-server）服务器中，支持所有文件格式。
+    # uguu: 将文件上传到一个 uguu（https://github.com/nokonoko/Uguu）服务器中。
     #
     # 特别提醒：
     # 1. vim-cn、sm.ms 为个人图床，资源有限。如果您的聊天群水量很大，请选择其他图床或自建服务器。
-    # 2. 如使用外部图床，请您设置合适的 User-Agent。
+    # 2. 如使用外部图床，建议您设置自己专用的 User-Agent。
+    # 3. 自建服务器请使用 80 或 443 端口（国内服务器需备案），否则图片可能无法正常转发。
     #
-    # 另外，如果使用酷 Q 的話，您需要定期自行清理酷 Q 的快取！
+    # 另外，如果使用酷 Q 的话，您需要定期自行清理酷 Q 的缓存！
     servemedia:
-      type: ""                              # 檔案的處置方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx
-      # coolqCache: '',                     # （仅用于兼容旧版 cqsocketapi，且在旧版 cqsocketapi 中为必填项）酷 Q 快取存放位置，例如 /home/coolq/CoolQ/data（如果為 *nix 伺服器）或 C:\CoolQ\data（如果為 Windows 伺服器，注意 js 轉義）
-      # legacy: false                       # （仅用于兼容旧版 cqsocketapi）true 時讀取 cqimg 下載圖片，而不調用酷 Q 自身的 API 獲取圖片
-                                            # 圖片下載失敗（https://cqp.cc/t/42857）時啟用
+      type: ""                              # 文件处理方式：省略/留空/none、self、vim-cn、imgur、sm.ms、linx、uguu
 
-      cachePath: ""                         # type 為 self 時有效：快取存放位置
-      serveUrl: ""                          # type 為 self 時有效：檔案 URL 的字首，一般需要以斜線結尾
+      # type为self时有效
+      cachePath: ""                         # 缓存存放位置
+      serveUrl: ""                          # URL 的前缀，通常需要以斜线结尾
 
-      linxApiUrl: ""                        # type 為 linx 時有效：linx API 位址，一般以斜線結尾
+      # type为linx时有效
+      linxApiUrl: ""                        # linx API 地址（例如 https://www.xxx.com/upload/），通常以斜线结尾
 
-      uguuApiUrl: ""                        # type 為 uguu 時有效：請使用 /api.php?d=upload-tool 結尾
+      # type为uguu时有效
+      uguuApiUrl: ""                        # 请以 /api.php?d=upload-tool 结尾
 
-      imgur:                                # type 為 imgur 時有效
+      # type为imgur时有效
+      imgur:
         apiUrl: "https://api.imgur.com/3/"
         clientId: ""                        # 從 imgur 申請到的 client_id
 
+      # 其他设置
       sizeLimit: 4096                       # 檔案最大大小，單位 KiB。0 表示不限制。限制僅對 Telegram 有效
-      timeout: 1000                         # 上传超时时间，单位毫秒，type 为 vim-cn、imgur 等外部图床时有效
+      timeout: 3000                         # 上传超时时间，单位毫秒，type 为 vim-cn、imgur 等外部图床时有效
       userAgent: ""                         # 访问外部图床时的 User-Agent，如留空则使用默认的 LilyWhiteBot/版本号
-
-      # 是否把 Telegram 的 Sticker （webp 格式）轉為 PNG 格式
-      # 如果設為 true，那麼需要安装 webp，具體步驟見 https://github.com/Intervox/node-webp
-      webp2png: false
-      webpPath: ""                          # dwebp 二进制文件地址，留空则从 PATH 搜索
-
 
 ircquery:
   disables:                                 # 不要在這些群組使用 ircquery 功能

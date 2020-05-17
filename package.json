@@ -1,26 +1,29 @@
 {
     "name": "lilywhitebot",
-    "version": "1.4.1",
-    "description": "互聯機器人（目前支援 QQ、Telegram、IRC、Discord）",
+    "version": "1.5.0",
+    "description": "多聊天群互聯機器人（目前支援 QQ、Telegram、IRC、Discord）",
     "repository": "github:joch2520/LilyWhiteBot",
+    "license": "AGPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/joch2520/LilyWhiteBot/issues"
+    },
     "dependencies": {
         "cqhttp": "^1.2.0",
-        "cwebp": "~2.0.5",
         "discord.js": "^12.0.1",
         "irc-colors": "~1.5.0",
         "irc-upd": "~0.10.0",
         "ishisashiencoding": "^0.4.0",
-        "ishisashimap": "^1.0.1",
         "js-yaml": "^3.13.1",
         "lru-cache": "^5.1.1",
         "request": "~2.88.2",
-        "telegraf": "^3.36.0",
-        "tmp": "~0.1.0",
+        "sharp": "^0.25.2",
+        "string-format": "^2.0.0",
+        "telegraf": "^3.38.0",
         "wechat4u": "^0.7.7",
         "winston": "^3.2.1"
     },
     "engines": {
-        "node": ">=8.0.0"
+        "node": ">=12.0.0"
     },
     "scripts": {
         "start": "node main.js",

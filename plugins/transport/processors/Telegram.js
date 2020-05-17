@@ -2,6 +2,7 @@
 
 const path = require('path');
 const BridgeMsg = require('../BridgeMsg.js');
+const format = require('string-format');
 
 const htmlEscape = (str) => {
     return str.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;');
@@ -146,59 +147,60 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
+const receive = async (msg) => {
+    // 元信息，用于自定义样式
+    let meta = {
+        nick: `<b>${htmlEscape(msg.nick)}</b>`,
+        from: htmlEscape(msg.from),
+        to: htmlEscape(msg.to),
+        text: htmlEscape(msg.text),
+        client_short: htmlEscape(msg.extra.clientName.shortname),
+        client_full: htmlEscape(msg.extra.clientName.fullname),
+        command: htmlEscape(msg.command),
+        param: htmlEscape(msg.param)
+    };
+    
+    // 自定义消息样式
+    let styleMode = 'simple';
+    let messageStyle = config.options.messageStyle;
+    if (msg.extra.clients >= 3 && (msg.extra.clientName.shortname || msg.isNotice)) {
+        styleMode = 'complex';
+    }
+
+    let template;
     if (msg.isNotice) {
-        if (msg.extra.clients >= 3) {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${msg.extra.clientName.fullname}: ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
-        } else {
-            tgHandler.sayWithHTML(msg.to, `<pre>&lt; ${htmlEscape(msg.text)} &gt;</pre>`).catch(e => reject(e));
-        }
+        template = messageStyle[styleMode].notice;
+    } else if (msg.extra.isAction) {
+        template = messageStyle[styleMode].action;
     } else {
-        let output = '';
-        let prefix = '';
+        template = messageStyle[styleMode].message;
+    }
 
-        // 多群組
-        if (!config.options.hidenick) {
-            if (msg.extra.isAction) {
-                prefix = `* <b>${htmlEscape(msg.nick)}</b> `;
+    template = htmlEscape(template);
+    let output = format(template, meta);
+    let newRawMsg = await tgHandler.sayWithHTML(msg.to, output);
+
+    // 如果含有相片和音訊
+    if (msg.extra.uploads) {
+        let replyOption = {
+            reply_to_message_id: newRawMsg.message_id
+        };
+
+        for (let upload of msg.extra.uploads) {
+            if (upload.type === 'audio') {
+                await tgHandler.sendAudio(msg.to, upload.url, replyOption);
+            } else if (upload.type === 'photo') {
+                if (path.extname(upload.url) === '.gif') {
+                    await tgHandler.sendAnimation(msg.to, upload.url, replyOption);
+                } else {
+                    await tgHandler.sendPhoto(msg.to, upload.url, replyOption);
+                }
             } else {
-                if (msg.extra.clients >= 3 && msg.extra.clientName.shortname) {
-                    prefix = `[${htmlEscape(msg.extra.clientName.shortname)} - <b>${htmlEscape(msg.nick)}</b>] `;
-                } else {
-                    prefix = `[<b>${htmlEscape(msg.nick)}</b>] `;
-                }
-            }
-        }
-        output = `${prefix}${htmlEscape(msg.text)}`;
-
-        // TODO 圖片在文字之前發出
-        tgHandler.sayWithHTML(msg.to, output).catch(e => reject(e));
-
-        // 如果含有相片和音訊
-        if (msg.extra.uploads) {
-            let files = [];
-
-            for (let upload of msg.extra.uploads) {
-                if (upload.type === 'audio') {
-                    tgHandler.sendAudio(msg.to, upload.url).catch(e => reject(e));
-                } else if (upload.type === 'photo') {
-                    if (path.extname(upload.url) === '.gif') {
-                        tgHandler.sendDocument(msg.to, upload.url).catch(e => reject(e));
-                    } else {
-                        tgHandler.sendPhoto(msg.to, upload.url).catch(e => reject(e));
-                    }
-                } else {
-                    files.push(upload.url);
-                }
-            }
-
-            if (files.length > 0) {
-                output += ` ${htmlEscape(files.join(' '))}`;
+                await tgHandler.sendDocument(msg.to, upload.url, replyOption);
             }
         }
     }
-    resolve();
-});
+};
 
 module.exports = {
     init,

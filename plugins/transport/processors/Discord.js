@@ -4,8 +4,8 @@
 
 'use strict';
 
-const BridgeMsg = require('../BridgeMsg.js');
 const LRU = require('lru-cache');
+const format = require('string-format');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -101,51 +101,57 @@ const init = (b, h, c) => {
 };
 
 // 收到了來自其他群組的訊息
-const receive = (msg) => new Promise((resolve, reject) => {
-    if (msg.isNotice) {
-        if (msg.extra.clients >= 3) {
-            discordHandler.say(msg.to, `< ${msg.extra.clientName.fullname}: ${msg.text} >`);
+const receive = async (msg) => {
+    // 元信息，用于自定义样式
+    let meta = {
+        nick: msg.nick,
+        from: msg.from,
+        to: msg.to,
+        text: msg.text,
+        client_short: msg.extra.clientName.shortname,
+        client_full: msg.extra.clientName.fullname,
+        command: msg.command,
+        param: msg.param
+    };
+    if (msg.extra.reply) {
+        let reply = msg.extra.reply;
+        meta.reply_nick = reply.nick;
+        meta.reply_user = reply.username;
+        if (reply.isText) {
+            meta.reply_text = truncate(reply.message);
         } else {
-            discordHandler.say(msg.to, `< ${msg.text} >`);
-        }
-    } else {
-        if (msg.extra.isAction) {
-            // 一定是 IRC
-            discordHandler.say(msg.to, `* ${msg.nick} ${msg.text}`);
-            resolve();
-        } else {
-            let special = '';
-            let prefix = '';
-            if (!config.options.hidenick) {
-                if (msg.extra.reply) {
-                    const reply = msg.extra.reply;
-                    special = `Re ${reply.nick} `;
-
-                    if (reply.isText) {
-                        special += `「${truncate(reply.message)}」`;
-                    } else {
-                        special += reply.message;
-                    }
-
-                    special += ': ';
-                } else if (msg.extra.forward) {
-                    special = `Fwd ${msg.extra.forward.nick}: `;
-                }
-
-                if (msg.extra.clients >= 3 && msg.extra.clientName.shortname) {
-                    prefix = `[${msg.extra.clientName.shortname} - ${msg.nick}] ${special}`;
-                } else {
-                    prefix = `[${msg.nick}] ${special}`;
-                }
-            }
-
-            // 檔案
-            const attachFileUrls = () => (msg.extra.uploads || []).map(u => ` ${u.url}`).join('');
-            discordHandler.say(msg.to, prefix + msg.text + attachFileUrls());
+            meta.reply_text = reply.message;
         }
     }
-    resolve();
-});
+    if (msg.extra.forward) {
+        meta.forward_nick = msg.extra.forward.nick;
+        meta.forward_user = msg.extra.forward.username;
+    }
+
+    // 自定义消息样式
+    let messageStyle = config.options.messageStyle;
+    let styleMode = 'simple';
+    if (msg.extra.clients >= 3 && (msg.extra.clientName.shortname || msg.isNotice)) {
+        styleMode = 'complex';
+    }
+
+    let template;
+    if (msg.isNotice) {
+        template = messageStyle[styleMode].notice;
+    } else if (msg.extra.isAction) {
+        template = messageStyle[styleMode].action;
+    } else if (msg.extra.reply) {
+        template = messageStyle[styleMode].reply;
+    } else if (msg.extra.forward) {
+        template = messageStyle[styleMode].forward;
+    } else {
+        template = messageStyle[styleMode].message;
+    }
+
+    let output = format(template, meta);
+    let attachFileUrls = (msg.extra.uploads || []).map(u => ` ${u.url}`).join('');
+    discordHandler.say(msg.to, `${output}${attachFileUrls}`);
+};
 
 module.exports = {
     init,
