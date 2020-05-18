@@ -197,7 +197,6 @@ const receive = async (msg) => {
     // 元信息，用于自定义样式
     let meta = {
         nick: msg.nick,
-        title: msg.title,
         from: msg.from,
         to: msg.to,
         text: msg.text,
