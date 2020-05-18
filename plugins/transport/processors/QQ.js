@@ -171,18 +171,18 @@ const init = (b, h, c) => {
      * 禁言與解禁
      */
     qqHandler.on('ban', (data) => {
-        let text;
+        let text = '';
         if (data.type === 1) {
-            text = `${data.user.name} (${data.target}) 被禁言 ${data.duration}`;
+            text = `${data.user_target.name} (${data.target}) 被禁言${data.durstr}`;
         } else {
-            text = `${data.user.name} (${data.target}) 被解除禁言`;
+            text = `${data.user_target.name} (${data.target}) 被解除禁言`;
         }
 
         if (options.notify.ban) {
             bridge.send(new BridgeMsg({
                 from: data.group,
                 to: data.group,
-                nick: data.user.name,
+                nick: data.user_target.name,
                 text: text,
                 isNotice: true,
                 handler: qqHandler,
