@@ -49,7 +49,7 @@ Telegram:
         caPath: ""                          # 如使用自签名证书，CA 证书路径
 
     apiRoot: "https://api.telegram.org"     # 无特殊需要的话勿动
-    
+
   options:
     nickStyle: username                     # 在其他群組中如何辨識使用者名稱：可取「username」（優先採用使用者名稱）、
                                             # 「fullname」（優先採用全名）、「firstname」（優先採用 First Name）
@@ -72,6 +72,7 @@ QQ:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
     ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
     nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
+    showTitle: false                        # 轉發時顯示頭銜（被@者不會顯示）
     CoolQPro: false                         # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
 
 Discord:
@@ -79,7 +80,7 @@ Discord:
   bot:
     token: ""
   options:
-    nickStyle: username                     # 可取「username」（使用者名稱）、「id」（ID）
+    nickStyle: nickname                     # 可取「nickname」（使用者暱稱，僅在伺服器有效，否則仍用使用者名稱）、「username」（使用者名稱）、「id」（ID）
     useProxyURL: false                      # 考虑到中国网络情况，若 https://cdn.discordapp.com 被屏蔽请改成 true（对应 https://media.discordapp.net）
 
 # 系统日志
@@ -109,7 +110,7 @@ transport:
   groups:
     - ['irc/#test', 'telegram/-12345678', 'qq/12345678']
     # 可以在同一组内增加软件相同、群号不同的群，例如
-    # - ['irc/#test', 'telegram/-12345678', 'qq/12345678', 'qq/87654321'] 
+    # - ['irc/#test', 'telegram/-12345678', 'qq/12345678', 'qq/87654321']
     # 另外如有多组互联需求，可继续增加互联关系
 
   # 如果希望把同一軟體的多個群組連接到一起，可為不同的群組設置不同的別名，
@@ -132,7 +133,7 @@ transport:
         leave: onlyactive                   # 有人離開頻道的話是否在其他群組提醒，也可取 all/onlyactive/none
         timeBeforeLeave: 600                # 如果 leave 為 onlyactive 的話：最後一次說話後多長時間內離開才會提醒
         topic: true                         # 頻道更換 Topic 時是否提醒
-      
+
       # 這裡可以設定機器人在 IRC 頻道中使用顏色。在啟用顏色功能之前，IRC 頻道的管理員需要解除頻道的 +c 模式，即
       #  /msg ChanServ SET #頻道 MLOCK -c
 
@@ -157,11 +158,11 @@ transport:
 
         # 如果 nick 為 colorful，則從這些顏色中挑選。為了使顏色分佈均勻，建議使顏色數量為素數
         nickcolors: ["green", "blue", "purple", "olive", "pink", "teal", "red"]
-  
+
       # 互联控制相关
       receiveCommands: true                 # 是否允許 Telegram 和 QQ 使用 irccommand
       allowQuery: true                      # 是否允許其他群組查詢 IRC 頻道資訊
-    
+
     Telegram:
       notify:
         join: true
@@ -188,7 +189,9 @@ transport:
         notice: true                        # 发送群公告时是否提醒其他群组
 
     # 其他设置
-    paeeye: "//"                            # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。留空或省略則禁用本功能
+    paeeye:                                 # 留空或省略則禁用本功能
+      prepend: "//"                         # 在訊息前面使用「//」會阻止此條訊息向其他群組轉發。
+      inline: "--no-relay"                  # 在訊息中間使用「--no-relay」會阻止此條訊息向其他群組轉發。
     # 自定义消息样式（使用 https://www.npmjs.com/package/string-format 库实现）
     # 字段一览：
     # 消息信息：from、to、nick、text、client_short、client_full、command、param
@@ -203,7 +206,7 @@ transport:
         forward: '[{nick}] Fwd {forward_nick}: {text}'
         action: '* {nick} {text}'
         notice: '< {text} >'
-      
+
       complex:
         # 多群互联样式
         # 备注：client_short 为空串时会使用 simple 的样式
@@ -212,7 +215,7 @@ transport:
         forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}'
         action: '* {client_short} - {nick} {text}'
         notice: '< {client_full}: {text} >'
-    
+
     # 本节用于处理图片文件
     #
     # 支持以下几种处理方式：
@@ -259,7 +262,7 @@ transport:
 ircquery:
   disables:                                 # 不要在這些群組使用 ircquery 功能
     - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
-  
+
   # 如果是只希望在特定群組使用，用這個
   # enables:
   #  - "qq/12345678"
@@ -271,7 +274,7 @@ irccommand:
 
   disables:                                 # 不要在這些群組使用 ircquery 功能
     - "qq/12345678"                         # 軟體名（qq/irc/telegram）要寫全而且小寫……
-  
+
   # 如果是只希望在特定群組使用，用這個
   # enables:
   #  - "qq/12345678"

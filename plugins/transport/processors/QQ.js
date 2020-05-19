@@ -81,13 +81,13 @@ const init = (b, h, c) => {
             Promise.all(promises).then((infos) => {
                 for (let info of infos) {
                     if (info) {
-                        groupInfo.set(`${info.qq}@${context.to}`, info);
+                        groupInfo.set(`${info.qq||info.user_id}@${context.to}`, info);
 
                         const user = {
                             sender: {
-                                user_id: info.qq,
-                                nickname: info.name,
-                                card: info.groupCard
+                                user_id: info.qq||info.user_id,
+                                nickname: info.name||info.nickname,
+                                card: info.groupCard||info.card
                             }
                         };
                         const searchReg = new RegExp(`\\[CQ:at,qq=${info.qq}\\]`, 'gu');
@@ -123,7 +123,7 @@ const init = (b, h, c) => {
         if (data.type === 1) {
             text = `${data.user_target.name} (${data.target}) 退出QQ群`;
         } else {
-            text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.adminQQ}) 踢出QQ群`;
+            text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.admin}) 踢出QQ群`;
         }
 
         if (groupInfo.has(`${data.target}@${data.group}`)) {
@@ -159,6 +159,30 @@ const init = (b, h, c) => {
                 from: data.group,
                 to: data.group,
                 nick: data.user.name,
+                text: text,
+                isNotice: true,
+                handler: qqHandler,
+                _rawdata: data,
+            })).catch(() => {});
+        }
+    });
+
+    /*
+     * 禁言與解禁
+     */
+    qqHandler.on('ban', (data) => {
+        let text = '';
+        if (data.type === 1) {
+            text = `${data.user_target.name} (${data.target}) 被禁言${data.durstr}`;
+        } else {
+            text = `${data.user_target.name} (${data.target}) 被解除禁言`;
+        }
+
+        if (options.notify.ban) {
+            bridge.send(new BridgeMsg({
+                from: data.group,
+                to: data.group,
+                nick: data.user_target.name,
                 text: text,
                 isNotice: true,
                 handler: qqHandler,

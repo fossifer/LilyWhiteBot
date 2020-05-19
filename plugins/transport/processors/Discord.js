@@ -43,6 +43,30 @@ const init = (b, h, c) => {
 
         userInfo.set(context.from, context._rawdata.author);
 
+        if (context.text.match(/<:\w+:\d*?>/u)) {
+          // 處理自定義表情符號
+          let emojis = [];
+
+          context.text.replace(/<:(\w+):(\d*?)>/g, (_, name, id) => {
+              if (id && !emojis.filter(v=>v.id===id).length) {emojis.push({name:name, id:id})};
+          });
+          if (!context.extra.files) { context.extra.files = [] }
+          for (let emoji of emojis) {
+              // TODO: 檢查是否動圖，使用.gif
+              let url = `https://cdn.discordapp.com/emojis/${emoji.id}.png`
+              let proxyURL = `https://media.discordapp.net/emojis/${emoji.id}.png`
+              context.text = context.text.replace(new RegExp(`<:${emoji.name}:${emoji.id}>`, 'gu'), `<emoji: ${emoji.name}>`);
+              context.extra.files.push({
+                  client: 'Discord',
+                  type: 'photo',
+                  id: emoji.id,
+                  size: 262144,
+                  url: discordHandler._useProxyURL ? proxyURL : url,
+              })
+          }
+          if (!context.extra.files.length) { delete context.extra.files }
+        }
+
         if (context.text.match(/<@\d*?>/u)) {
             // 處理 at
             let ats = [];
