@@ -82,6 +82,7 @@ Discord:
   options:
     nickStyle: nickname                     # 可取「nickname」（使用者暱稱，僅在伺服器有效，否則仍用使用者名稱）、「username」（使用者名稱）、「id」（ID）
     useProxyURL: false                      # 考虑到中国网络情况，若 https://cdn.discordapp.com 被屏蔽请改成 true（对应 https://media.discordapp.net）
+    relayEmoji: true                        # 轉發時附帶自定義表情圖片，如為否只轉發表情名稱
 
 # 系统日志
 logging:

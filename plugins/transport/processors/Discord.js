@@ -56,13 +56,15 @@ const init = (b, h, c) => {
               let url = `https://cdn.discordapp.com/emojis/${emoji.id}.png`
               let proxyURL = `https://media.discordapp.net/emojis/${emoji.id}.png`
               context.text = context.text.replace(new RegExp(`<:${emoji.name}:${emoji.id}>`, 'gu'), `<emoji: ${emoji.name}>`);
-              context.extra.files.push({
-                  client: 'Discord',
-                  type: 'photo',
-                  id: emoji.id,
-                  size: 262144,
-                  url: discordHandler._useProxyURL ? proxyURL : url,
-              })
+              if (discordHandler._relayEmoji) {
+                context.extra.files.push({
+                    client: 'Discord',
+                    type: 'photo',
+                    id: emoji.id,
+                    size: 262144,
+                    url: discordHandler._useProxyURL ? proxyURL : url,
+                })
+              }
           }
           if (!context.extra.files.length) { delete context.extra.files }
         }
