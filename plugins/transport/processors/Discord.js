@@ -43,16 +43,16 @@ const init = (b, h, c) => {
 
         userInfo.set(context.from, context._rawdata.author);
 
-        if (context.text.match(/<:\w+:\d*?>/u)) {
+        if (/<a?:\w+:\d*?>/g.test(context.text)) {
           // 處理自定義表情符號
           let emojis = [];
           let animated = [];
 
-          context.text.replace(/<:(\w+):(\d*?)>/g, (_, name, id) => {
+          context.text = context.text.replace(/<:(\w+):(\d*?)>/g, (_, name, id) => {
               if (id && !emojis.filter(v=>v.id===id).length) {emojis.push({name:name, id:id})};
               return `<emoji: ${name}>`;
           });
-          context.text.replace(/<a:(\w+):(\d*?)>/g, (_, name, id) => {
+          context.text = context.text.replace(/<a:(\w+):(\d*?)>/g, (_, name, id) => {
               if (id && !animated.filter(v=>v.id===id).length) {animated.push({name:name, id:id})};
               return `<emoji: ${name}>`;
           });
@@ -85,7 +85,7 @@ const init = (b, h, c) => {
           if (!context.extra.files.length) { delete context.extra.files }
         }
 
-        if (context.text.match(/<@\d*?>/u)) {
+        if (/<@\d*?>/u.test(context.text)) {
             // 處理 at
             let ats = [];
             let promises = [];
