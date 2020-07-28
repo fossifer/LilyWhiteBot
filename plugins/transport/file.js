@@ -159,7 +159,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
                     } else {
                         requestOptions.url = servemedia.imgur.apiUrl + '/upload';
                     }
-                    requestOptions.headers.Authorization = `Client-ID ${config.clientId}`;
+                    requestOptions.headers.Authorization = `Client-ID ${servemedia.imgur.clientId}`;
                     requestOptions.json = true;
                     requestOptions.formData = {
                         type: 'file',
