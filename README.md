@@ -2,8 +2,11 @@ LilyWhiteBot
 ===
 在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
+## 关于QQ的重要说明
+2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。本程序QQ部分依赖酷Q运行，因此也不再支持QQ传话，直到有其他解决方案为止。
+
 ## 功能
-* QQ、Telegram、IRC、Discord 等多组聊天群之间互联。
+* <s>QQ</s>、Telegram、IRC、Discord 等多组聊天群之间互联。
 * 可根据需要配置单向互联，或者将同一聊天软件的多个分群互联到一起。
 * 支持图片转发。如不能发送图片（IRC），程序可将图片上传到图床并提供图片链接。
     * *由于 QQ 发言借助酷 Q 实现，在 QQ 发送图片需购买 Pro 授权。*
@@ -13,7 +16,7 @@ LilyWhiteBot
 
 ## 部署操作指南
 ### 准备机器人账号
-#### QQ
+#### QQ（已停止支持）
 由于全新的 QQ 号无法直接进群，故建议提前两周注册 QQ 账号，并保持在线。尽量实名注册并绑定手机，以免在触发验证时无法验证账号。
 
 #### Telegram
@@ -43,7 +46,7 @@ IRC 不需要注册。为了提高安全性，您可以采取注册 Nick、增�
 推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/infnan/LilyWhiteBot/blob/master/README_Docker.md)。
 
 ### 配置互联程序（手工操作）
-#### 配置酷 Q（仅在涉及 QQ 时需要）
+#### 配置酷 Q（酷Q已跑路）
 1. 下载酷 Q。下载链接：[Air 版](http://dlsec.cqp.me/cqa-tuling)、[Pro 版](http://dlsec.cqp.me/cqp-full)
     * 如果您使用 Windows 系统，可直接解压运行。预算充足的话甚至可以酷 Q 在 Windows 服务器上跑，而 LilyWhiteBot 在另一台 Linux 服务器上跑。
     * 如果您使用 Linux 系统，需安装 wine、任意一个桌面环境（至少要把 X11 装好）与 x11vnc 等远程连接软件。由于这些软件配置麻烦，且容易“污染环境”，建议使用 Docker（[docker-wine-coolq](https://github.com/CoolQ/docker-wine-coolq)），免得自己配置。
