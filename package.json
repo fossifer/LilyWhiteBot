@@ -1,6 +1,6 @@
 {
     "name": "lilywhitebot",
-    "version": "1.5.0",
+    "version": "2.0.0alpha",
     "description": "多聊天群互联机器人（目前支持 QQ、Telegram、IRC、Discord）",
     "repository": "github:joch2520/LilyWhiteBot",
     "license": "AGPL-3.0-or-later",
@@ -15,6 +15,7 @@
         "ishisashiencoding": "^0.4.0",
         "js-yaml": "^3.13.1",
         "lru-cache": "^5.1.1",
+        "oicq": "^0.1.4",
         "request": "~2.88.2",
         "sharp": "^0.25.2",
         "string-format": "^2.0.0",
