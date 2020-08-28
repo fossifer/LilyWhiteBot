@@ -8,6 +8,7 @@
         "url": "https://github.com/infnan/LilyWhiteBot/issues"
     },
     "dependencies": {
+        "asciify-image": "^0.1.6",
         "cqhttp": "^1.2.0",
         "discord.js": "^12.0.1",
         "irc-colors": "~1.5.0",
