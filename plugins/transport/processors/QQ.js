@@ -241,14 +241,14 @@ const receive = async (msg) => {
     }
 
     // 处理图片附件
-    let output = qqHandler.escape(format(template, meta));
+    let output = format(template, meta);
     if (qqHandler.isCoolQPro) {
         // HTTP API 插件 + CoolQ Pro 直接插图
         if (msg.extra.uploads && msg.extra.uploads.length > 0) {
             output += '\n' + msg.extra.uploads.map(u => `[CQ:image,file=${u.url}]`).join('');
         }
     } else {
-        output += qqHandler.escape((msg.extra.uploads || []).map(u => ` ${u.url}`).join(''));
+        output += (msg.extra.uploads || []).map(u => ` ${u.url}`).join('');
     }
 
     await qqHandler.say(msg.to, output, {
