@@ -68,14 +68,14 @@ QQ:
     ignoreSelf: true                        # 群聊是否无视自己的发言
     devicePath: "./data/"                   # 设备文件保存路径，默认为启动文件同目录下的data文件夹
 
-    # 以下参数用于与已停运的 CoolQ HTTP API 插件连接，需要和其设置一致
-    # 已弃用，建议将酷Q 换成 Mirai 并使用 Mirai HTTP API 插件 或 OICQ
-    # apiRoot: "http://127.0.0.1:5700/"
-    # accessToken: "123"
-    # secret: "abc"
-    # listen:                               # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
-    #   host: "127.0.0.1"                   # 使用Docker时请设置成0.0.0.0
-    #   port: 11234
+    # 以下参数用于与 Mirai 及 CQHTTP Mirai 插件连接，需要和其设置一致
+    # 酷Q 及 CoolQ HTTP API 插件已停运
+    apiRoot: "http://127.0.0.1:5700/"
+    accessToken: "123"
+    secret: "abc"
+    listen:                                 # 用于接收消息，需要同步修改 CQHTTP Mirai 插件中 post_url 参数
+      host: "127.0.0.1"                     # 使用Docker时请设置成0.0.0.0
+     port: 11234
 
   options:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词

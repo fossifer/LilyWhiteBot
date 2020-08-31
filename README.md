@@ -4,7 +4,7 @@ LilyWhiteBot
 
 ## 关于QQ的重要说明
 2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。<s>本程序QQ部分依赖酷Q运行，因此也不再支持QQ传话，直到有其他解决方案为止。</s><br />
-暫時備選解決方案為 [OICQ](https://github.com/takayama-lily/oicq) 或 [Mirai](https://github.com/mamoe/mirai)/[Mirai Api Http插件](https://github.com/project-mirai/mirai-api-http)。
+暫時備選解決方案為 [OICQ](https://github.com/takayama-lily/oicq) 或 [Mirai](https://github.com/mamoe/mirai)/[CQHTTP Mirai](https://github.com/yyuueexxiinngg/cqhttp-mirai)。
 
 ## 功能
 * QQ（实验性）、Telegram、IRC、Discord 等多组聊天群之间互联。
