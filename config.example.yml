@@ -63,7 +63,7 @@ QQ:
     # 以下為[OICQ](https://github.com/takayama-lily/oicq)參數
     passwordMd5: ""                         # 使用MD5進行加密後的QQ密碼，並不儲存明文
     platform: 2                             # 登陆类型 1手机 2平板
-    logLevel: "off"                         # 日志级别，有trace,debug,info,warn,error,fatal,off
+    logLevel: "warn"                         # 日志级别，有trace,debug,info,warn,error,fatal,off
     kickoff: false                          # 被挤下线是否在3秒后反挤对方
     ignoreSelf: true                        # 群聊是否无视自己的发言
     devicePath: "./data/"                   # 设备文件保存路径，默认为启动文件同目录下的data文件夹
