@@ -3,6 +3,8 @@ LilyWhiteBot
 在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
 ## 关于QQ的重要说明
+**该仓库版本不支持QQ。如需QQ互联，参见[https://github.com/Joch2520/LilyWhiteBot](https://github.com/Joch2520/LilyWhiteBot)**
+
 2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。本程序QQ部分依赖酷Q运行，因此也不再支持QQ传话，直到有其他解决方案为止。
 
 ## 功能
