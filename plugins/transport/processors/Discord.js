@@ -6,6 +6,7 @@
 
 const LRU = require('lru-cache');
 const format = require('string-format');
+const winston = require('winston');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
@@ -23,8 +24,65 @@ let userInfo = new LRU({
 let bridge = null;
 let config = null;
 let discordHandler = null;
+let forwardBots = {};
 
 let options = {};
+
+const defaultMessageStyle = {
+    simple: {
+        message: '[{nick}] {text}',
+        reply: '[{nick}] Re {reply_nick} 「{reply_text}」: {text}',
+        forward: '[{nick}] Fwd {forward_nick}: {text}',
+        action: '* {nick} {text}',
+        notice: '< {text} >'
+    },
+    complex: {
+        message: '[{client_short} - {nick}] {text}',
+        reply: '[{client_short} - {nick}] Re {reply_nick} 「{reply_text}」: {text}',
+        forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}',
+        action: '* {client_short} - {nick} {text}',
+        notice: '< {client_full}: {text} >'
+    }
+};
+
+const parseForwardBot = (text, options) => {
+    let tester = {};
+    for (let style in options) {
+      tester[style] = {};
+      for (let template in options[style]) {
+          tester[style][template] = new RegExp("^" + options[style][template].replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\*/g, "\\*").replace("{text}", "(?<text>[^]*)").replace("{nick}", "(?<nick>.*?)").replace(/\{[^\{\}]+\}/g, "(.*?)") + "$", "mu");
+      };
+    };
+
+    let realText, realNick;
+    let groups;
+    if (tester.complex.reply.test(text)) {
+        groups = text.match(tester.complex.reply).groups || {};
+    } else if (tester.complex.forward.test(text)) {
+        groups = text.match(tester.complex.forward).groups || [];
+    } else if (tester.complex.action.test(text)) {
+        groups = text.match(tester.complex.action).groups || [];
+    } else if (tester.complex.message.test(text)) {
+        groups = text.match(tester.complex.message).groups || [];
+    } else if (tester.complex.notice.test(text)) {
+        groups = text.match(tester.complex.notice).groups || [];
+        groups.realNick = "";
+    } else if (tester.simple.reply.test(text)) {
+        groups = text.match(tester.simple.reply).groups || [];
+    } else if (tester.simple.forward.test(text)) {
+        groups = text.match(tester.simple.forward).groups || [];
+    } else if (tester.simple.action.test(text)) {
+        groups = text.match(tester.simple.action).groups || [];
+    } else if (tester.simple.message.test(text)) {
+        groups = text.match(tester.simple.message).groups || {};
+    } else if (tester.simple.notice.test(text)) {
+        groups = text.match(tester.simple.notice).groups || [];
+        groups.realNick = "";
+    }
+    [realNick, realText] = [groups.nick, groups.text];
+
+    return { realNick, realText };
+};
 
 const init = (b, h, c) => {
     bridge = b;
@@ -32,6 +90,10 @@ const init = (b, h, c) => {
     discordHandler = h;
 
     options = config.options.Discord || {};
+    forwardBots = options.forwardBots || {};
+
+    // 默认消息样式
+    let messageStyle = config.options.messageStyle || defaultMessageStyle;
 
     /*
      * 傳話
@@ -39,9 +101,20 @@ const init = (b, h, c) => {
 
     // 將訊息加工好並發送給其他群組
     discordHandler.on('text', (context) => {
-        const send = () => bridge.send(context).catch(() => {});
+        const send = () => bridge.send(context).catch(e => winston.error(e.trace));
 
         userInfo.set(context.from, context._rawdata.author);
+
+        let extra = context.extra;
+
+        // 檢查是不是在回覆自己
+        if (extra.reply && forwardBots[extra.reply.username]==extra.reply.discriminator) {
+            let { realNick, realText } = parseForwardBot(extra.reply.message, messageStyle);
+            if (realText) {
+
+                [extra.reply.nick, extra.reply.message] = [realNick, realText];
+            }
+        }
 
         if (/<a?:\w+:\d*?>/g.test(context.text)) {
           // 處理自定義表情符號
@@ -110,7 +183,7 @@ const init = (b, h, c) => {
                         context.text = context.text.replace(new RegExp(`<@${info.id}>`, 'gu'), `@${discordHandler.getNick(info)}`);
                     }
                 }
-            }).catch(_ => {}).then(() => send());
+            }).catch(e => winston.error(e.trace)).then(() => send());
         } else {
             send();
         }
