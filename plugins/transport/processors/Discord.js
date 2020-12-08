@@ -28,22 +28,6 @@ let forwardBots = {};
 
 let options = {};
 
-const defaultMessageStyle = {
-    simple: {
-        message: '[{nick}] {text}',
-        reply: '[{nick}] Re {reply_nick} 「{reply_text}」: {text}',
-        forward: '[{nick}] Fwd {forward_nick}: {text}',
-        action: '* {nick} {text}',
-        notice: '< {text} >'
-    },
-    complex: {
-        message: '[{client_short} - {nick}] {text}',
-        reply: '[{client_short} - {nick}] Re {reply_nick} 「{reply_text}」: {text}',
-        forward: '[{client_short} - {nick}] Fwd {forward_nick}: {text}',
-        action: '* {client_short} - {nick} {text}',
-        notice: '< {client_full}: {text} >'
-    }
-};
 
 const parseForwardBot = (text, options) => {
     let tester = {};
@@ -92,8 +76,8 @@ const init = (b, h, c) => {
     options = config.options.Discord || {};
     forwardBots = options.forwardBots || {};
 
-    // 默认消息样式
-    let messageStyle = config.options.messageStyle || defaultMessageStyle;
+    // 消息样式
+    let messageStyle = config.options.messageStyle;
 
     /*
      * 傳話

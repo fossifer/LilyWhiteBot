@@ -24,15 +24,60 @@ let groupInfo = new LRU({
 let bridge = null;
 let config = null;
 let qqHandler = null;
+let forwardBots = {};
 
 let options = {};
+
+
+const parseForwardBot = (text, options) => {
+    let tester = {};
+    for (let style in options) {
+      tester[style] = {};
+      for (let template in options[style]) {
+          tester[style][template] = new RegExp("^" + options[style][template].replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\*/g, "\\*").replace("{text}", "(?<text>[^]*)").replace("{nick}", "(?<nick>.*?)").replace(/\{[^\{\}]+\}/g, "(.*?)") + "$", "mu");
+      };
+    };
+
+    let realText, realNick;
+    let groups;
+    if (tester.complex.reply.test(text)) {
+        groups = text.match(tester.complex.reply).groups || {};
+    } else if (tester.complex.forward.test(text)) {
+        groups = text.match(tester.complex.forward).groups || [];
+    } else if (tester.complex.action.test(text)) {
+        groups = text.match(tester.complex.action).groups || [];
+    } else if (tester.complex.message.test(text)) {
+        groups = text.match(tester.complex.message).groups || [];
+    } else if (tester.complex.notice.test(text)) {
+        groups = text.match(tester.complex.notice).groups || [];
+        groups.realNick = "";
+    } else if (tester.simple.reply.test(text)) {
+        groups = text.match(tester.simple.reply).groups || [];
+    } else if (tester.simple.forward.test(text)) {
+        groups = text.match(tester.simple.forward).groups || [];
+    } else if (tester.simple.action.test(text)) {
+        groups = text.match(tester.simple.action).groups || [];
+    } else if (tester.simple.message.test(text)) {
+        groups = text.match(tester.simple.message).groups || {};
+    } else if (tester.simple.notice.test(text)) {
+        groups = text.match(tester.simple.notice).groups || [];
+        groups.realNick = "";
+    }
+    [realNick, realText] = [groups.nick, groups.text];
+
+    return { realNick, realText };
+};
 
 const init = (b, h, c) => {
     bridge = b;
     config = c;
     qqHandler = h;
 
-    const options = config.options.QQ || {};
+    options = config.options.QQ || {};
+    forwardBots = options.forwardBots || {};
+
+    // 消息样式
+    let messageStyle = config.options.messageStyle;
 
     if (!options.notify) {
         options.notify = {};
@@ -51,6 +96,16 @@ const init = (b, h, c) => {
                 isNotice: true,
             }));
             return;
+        }
+
+        let extra = context.extra;
+
+        // 檢查是不是在回覆自己
+        if (extra.reply && forwardBots.includes(`${extra.reply.qq}`)) {
+            let { realNick, realText } = parseForwardBot(extra.reply.message, messageStyle);
+            if (realText) {
+                [extra.reply.nick, extra.reply.message] = [realNick, realText];
+            }
         }
 
         // 過濾口令紅包
