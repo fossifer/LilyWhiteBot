@@ -60,20 +60,29 @@ QQ:
   bot:
     qq: "10000"                             # 机器人的 QQ 号
 
-    # 以下参数用于与 CoolQ HTTP API 插件连接，需要和其设置一致
+    # 以下為[OICQ](https://github.com/takayama-lily/oicq)參數
+    passwordMd5: ""                         # 使用MD5進行加密後的QQ密碼，並不儲存明文
+    platform: 2                             # 登陆类型 1手机 2平板
+    logLevel: "warn"                         # 日志级别，有trace,debug,info,warn,error,fatal,off
+    kickoff: false                          # 被挤下线是否在3秒后反挤对方
+    ignoreSelf: true                        # 群聊是否无视自己的发言
+    devicePath: "./data/"                   # 设备文件保存路径，默认为启动文件同目录下的data文件夹
+
+    # 以下参数用于与 Mirai 及 CQHTTP Mirai 插件连接，需要和其设置一致
+    # 酷Q 及 CoolQ HTTP API 插件已停运
     apiRoot: "http://127.0.0.1:5700/"
     accessToken: "123"
     secret: "abc"
-    listen:                                 # 用于接收消息，需要同步修改 CoolQ HTTP API 插件中 post_url 参数
+    listen:                                 # 用于接收消息，需要同步修改 CQHTTP Mirai 插件中 post_url 参数
       host: "127.0.0.1"                     # 使用Docker时请设置成0.0.0.0
-      port: 11234
+     port: 11234
 
   options:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
     ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
     nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
     showTitle: false                        # 轉發時顯示頭銜（被@者不會顯示）
-    CoolQPro: false                         # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
+    # CoolQPro: false                       # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
 
 Discord:
   disabled: true                            # 如果需要 Discord 机器人，请设置为 false
@@ -82,6 +91,7 @@ Discord:
   options:
     nickStyle: nickname                     # 可取「nickname」（使用者暱稱，僅在伺服器有效，否則仍用使用者名稱）、「username」（使用者名稱）、「id」（ID）
     useProxyURL: false                      # 考虑到中国网络情况，若 https://cdn.discordapp.com 被屏蔽请改成 true（对应 https://media.discordapp.net）
+    relayEmoji: true                        # 轉發時附帶自定義表情圖片，如為否只轉發表情名稱
 
 # 系统日志
 logging:
@@ -187,6 +197,18 @@ transport:
         setadmin: true                      # 是否提醒設定/取消管理員
         # sysmessage: true                  # 是否提醒系統消息，包括禁言和全體禁言 -- 酷Q收不到此类消息，移除
         notice: true                        # 发送群公告时是否提醒其他群组
+      # 下面是其他群里面互联机器人的QQ。在转发这些机器人的消息时，程序会尝试从消息中提取出真正的昵称，
+      # 而不是显示机器人的名称。使用下面 messageStyle 所指定的格式进行解析。
+      forwardBots:
+        - "1234567890"
+        - "9876543210"
+
+    Discord:
+      # 下面是其他群里面互联机器人的名称。在转发这些机器人的消息时，程序会尝试从消息中提取出真正的昵称，
+      # 而不是显示机器人的名称。使用下面 messageStyle 所指定的格式进行解析。
+      # 格式为 "机器人名称: 机器人discriminator编号"。
+      forwardBots:
+        Repeater: 1202
 
     # 其他设置
     paeeye:                                 # 留空或省略則禁用本功能
