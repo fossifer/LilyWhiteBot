@@ -44,13 +44,28 @@ module.exports = (pluginManager, options) => {
 
         for (let f of filters) {
             let rejects = false;
+            let rejects_reply = false;
             for (let prop in f) {
                 if (!(msg[prop] && msg[prop].toString().match(f[prop]))) {
                     rejects = true;
                     break;
                 }
             }
-            if (rejects) {
+            // check the replied message if `filter_reply` flag of the filter is set
+            if (f.filter_reply && msg.extra.reply) {
+                rejects_reply = false;
+                let reply = msg.extra.reply;
+                reply.text = reply.message;
+                reply.to_uid = msg.to_uid;
+                reply.from_uid = msg.from_uid;
+                for (let prop in f) {
+                    if (!(reply[prop] && reply[prop].toString().match(f[prop]))) {
+                        rejects_reply = true;
+                        break;
+                    }
+                }
+            }
+            if (rejects || rejects_reply) {
                 return Promise.reject();
             }
         }
