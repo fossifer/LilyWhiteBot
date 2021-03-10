@@ -30,5 +30,8 @@
     "scripts": {
         "start": "node main.js",
         "install-start": "npm install && node main.js"
+    },
+    "devDependencies": {
+        "jpeg-js": "^0.4.3"
     }
 }
