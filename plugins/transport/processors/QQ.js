@@ -24,7 +24,7 @@ let groupInfo = new LRU({
 let bridge = null;
 let config = null;
 let qqHandler = null;
-let forwardBots = {};
+let forwardBots = [];
 
 let options = {};
 
@@ -74,7 +74,7 @@ const init = (b, h, c) => {
     qqHandler = h;
 
     options = config.options.QQ || {};
-    forwardBots = options.forwardBots || {};
+    forwardBots = options.forwardBots || [];
 
     // 消息样式
     let messageStyle = config.options.messageStyle;
@@ -295,15 +295,16 @@ const receive = async (msg) => {
         template = messageStyle[styleMode].message;
     }
 
-    // 处理图片附件
+    // 处理图片和音频附件
     let output = format(template, meta);
-    if (qqHandler.isCoolQPro) {
-        // HTTP API 插件 + CoolQ Pro 直接插图
-        if (msg.extra.uploads && msg.extra.uploads.length > 0) {
-            output += '\n' + msg.extra.uploads.map(u => `[CQ:image,file=${u.url}]`).join('');
+    for (let upload of msg.extra.uploads) {
+        if (upload.type === 'audio') {
+            output += '\n' + `[CQ:record,file=${upload.url}]`;
+        } else if (upload.type === 'photo') {
+            output += '\n' + `[CQ:image,file=${upload.url}]`;
+        } else {
+            output += '\n' + upload.url;
         }
-    } else {
-        output += (msg.extra.uploads || []).map(u => ` ${u.url}`).join('');
     }
 
     await qqHandler.say(msg.to, output, {

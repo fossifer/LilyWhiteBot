@@ -3,7 +3,6 @@ LilyWhiteBot
 在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
 ## 关于QQ的重要说明
-
 2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。
 
 目前可行的备选方案为 [OICQ](https://github.com/takayama-lily/oicq) 或 [Mirai](https://github.com/mamoe/mirai)/[CQHTTP Mirai](https://github.com/yyuueexxiinngg/cqhttp-mirai)。
