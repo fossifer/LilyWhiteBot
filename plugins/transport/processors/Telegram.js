@@ -163,7 +163,7 @@ const receive = async (msg) => {
     // 自定义消息样式
     let styleMode = 'simple';
     let messageStyle = config.options.messageStyle;
-    if (msg.extra.clients >= 3 && (msg.extra.clientName.shortname || msg.isNotice)) {
+    if (/*msg.extra.clients >= 3 && */(msg.extra.clientName.shortname || msg.isNotice)) {
         styleMode = 'complex';
     }
 

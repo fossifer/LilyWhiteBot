@@ -70,6 +70,7 @@ QQ:
 
     # 以下参数用于与 Mirai 及 CQHTTP Mirai 插件连接，需要和其设置一致
     # 酷Q 及 CoolQ HTTP API 插件已停运
+    # 如果使用 OICQ，请删除以下参数
     apiRoot: "http://127.0.0.1:5700/"
     accessToken: "123"
     secret: "abc"

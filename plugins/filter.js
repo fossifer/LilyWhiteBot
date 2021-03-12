@@ -12,7 +12,8 @@
  *             from: "regex",               // 需要小寫、完整名稱：irc\\/user、telegram\\/userid、qq\\/@qq號
  *             to: "regex",
  *             nick: "regex",
- *             text: "regex"                // 以上均为並列關係
+ *             text: "regex",               // 以上均为並列關係
+ *             filter_reply: true           // 如果一條訊息回覆了其他訊息，且後者滿足以上條件，則也會被過濾，預設false
  *         },
  *     ]
  * }
@@ -58,13 +59,28 @@ module.exports = (pluginManager, options) => {
 
         for (let f of filters) {
             let rejects = true;
+			let rejects_reply = false;
             for (let prop in f) {
                 if (!(msg[prop] && msg[prop].toString().match(f[prop]))) {
                     rejects = false;
                     break;
                 }
             }
-            if (rejects) {
+			// check the replied message if `filter_reply` flag of the filter is set
+			if (f.filter_reply && msg.extra.reply) {
+				rejects_reply = true;
+				let reply = msg.extra.reply;
+				reply.text = reply.message;
+				reply.to_uid = msg.to_uid;
+				reply.from_uid = msg.from_uid;
+				for (let prop in f) {
+					if (!(reply[prop] && reply[prop].toString().match(f[prop]))) {
+						rejects_reply = false;
+						break;
+					}
+				}
+			}
+            if (rejects || rejects_reply) {
                 return Promise.reject();
             }
         }

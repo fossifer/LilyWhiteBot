@@ -3,8 +3,9 @@ LilyWhiteBot
 在多个群组间传话的机器人。原名为“qq-tg-irc”。
 
 ## 关于QQ的重要说明
-2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。<s>本程序QQ部分依赖酷Q运行，因此也不再支持QQ传话，直到有其他解决方案为止。</s><br />
-暫時備選解決方案為 [OICQ](https://github.com/takayama-lily/oicq) 或 [Mirai](https://github.com/mamoe/mirai)/[CQHTTP Mirai](https://github.com/yyuueexxiinngg/cqhttp-mirai)。
+2020年7月22日，晨风机器人作者被警方喝茶，随后酷Q作者迫于压力跑路。
+
+目前可行的备选方案为 [OICQ](https://github.com/takayama-lily/oicq) 或 [Mirai](https://github.com/mamoe/mirai)/[CQHTTP Mirai](https://github.com/yyuueexxiinngg/cqhttp-mirai)。
 
 ## 功能
 * QQ（实验性）、Telegram、IRC、Discord 等多组聊天群之间互联。
@@ -16,7 +17,7 @@ LilyWhiteBot
 
 ## 部署操作指南
 ### 准备机器人账号
-#### QQ（<s>已停止</s>实验性支持）
+#### QQ（实验性支持）
 由于全新的 QQ 号无法直接进群，故建议提前两周注册 QQ 账号，并保持在线。尽量实名注册并绑定手机，以免在触发验证时无法验证账号。
 
 #### Telegram
