@@ -83,6 +83,10 @@ const getFileStream = (file) => {
             fileStream = fileStream.pipe(sharp().png());
         // }
     }
+    
+    // if (file.type === 'record') {
+    //   // TODO: 語音使用silk格式，需要wx-voice解碼
+    // }
 
     return fileStream;
 
