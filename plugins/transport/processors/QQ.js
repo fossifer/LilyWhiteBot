@@ -24,7 +24,7 @@ let groupInfo = new LRU({
 let bridge = null;
 let config = null;
 let qqHandler = null;
-let forwardBots = {};
+let forwardBots = [];
 
 let options = {};
 
@@ -74,7 +74,7 @@ const init = (b, h, c) => {
     qqHandler = h;
 
     options = config.options.QQ || {};
-    forwardBots = options.forwardBots || {};
+    forwardBots = options.forwardBots || [];
 
     // 消息样式
     let messageStyle = config.options.messageStyle;
