@@ -157,7 +157,7 @@ const init = (b, h, c) => {
                 if (userInfo.has(at)) {
                     promises.push(Promise.resolve(userInfo.get(at)));
                 } else {
-                    promises.push(discordHandler.fetchUser(at).catch(_ => {}));
+                    promises.push(discordHandler.fetchUser(at).catch(e => winston.error(e.stack)));
                 }
             }
 

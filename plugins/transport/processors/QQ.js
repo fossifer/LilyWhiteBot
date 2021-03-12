@@ -130,7 +130,7 @@ const init = (b, h, c) => {
                 if (groupInfo.has(`${at}@${context.to}`)) {
                     promises.push(Promise.resolve(groupInfo.get(`${at}@${context.to}`)));
                 } else {
-                    promises.push(qqHandler.groupMemberInfo(context.to, at).catch(_ => {}));
+                    promises.push(qqHandler.groupMemberInfo(context.to, at).catch(e => winston.error(e.stack)));
                 }
             }
 
@@ -151,7 +151,7 @@ const init = (b, h, c) => {
                         context.text = context.text.replace(searchReg, atText);
                     }
                 }
-            }).catch(_ => {}).then(() => send());
+            }).catch(e => winston.error(e.stack)).then(() => send());
         } else {
             send();
         }
