@@ -34,7 +34,8 @@ const parseForwardBot = (text, options) => {
     for (let style in options) {
       tester[style] = {};
       for (let template in options[style]) {
-          tester[style][template] = new RegExp("^" + options[style][template].replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\*/g, "\\*").replace("{text}", "(?<text>[^]*)").replace("{nick}", "(?<nick>.*?)").replace(/\{[^\{\}]+\}/g, "(.*?)") + "$", "mu");
+          tester[style][template] = new RegExp("^" + options[style][template].replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/\*/g, "\\*")
+            .replace("{text}", "(?<text>[^]*)").replace("{nick}", "(?<nick>.*?)").replace(/\{[^\{\}]+\}/g, "(.*?)") + "$", "mu");
       };
     };
 
@@ -43,25 +44,25 @@ const parseForwardBot = (text, options) => {
     if (tester.complex.reply.test(text)) {
         groups = text.match(tester.complex.reply).groups || {};
     } else if (tester.complex.forward.test(text)) {
-        groups = text.match(tester.complex.forward).groups || [];
+        groups = text.match(tester.complex.forward).groups || {};
     } else if (tester.complex.action.test(text)) {
-        groups = text.match(tester.complex.action).groups || [];
+        groups = text.match(tester.complex.action).groups || {};
     } else if (tester.complex.message.test(text)) {
-        groups = text.match(tester.complex.message).groups || [];
+        groups = text.match(tester.complex.message).groups || {};
     } else if (tester.complex.notice.test(text)) {
-        groups = text.match(tester.complex.notice).groups || [];
-        groups.realNick = "";
+        groups = text.match(tester.complex.notice).groups || {};
+        groups.nick = "";
     } else if (tester.simple.reply.test(text)) {
-        groups = text.match(tester.simple.reply).groups || [];
+        groups = text.match(tester.simple.reply).groups || {};
     } else if (tester.simple.forward.test(text)) {
-        groups = text.match(tester.simple.forward).groups || [];
+        groups = text.match(tester.simple.forward).groups || {};
     } else if (tester.simple.action.test(text)) {
-        groups = text.match(tester.simple.action).groups || [];
+        groups = text.match(tester.simple.action).groups || {};
     } else if (tester.simple.message.test(text)) {
         groups = text.match(tester.simple.message).groups || {};
     } else if (tester.simple.notice.test(text)) {
-        groups = text.match(tester.simple.notice).groups || [];
-        groups.realNick = "";
+        groups = text.match(tester.simple.notice).groups || {};
+        groups.nick = "";
     }
     [realNick, realText] = [groups.nick, groups.text];
 
@@ -156,7 +157,7 @@ const init = (b, h, c) => {
                 if (userInfo.has(at)) {
                     promises.push(Promise.resolve(userInfo.get(at)));
                 } else {
-                    promises.push(discordHandler.fetchUser(at).catch(_ => {}));
+                    promises.push(discordHandler.fetchUser(at).catch(e => winston.error(e.stack)));
                 }
             }
 
