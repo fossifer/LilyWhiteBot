@@ -316,9 +316,7 @@ const fileUploader = {
     process: async (context) => {
         // 上传文件
 		// p4: dont bother with files from somewhere without bridges in config
-		if (context.extra.clients < 2 && !([-1001127637325 /* moha */, -1001334451954 /* dchost */, -1001485699980 /* humanities */, -1001313763978 /* wikiquote */, 958280901 /* acg qq */].includes(context.to)))
-			console.log(`Unauthorized group/pm: ${context.to} (from user id ${context.from} - ${context.nick}) ${context.text}`);
-        if (context.extra.clients > 1 && context.extra.files && servemedia.type && servemedia.type !== 'none') {
+		if (context.extra.clients > 1 && context.extra.files && servemedia.type && servemedia.type !== 'none') {
             let promises = [];
             let fileCount = context.extra.files.length;
 
