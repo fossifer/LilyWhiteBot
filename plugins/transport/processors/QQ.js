@@ -3,6 +3,7 @@
 const BridgeMsg = require('../BridgeMsg.js');
 const LRU = require('lru-cache');
 const format = require('string-format');
+const winston = require('winston');
 
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
