@@ -83,6 +83,7 @@ QQ:
     ignoreCash: true                        # 如果消息疑似口令红包则忽略、屏蔽消息（注意程序无法区分口令红包和群友自行刷屏）
     nickStyle: groupcard                    # 暱稱，可取「groupcard」（優先採用群名片）、「nick」（優先採用暱稱）、「qq」（只用 QQ 號）
     showTitle: false                        # 轉發時顯示頭銜（被@者不會顯示）
+    multiMsgId: true                        # 合併轉發消息提供消息id，可使用 qqmultimsg 插件查詢合併轉發消息完整內容
     # CoolQPro: false                       # 如使用 CoolQ Pro，开启此参数后可直接发送图片（仅限使用 HTTP API 插件。另外 Air 版无效）
 
 Discord:
@@ -102,6 +103,7 @@ logging:
 # 启用的插件（繁体字用户叫套件）
 plugins:
   - transport                               # 啟用互聯功能，不想禁止互聯的話請勿移除
+  - qqmultimsg                              # 允許私聊查詢 QQ 的合併轉發消息
   - groupid-tg                              # 取得目前 Telegram 群組的 ID，
                                             # 可在正式連接之前啟用該套件，然後在 Telegram 群中使用 /thisgroupid 取得ID
   - ircquery                                # 允許查詢 IRC 的一些訊息
