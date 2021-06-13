@@ -177,7 +177,7 @@ const init = (b, h, c) => {
 
     qqHandler.on('leave', (data) => {
         let text;
-        if (data.type === 1) {
+        if (data.target === data.admin || data.admin === 0) {
             text = `${data.user_target.name} (${data.target}) 退出QQ群`;
         } else {
             text = `${data.user_target.name} (${data.target}) 被管理員 ${data.user_admin.name} (${data.admin}) 踢出QQ群`;
