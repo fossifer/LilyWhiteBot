@@ -5,6 +5,9 @@ const LRU = require('lru-cache');
 const format = require('string-format');
 const winston = require('winston');
 
+const pkg = require('../../../package.json');
+const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
+
 const truncate = (str, maxLen = 10) => {
     str = str.replace(/\n/gu, '');
     if (str.length > maxLen) {
@@ -299,11 +302,13 @@ const receive = async (msg) => {
 
     // 处理图片和音频附件
     let output = format(template, meta);
+    let useragent = config.options.servemedia.userAgent || USERAGENT;
+    let headers = JSON.stringify({'User-Agent': useragent});
     for (let upload of msg.extra.uploads) {
         if (upload.type === 'audio') {
-            output += '\n' + `[CQ:record,file=${upload.url}]`;
+            output += '\n' + `[CQ:record,file=${upload.url},headers=${headers}]`;
         } else if (upload.type === 'photo') {
-            output += '\n' + `[CQ:image,file=${upload.url}]`;
+            output += '\n' + `[CQ:image,file=${upload.url},headers=${headers}]`;
         } else {
             output += '\n' + upload.url;
         }
