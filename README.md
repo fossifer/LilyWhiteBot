@@ -34,7 +34,7 @@ IRC 不需要注册。为了提高安全性，您可以采取注册 Nick、增�
 3. 进入 OAuth2 页面，往下翻到“OAuth2 URL Generator”，找到 SCOPES 并勾选 bot，然后再继续勾选 BOT PERMISSIONS 中的权限（例如 Administrator），系统会生成一个链接。访问生成的链接，按照屏幕提示将机器人拉入到你的服务器与频道中。
 <!--
 #### 微信
-**警告：微信极容易被封号，请认真阅读[注意事项](https://github.com/Joch2520/LilyWhiteBot/wiki/%E5%BE%AE%E4%BF%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9%EF%BC%88%E4%BD%BF%E7%94%A8%E5%89%8D%E5%BF%85%E8%AF%BB%EF%BC%81%EF%BC%89)之后再进行操作！**
+**警告：微信极容易被封号，请认真阅读[注意事项](https://github.com/Zokhoi/LilyWhiteBot/wiki/%E5%BE%AE%E4%BF%A1%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9%EF%BC%88%E4%BD%BF%E7%94%A8%E5%89%8D%E5%BF%85%E8%AF%BB%EF%BC%81%EF%BC%89)之后再进行操作！**
 
 1. 准备专用手机。除机器人账号外，不要登录其他账号。
 2. 启动微信，实名制注册。
@@ -44,14 +44,14 @@ IRC 不需要注册。为了提高安全性，您可以采取注册 Nick、增�
 -->
 
 ### 配置互联程序（Docker）
-推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/Joch2520/LilyWhiteBot/blob/master/README_Docker.md)。
+推荐在 Docker 中运行互联机器人程序。具体配置方法见 [Docker说明](https://github.com/Zokhoi/LilyWhiteBot/blob/master/README_Docker.md)。
 
 ### 配置互联程序（手工操作）
 #### 配置 LilyWhiteBot
 1. 安装 Node.js，最小版本 12。
 2. 下载代码
 ```
-git clone https://github.com/Joch2520/LilyWhiteBot
+git clone https://github.com/Zokhoi/LilyWhiteBot
 ```
 3. 修改配置文件：
     * 将 config.example.yml 改名为 config.yml，按照配置文件中的提示填入参数。默认情况下各机器人都是关闭的，您需要将需要的机器人的 `disabled` 改为 `false`。
@@ -78,7 +78,7 @@ node main.js
 3. 程序不再支持酷 Q。
 
 ## 实验性插件
-以下各功能的设定方法均为改 config.yml。接口与功能可能会有所调整。详细内容参见[插件](https://github.com/Joch2520/LilyWhiteBot/wiki/%E6%8F%92%E4%BB%B6)。
-* [filter](https://github.com/Joch2520/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
-* [qqxiaoice](https://github.com/Joch2520/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
-* [wikilinky](https://github.com/Joch2520/LilyWhiteBot/blob/master/plugins/wikilinky.js)
+以下各功能的设定方法均为改 config.yml。接口与功能可能会有所调整。详细内容参见[插件](https://github.com/Zokhoi/LilyWhiteBot/wiki/%E6%8F%92%E4%BB%B6)。
+* [filter](https://github.com/Zokhoi/LilyWhiteBot/blob/master/plugins/filter.js)：过滤符合指定规则的信息。
+* [qqxiaoice](https://github.com/Zokhoi/LilyWhiteBot/blob/master/plugins/qqxiaoice.js)：召唤 QQ 群的小冰。（需要 QQ 群群主开启小冰/BabyQ 功能）
+* [wikilinky](https://github.com/Zokhoi/LilyWhiteBot/blob/master/plugins/wikilinky.js)

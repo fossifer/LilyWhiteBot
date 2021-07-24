@@ -9,7 +9,7 @@
 下面是一个基于 Docker Compose 的示例配置方法：
 
 ## 1. 配置机器人账号
-参见[README.md](https://github.com/Joch2520/LilyWhiteBot/blob/master/README.md)。
+参见[README.md](https://github.com/Zokhoi/LilyWhiteBot/blob/master/README.md)。
 
 ## 2. 安装必要的软件
 需要在服务器上安装Docker、Docker Compose、git，具体操作步骤略。
@@ -32,7 +32,7 @@ mkdir bot
 cd bot
 
 # 互联机器人源码
-git clone https://github.com/Joch2520/LilyWhiteBot
+git clone https://github.com/Zokhoi/LilyWhiteBot
 ```
 
 ## 4. 修改配置文件
