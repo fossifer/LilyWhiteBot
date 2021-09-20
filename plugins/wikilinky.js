@@ -8,6 +8,12 @@
     "wikilinky": {
         "groups": {
             "qq/123123123": "https://zh.wikipedia.org/wiki/$1"
+        },
+        "ignore": {
+            "IRC": "wm-bot",
+            "Telegram": "^12345678$"
+            "QQ": "^123456789$"
+            "Discord": "^123456789987654321$"
         }
     }
  */
@@ -20,6 +26,7 @@ const compare = (x, y) => {
 };
 
 let map = {};
+let ignore = {};
 
 const pad = (str) => {
     return `00${str}`.substr(-2);
@@ -80,13 +87,22 @@ const linky = (string, prefix) => {
     return links;
 };
 
+const checkignore = (context) => {
+    for (let [client, from] of Object.entries(ignore)) {
+        if (context.handler.type === client && context.from.toString().match(from)) {
+            return true;
+        }
+    }
+    return false;
+};
+
 const processlinky = (context, bridge) => {
     try {
         let rule = map[BridgeMsg.getUIDFromContext(context, context.to)];
         if (rule) {
             let links = linky(context.text, rule);
 
-            if (links.length > 0) {
+            if (links.length > 0 && !checkignore(context)) {
                 context.reply(links.map(l => l.link).join('  '));
                 // 若互聯且在公開群組調用，則讓其他群也看到連結
                 if (bridge && !context.isPrivate) {
@@ -116,6 +132,7 @@ module.exports = (pluginManager, options) => {
         map[type] = {};
     }
 
+    ignore = options.ignore || {};
     let groups = options.groups || {};
     for (let group in groups) {
         let client = BridgeMsg.parseUID(group);
