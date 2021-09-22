@@ -250,10 +250,11 @@ transport:
     # imgur：将图片上传到 imgur.com。
     # sm.ms：将图片上传到 sm.ms 图床中。
     #
-    # 以下三个需自建服务器：
+    # 以下需自建服务器：
     # self：将文件保存在自己的服务器中。请确保您的服务器设置正确，URL 能够正常访问，否则将无法发送图片。
     # linx：将文件上传到一个 linx（https://github.com/andreimarcu/linx-server）服务器中，支持所有文件格式。
     # uguu: 将文件上传到一个 uguu（https://github.com/nokonoko/Uguu）服务器中。
+    # lsky: 將檔案上傳到一個 lsky（https://github.com/wisp-x/lsky-pro）伺服器中
     #
     # 特别提醒：
     # 1. vim-cn、sm.ms 为个人图床，资源有限。如果您的聊天群水量很大，请选择其他图床或自建服务器。
@@ -273,6 +274,11 @@ transport:
 
       # type为uguu时有效
       uguuApiUrl: ""                        # 请以 /api.php?d=upload-tool 结尾
+      
+      # type为lsky时有效
+      lsky:
+        apiUrl: ""                          # 請使用 /api/upload 結尾
+        token: ""
 
       # type为imgur时有效
       imgur:

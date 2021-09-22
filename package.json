@@ -11,6 +11,7 @@
         "asciify-image": "^0.1.6",
         "cqhttp": "^1.2.0",
         "discord.js": "^12.4.1",
+        "image-type": "^4.1.0",
         "irc-colors": "~1.5.0",
         "irc-upd": "~0.10.0",
         "ishisashiencoding": "^0.4.0",

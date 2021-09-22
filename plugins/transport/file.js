@@ -13,6 +13,7 @@ const path = require('path');
 const request = require('request');
 const sharp = require('sharp');
 const winston = require('winston');
+const imgType = require('image-type');
 
 let options = {};
 let servemedia;
@@ -135,6 +136,9 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
         .on('data', d => buf.push(d))
         .on('end', () => {
             let pendingFile = Buffer.concat(buf);
+            if (!path.extname(name)) {
+              name += '.' + imgType(pendingFile).ext;
+            }
 
             switch (host) {
                 case 'vim-cn':
@@ -195,7 +199,22 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
                         randomname: 'true'
                     };
                     break;
-
+                    
+                case 'lsky':
+                    requestOptions.url = servemedia.lsky.apiUrl;
+                    if (servemedia.lsky.token) {
+                        requestOptions.headers.token = servemedia.lsky.token;
+                    }
+                    requestOptions.formData = {
+                        image: {
+                            value: pendingFile,
+                            options: {
+                                filename: name,
+                            }
+                        },
+                    };
+                    break;
+                    
                 default:
                     reject(new Error('Unknown host type'));
             }
@@ -205,6 +224,7 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
                     callback();
                 }
                 if (!error && response.statusCode === 200) {
+                    if (typeof body === 'string') body = JSON.parse(body);
                     switch (host) {
                         case 'vim-cn':
                         case 'vimcn':
@@ -226,6 +246,13 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
                                 reject(new Error(`Imgur return: ${body.data.error}`));
                             } else {
                                 resolve(body.data.link);
+                            }
+                            break;
+                        case 'lsky':
+                            if (body && body.code !== 200) {
+                                reject(new Error(`Lsky return: ${body.msg}`));
+                            } else {
+                                resolve(body.data.url);
                             }
                             break;
                     }
@@ -270,6 +297,7 @@ const uploadFile = async (file) => {
         case 'vim-cn':
         case 'uguu':
         case 'Uguu':
+        case 'lsky':
             url = await uploadToHost(servemedia.type, file);
             break;
 
