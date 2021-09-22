@@ -189,7 +189,7 @@ const receive = async (msg) => {
         for (let upload of msg.extra.uploads) {
             if (upload.type === 'audio') {
                 await tgHandler.sendAudio(msg.to, upload.url, replyOption);
-            } else if (upload.type === 'photo') {
+            } else if (upload.type === 'image') {
                 if (path.extname(upload.url) === '.gif') {
                     await tgHandler.sendAnimation(msg.to, upload.url, replyOption);
                 } else {

@@ -122,7 +122,7 @@ const init = (b, h, c) => {
               let proxyURL = `https://media.discordapp.net/emojis/${emoji.id}.png`
               context.extra.files.push({
                     client: 'Discord',
-                    type: 'photo',
+                    type: 'image',
                     id: emoji.id,
                     size: 262144,
                     url: discordHandler._useProxyURL ? proxyURL : url,
@@ -133,7 +133,7 @@ const init = (b, h, c) => {
               let proxyURL = `https://media.discordapp.net/emojis/${emoji.id}.gif`
               context.extra.files.push({
                     client: 'Discord',
-                    type: 'photo',
+                    type: 'image',
                     id: emoji.id,
                     size: 262144,
                     url: discordHandler._useProxyURL ? proxyURL : url,

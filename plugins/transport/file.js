@@ -13,7 +13,7 @@ const path = require('path');
 const request = require('request');
 const sharp = require('sharp');
 const winston = require('winston');
-const imgType = require('image-type');
+const fileType = require('file-type');
 
 let options = {};
 let servemedia;
@@ -46,7 +46,7 @@ const generateFileName = (url, name) => {
 const convertFileType = (type) => {
     switch (type) {
         case 'sticker':
-            return 'photo';
+            return 'image';
         case 'voice':
             return 'audio';
         case 'video':
@@ -76,7 +76,7 @@ const getFileStream = (file) => {
     }
 
     // Telegram默认使用webp格式，转成png格式以便让其他聊天软件的用户查看
-    if ((file.type === 'sticker' || file.type === 'photo') && path.extname(filePath) === '.webp') {
+    if ((file.type === 'sticker' || file.type === 'image') && path.extname(filePath) === '.webp') {
         // if (file.type === 'sticker' && servemedia.stickerMaxWidth !== 0) {
         //     // 缩小表情包尺寸，因容易刷屏
         //     fileStream = fileStream.pipe(sharp().resize(servemedia.stickerMaxWidth || 256).png());
@@ -134,10 +134,11 @@ const uploadToHost = (host, file) => new Promise((resolve, reject) => {
     let buf = []
     pendingFileStream
         .on('data', d => buf.push(d))
-        .on('end', () => {
+        .on('end', async () => {
             let pendingFile = Buffer.concat(buf);
             if (!path.extname(name)) {
-              name += '.' + imgType(pendingFile).ext;
+              let type = await fileType.fromBuffer(pendingFile);
+              if (type) name += '.' + type.ext;
             }
 
             switch (host) {
@@ -304,7 +305,7 @@ const uploadFile = async (file) => {
         case 'sm.ms':
         case 'imgur':
             // 公共图床只接受图片，不要上传其他类型文件
-            if (fileType === 'photo') {
+            if (fileType === 'image') {
                 url = await uploadToHost(servemedia.type, file);
             }
             break;

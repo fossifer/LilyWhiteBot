@@ -307,8 +307,10 @@ const receive = async (msg) => {
     for (let upload of msg.extra.uploads) {
         if (upload.type === 'audio') {
             output += '\n' + `[CQ:record,file=${upload.url},headers=${headers}]`;
-        } else if (upload.type === 'photo') {
+        } else if (upload.type === 'image') {
             output += '\n' + `[CQ:image,file=${upload.url},headers=${headers}]`;
+        } else if (upload.type === 'video') {
+            output += '\n' + `[CQ:video,file=${upload.url},headers=${headers}]`;
         } else {
             output += '\n' + upload.url;
         }
