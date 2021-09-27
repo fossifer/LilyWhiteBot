@@ -43,7 +43,6 @@ const parseForwardBot = (text, options) => {
       };
     };
 
-    let realText, realNick;
     let groups;
     if (tester.complex.reply.test(text)) {
         groups = text.match(tester.complex.reply).groups || {};
@@ -67,10 +66,11 @@ const parseForwardBot = (text, options) => {
     } else if (tester.simple.notice.test(text)) {
         groups = text.match(tester.simple.notice).groups || {};
         groups.nick = "";
+    } else {
+      groups = {nick: undefined, text: undefined}
     }
-    [realNick, realText] = [groups.nick, groups.text];
 
-    return { realNick, realText };
+    return { realNick: groups.nick, realText: groups.text };
 };
 
 const init = (b, h, c) => {
