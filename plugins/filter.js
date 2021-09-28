@@ -50,6 +50,7 @@ module.exports = (pluginManager, options) => {
         if (f.to   !== undefined) { opt.to_uid   = f.to; }
         if (f.nick !== undefined) { opt.nick     = f.nick; }
         if (f.text !== undefined) { opt.text     = f.text; }
+        if (f.filter_reply !== undefined) { opt.filter_reply = f.filter_reply; }
 
         arr.push(opt);
     }
@@ -59,27 +60,29 @@ module.exports = (pluginManager, options) => {
 
         for (let f of filters) {
             let rejects = true;
-			let rejects_reply = false;
+            let rejects_reply = false;
             for (let prop in f) {
+                if (prop === 'filter_reply') continue;
                 if (!(msg[prop] && msg[prop].toString().match(f[prop]))) {
                     rejects = false;
                     break;
                 }
             }
-			// check the replied message if `filter_reply` flag of the filter is set
-			if (f.filter_reply && msg.extra.reply) {
-				rejects_reply = true;
-				let reply = msg.extra.reply;
-				reply.text = reply.message;
-				reply.to_uid = msg.to_uid;
-				reply.from_uid = msg.from_uid;
-				for (let prop in f) {
-					if (!(reply[prop] && reply[prop].toString().match(f[prop]))) {
-						rejects_reply = false;
-						break;
-					}
-				}
-			}
+            // check the replied message if `filter_reply` flag of the filter is set
+            if (f.filter_reply && msg.extra.reply) {
+                rejects_reply = true;
+                let reply = msg.extra.reply;
+                reply.text = reply.message;
+                reply.to_uid = msg.to_uid;
+                reply.from_uid = msg.from_uid;
+                for (let prop in f) {
+                    if (prop === 'filter_reply') continue;
+                    if (!(reply[prop] && reply[prop].toString().match(f[prop]))) {
+                        rejects_reply = false;
+                        break;
+                    }
+                }
+            }
             if (rejects || rejects_reply) {
                 return Promise.reject();
             }
