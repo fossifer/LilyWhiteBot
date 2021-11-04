@@ -8,6 +8,14 @@ const htmlEscape = (str) => {
     return str.replace(/&/gu, '&amp;').replace(/</gu, '&lt;').replace(/>/gu, '&gt;');
 };
 
+const truncate = (str, maxLen = 10) => {
+    str = str.replace(/\n/gu, '');
+    if (str.length > maxLen) {
+        str = str.substring(0, maxLen - 3) + '...';
+    }
+    return str;
+};
+
 let bridge = null;
 let config = null;
 let tgHandler = null;
@@ -159,6 +167,20 @@ const receive = async (msg) => {
         command: htmlEscape(msg.command),
         param: htmlEscape(msg.param)
     };
+    if (msg.extra.reply) {
+        let reply = msg.extra.reply;
+        meta.reply_nick = reply.nick;
+        meta.reply_user = reply.username;
+        if (reply.isText) {
+            meta.reply_text = truncate(reply.message);
+        } else {
+            meta.reply_text = reply.message;
+        }
+    }
+    if (msg.extra.forward) {
+        meta.forward_nick = msg.extra.forward.nick;
+        meta.forward_user = msg.extra.forward.username;
+    }
     
     // 自定义消息样式
     let styleMode = 'simple';
@@ -172,6 +194,10 @@ const receive = async (msg) => {
         template = messageStyle[styleMode].notice;
     } else if (msg.extra.isAction) {
         template = messageStyle[styleMode].action;
+    } else if (msg.extra.reply) {
+        template = messageStyle[styleMode].reply;
+    } else if (msg.extra.forward) {
+        template = messageStyle[styleMode].forward;
     } else {
         template = messageStyle[styleMode].message;
     }
