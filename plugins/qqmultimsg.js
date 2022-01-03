@@ -26,6 +26,7 @@ module.exports = (pluginManager, options) => {
               let handler = pluginManager.handlers.get(context._from_client);
               let qqHandler = pluginManager.handlers.get('QQ');
               qqHandler._client.getForwardMsg(context.param.split(' ')[0]).then(res=>{
+                let target = context._from_client == 'IRC' ? context.from : context.to;
                 if (res.status=='ok') {
                   // console.log(res.data)
                   res.data.forEach(msg=>{
@@ -41,7 +42,7 @@ module.exports = (pluginManager, options) => {
                     
                     
                     if (message.extra.multimsg) {
-                      meta.text+=`\n[私聊机器人使用 !qmulti ${message.extra.multimsg[0]} 以${message.extra.multimsg[1]}]`;
+                      meta.text+=`\n[私聊机器人使用 ${command} ${message.extra.multimsg[0]} 以${message.extra.multimsg[1]}]`;
                     }
                     
                     let output = format('[{nick}] {text}', meta);
@@ -57,10 +58,10 @@ module.exports = (pluginManager, options) => {
                         output += '\n' + file;
                     }
                     
-                    handler.say(context.to, output)
+                    handler.say(target, output);
                   })
                 } else {
-                  handler.say(context.to, `找不到指定的合并转发消息。`);
+                  handler.say(target, `找不到指定的合并转发消息。`);
                 }
               });
               
