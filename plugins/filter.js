@@ -12,6 +12,7 @@
  *             from: "regex",               // 需要小寫、完整名稱：irc\\/user、telegram\\/userid、qq\\/@qq號
  *             to: "regex",
  *             nick: "regex",
+ *             forward_nick: "regex",
  *             text: "regex",               // 以上均为並列關係
  *             filter_reply: true           // 如果一條訊息回覆了其他訊息，且後者滿足以上條件，則也會被過濾，預設false
  *         },
@@ -51,6 +52,7 @@ module.exports = (pluginManager, options) => {
         if (f.nick !== undefined) { opt.nick     = f.nick; }
         if (f.text !== undefined) { opt.text     = f.text; }
         if (f.filter_reply !== undefined) { opt.filter_reply = f.filter_reply; }
+        if (f.forward_nick !== undefined) { opt.forward_nick = f.forward_nick; }
 
         arr.push(opt);
     }
@@ -61,14 +63,21 @@ module.exports = (pluginManager, options) => {
         for (let f of filters) {
             let rejects = true;
             let rejects_reply = false;
+            // Check forward_from first, continue early if not matched
+            if (f.forward_nick && msg.extra.forward && msg.extra.forward.nick) {
+                if (msg.extra.forward.nick.toString().match(f.forward_nick)) {
+                    return Promise.reject();
+                }
+                continue;
+            }
             for (let prop in f) {
-                if (prop === 'filter_reply') continue;
+                if (['filter_reply', 'forward_nick'].includes(prop)) continue;
                 if (!(msg[prop] && msg[prop].toString().match(f[prop]))) {
                     rejects = false;
                     break;
                 }
             }
-            // check the replied message if `filter_reply` flag of the filter is set
+            // Check the replied message if `filter_reply` flag of the filter is set
             if (f.filter_reply && msg.extra.reply) {
                 rejects_reply = true;
                 let reply = msg.extra.reply;
@@ -76,7 +85,7 @@ module.exports = (pluginManager, options) => {
                 reply.to_uid = msg.to_uid;
                 reply.from_uid = msg.from_uid;
                 for (let prop in f) {
-                    if (prop === 'filter_reply') continue;
+                    if (['filter_reply', 'forward_nick'].includes(prop)) continue;
                     if (!(reply[prop] && reply[prop].toString().match(f[prop]))) {
                         rejects_reply = false;
                         break;
