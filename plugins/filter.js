@@ -72,8 +72,8 @@ module.exports = (pluginManager, options) => {
                 if (prop === 'filter_reply') continue;
                 if (prop.startsWith('extra_')) {
                     // Check msg.extra (a nested dictionary)
-                    props = prop.split('_');
-                    cur_obj = msg;
+                    let props = prop.split('_');
+                    let cur_obj = msg;
                     for (let cur_prop of props) {
                         if (!cur_obj[cur_prop]) {
                             rejects = false;
