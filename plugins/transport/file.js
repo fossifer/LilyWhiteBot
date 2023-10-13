@@ -28,6 +28,7 @@ const USERAGENT = `LilyWhiteBot/${pkg.version} (${pkg.repository})`;
  * @returns {string} 新文件名
  */
 const generateFileName = (url, name) => {
+    url = url.replace(/\?.*$/, ''); // removing tracking param, issue with discord attachments
     let extName = path.extname(name || '');
     if (extName === '') {
         extName = path.extname(url || '');
