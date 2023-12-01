@@ -78,7 +78,7 @@ QQ:
     secret: "abc"
     listen:                                 # 用于接收消息，需要同步修改 CQHTTP Mirai 插件中 post_url 参数
       host: "127.0.0.1"                     # 使用Docker时请设置成0.0.0.0
-     port: 11234
+      port: 11234
 
   options:
     selfCensorship: true                    # 根据 badwords.yml 文件过滤敏感词
